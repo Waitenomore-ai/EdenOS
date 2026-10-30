@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Non-destructive BIOS boot smoke check for a built EdenOS live ISO.
+# Uses a disposable QEMU guest. It never attaches a host disk.
+set -euo pipefail
+iso="${1:-output/eden-os-amd64-test.iso}"
+log="${2:-output/qemu-bios-smoke.log}"
+[[ -s "$iso" ]] || { echo "ISO not found: $iso" >&2; exit 1; }
+command -v qemu-system-x86_64 >/dev/null || { echo "Install qemu-system-x86" >&2; exit 1; }
+mkdir -p "$(dirname "$log")"
+# Smoke only: an attempted firmware-to-kernel boot, not a desktop or installer certification.
+set +e
+timeout --signal=TERM --kill-after=5s 100s qemu-system-x86_64 \
+  -machine pc,accel=tcg -cpu max -m 2048 -smp 2 \
+  -cdrom "$iso" -boot order=d -no-reboot -display none \
+  -serial stdio -monitor none -nic none >"$log" 2>&1
+status=$?
+set -e
+echo "QEMU exit status: $status" >>"$log"
+# Do not mistake a timeout for proof of a successful boot.
+if grep -Eiq 'Kernel panic|VFS: Unable to mount root|No bootable device|Boot failed' "$log"; then
+  echo "Detected an explicit boot error; see $log" >&2
+  exit 1
+fi
+echo "Smoke run finished. Serial output may be unavailable; visual VM testing remains mandatory."
