@@ -62,7 +62,7 @@ physical device or runtime evidence; **Pending** = not yet implemented/tested.
 51|Home fits smaller screens|Source: wrapping category FlowBox; visual check pending|
 52|Footer fits larger text|Source: wrapping FlowBox; visual check pending|
 53|All screens at maximum text scaling|Partial: opt-in GTK smoke; allocation/visual checks pending|
-54|Predictable focus after navigation|Pending|
+54|Predictable focus after navigation|Source: first Home tile or page Home button focused after navigation; real GTK assertions queued|
 55|Visible keyboard focus|Source: explicit button/high-contrast focus styles; visual check pending|
 56|Useful screen-reader labels|Source: corrected GTK update_property binding; real screen-reader check pending|
 57|Screen-reader test|Blocked: desktop/screen reader|
@@ -74,7 +74,7 @@ physical device or runtime evidence; **Pending** = not yet implemented/tested.
 63|Explain offline features|Source: home-screen explanation|
 64|Label internet activities|Source: KidsTube labelled online; browser disabled pending review|
 65|Helpful unavailable-activity messages|Source: handle PyGObject NULL-constructor exception; unit regression passes; real GTK rerun required|
-66|Prevent duplicate activity windows|Pending|
+66|Prevent duplicate activity windows|Partial: two-second same-activity repeat-click guard; full process-lifetime single-instance tracking pending|
 67|Activity returns to Eden|Blocked: real activity/session|
 68|Tux Paint save/reopen|Blocked: real activity session|
 69|Correct ownership of saved work|Blocked: disposable child accounts|
@@ -173,3 +173,18 @@ The pending-shutdown dialog has a close guard, with a regression test. The
 missing-activity constructor exception has a regression test and is caught.
 Local verification: 46 passed, one graphical runtime test skipped (47 total).
 Focused review found no important issues. Real GTK CI remains queued.
+
+## Navigation and rapid-click guard
+
+Home initially focuses its first learning tile. Navigation to other pages
+focuses Home, and returning Home focuses the first tile. Preference refreshes
+do not explicitly force this navigation target. Real GTK focus assertions
+were added but must run online. A monotonic two-second per-activity guard
+ignores rapid repeat clicks; failed launches release it for immediate retry.
+It does not track whether a previous activity process is still running.
+Local suite: 50 passed, one graphical runtime test skipped (51 total). Source
+checks now cancel superseded runs on the same branch to reduce queue buildup.
+
+Online source run 41122191904 for commit 4d43618 passed, including the real GTK
+missing-activity and repeated-status checks. That result predates the new focus
+and rapid-click changes; those need their own online run.

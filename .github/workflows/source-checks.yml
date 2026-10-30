@@ -5,6 +5,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: eden-source-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   check:
     runs-on: ubuntu-24.04
@@ -24,3 +27,4 @@ jobs:
         run: |
           bash -n scripts/build-iso scripts/boot-smoke
           sh -n auto/config scripts/prepare-chroot-assets scripts/stage-branding
+

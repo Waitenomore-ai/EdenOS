@@ -25,8 +25,10 @@ class GtkRuntimeTests(unittest.TestCase):
                     if context.pending():
                         context.iteration(False)
                 self.assertIsNotNone(window.get_child())
+                self.assertEqual(window.get_focus(), window._page_focus_target)
                 window._open_category('create')(None)
                 self.assertEqual(window.state.category, 'create')
+                self.assertEqual(window.get_focus().get_label(), 'Home')
                 window._launch_activity(Activity('missing', 'Missing', 'Unavailable fixture',
                                                  'create', 'eden-does-not-exist.desktop', True))
                 self.assertIn("couldn't open", window._status_label.get_text())
@@ -42,6 +44,7 @@ class GtkRuntimeTests(unittest.TestCase):
                 self.assertTrue(window.has_css_class('contrast'))
                 window._go_home(None)
                 self.assertEqual(window.state.page, 'home')
+                self.assertEqual(window.get_focus(), window._page_focus_target)
                 window.destroy()
                 app.quit()
                 setup = SetupApplication()

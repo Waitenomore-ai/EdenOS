@@ -20,6 +20,7 @@ from .catalogue import CATEGORIES, Activity, load_catalogue
 from .browser import browser_access_ready
 from .version import build_label
 from .navigation import ScreenState
+from .launch_control import LaunchCooldown
 from .preferences import (
     AccessibilityPreferences,
     load_preferences,
@@ -35,10 +36,12 @@ class EdenWindow(Gtk.ApplicationWindow):
         self.fullscreen()
         self.state = ScreenState()
         self.catalogue = load_catalogue()
+        self._launch_cooldown = LaunchCooldown()
         self.preferences = load_preferences()
         self._install_styles()
         self._apply_preferences()
         self._render()
+        self._page_focus_target.grab_focus()
 
     def _install_styles(self) -> None:
         provider = Gtk.CssProvider()
@@ -110,6 +113,7 @@ class EdenWindow(Gtk.ApplicationWindow):
 
     def _render(self) -> None:
         self._status_label = None
+        self._page_focus_target = None
         root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
         root.set_margin_top(22)
         root.set_margin_bottom(22)
@@ -119,7 +123,9 @@ class EdenWindow(Gtk.ApplicationWindow):
 
         header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         if self.state.page != "home":
-            header.append(self._text_button("Home", self._go_home))
+            home_button = self._text_button("Home", self._go_home)
+            header.append(home_button)
+            self._page_focus_target = home_button
         logo_path = Path("/usr/share/pixmaps/edenos-logo.png")
         if logo_path.is_file():
             logo = Gtk.Image.new_from_file(str(logo_path))
@@ -172,7 +178,10 @@ class EdenWindow(Gtk.ApplicationWindow):
         grid.set_homogeneous(True)
         grid.set_hexpand(True)
         for category in CATEGORIES:
-            grid.insert(self._tile(category.label, category.icon, self._open_category(category.slug)), -1)
+            tile = self._tile(category.label, category.icon, self._open_category(category.slug))
+            grid.insert(tile, -1)
+            if self._page_focus_target is None:
+                self._page_focus_target = tile
         content.append(grid)
 
         footer = Gtk.FlowBox()
@@ -232,9 +241,13 @@ class EdenWindow(Gtk.ApplicationWindow):
         if app_info is None:
             self._show_status("I couldn't open that activity. Ask an adult for help.")
             return
+        if not self._launch_cooldown.try_start(activity.id):
+            self._show_status("Please give that activity a moment to open.")
+            return
         try:
             app_info.launch([], None)
         except GLib.Error:  # pragma: no cover - actual desktop launch requires GTK session
+            self._launch_cooldown.release(activity.id)
             self._show_status("I couldn't open that activity. Ask an adult for help.")
 
     def _render_progress(self, content: Gtk.Box) -> None:
@@ -310,27 +323,29 @@ class EdenWindow(Gtk.ApplicationWindow):
         if isinstance(child, Gtk.Box):
             child.append(self._status_label)
 
-    def _update(self) -> None:
+    def _update(self, focus_page: bool = False) -> None:
         self._render()
+        if focus_page and self._page_focus_target is not None:
+            self._page_focus_target.grab_focus()
 
     def _go_home(self, _button: Gtk.Button) -> None:
         self.state.go_home()
-        self._update()
+        self._update(focus_page=True)
 
     def _open_category(self, category: str):
         def open_page(_button: Gtk.Button) -> None:
             self.state.open_category(category)
-            self._update()
+            self._update(focus_page=True)
 
         return open_page
 
     def _open_progress(self, _button: Gtk.Button) -> None:
         self.state.open_progress()
-        self._update()
+        self._update(focus_page=True)
 
     def _open_help(self, _button: Gtk.Button) -> None:
         self.state.open_help()
-        self._update()
+        self._update(focus_page=True)
 
     def _open_kidstube(self, _button: Gtk.Button) -> None:
         if not browser_access_ready():
@@ -347,7 +362,7 @@ class EdenWindow(Gtk.ApplicationWindow):
 
     def _open_settings(self, _button: Gtk.Button) -> None:
         self.state.open_settings()
-        self._update()
+        self._update(focus_page=True)
 
     def _return_to_login(self, _button: Gtk.Button) -> None:
         # The child session ends; LightDM then presents its normal authenticated
