@@ -73,7 +73,7 @@ physical device or runtime evidence; **Pending** = not yet implemented/tested.
 62|Improve first-profile instructions|Pending|
 63|Explain offline features|Source: home-screen explanation|
 64|Label internet activities|Source: KidsTube labelled online; browser disabled pending review|
-65|Helpful unavailable-activity messages|Source existed; runtime check pending|
+65|Helpful unavailable-activity messages|Source: handle PyGObject NULL-constructor exception; unit regression passes; real GTK rerun required|
 66|Prevent duplicate activity windows|Pending|
 67|Activity returns to Eden|Blocked: real activity/session|
 68|Tux Paint save/reopen|Blocked: real activity session|
@@ -156,3 +156,12 @@ Build 41119927894 has completed ISO construction, checksum/boot-structure checks
 and embedded-artwork verification. BIOS/UEFI diagnostics and artifact upload
 were still running when this checkpoint was recorded. This build does not
 include the later account/shutdown batch.
+
+## Missing-activity runtime fix
+
+The expanded real GTK test found DesktopAppInfo.new raises TypeError when a
+desktop entry is missing. The launcher now catches that binding failure and
+shows the existing adult-help message. Local suite: 44 passed, one graphical
+runtime test skipped (45 total). Build 41119927894 produced branded artifact
+13008502831; this earlier ISO does not include the account/shutdown batch or
+this missing-activity fix.

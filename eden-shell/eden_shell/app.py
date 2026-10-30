@@ -224,7 +224,10 @@ class EdenWindow(Gtk.ApplicationWindow):
         content.append(row)
 
     def _launch_activity(self, activity: Activity) -> None:
-        app_info = Gio.DesktopAppInfo.new(activity.desktop_id)
+        try:
+            app_info = Gio.DesktopAppInfo.new(activity.desktop_id)
+        except (TypeError, GLib.Error):
+            app_info = None
         if app_info is None:
             self._show_status("I couldn't open that activity. Ask an adult for help.")
             return
