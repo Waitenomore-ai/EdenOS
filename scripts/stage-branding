@@ -8,8 +8,25 @@ if [ ! -f "$assets/logo/edenos-logo.png" ]; then
   echo "EdenOS artwork not present; building with existing theme."
   exit 0
 fi
+[ -d "$assets/wallpapers" ] || { echo "Missing EdenOS wallpaper directory" >&2; exit 1; }
 count=$(find "$assets/wallpapers" -maxdepth 1 -type f -name '*.png' | wc -l)
 [ "$count" -eq 6 ] || { echo "Expected six EdenOS wallpapers, found $count" >&2; exit 1; }
+for name in 01-eden-sunrise 02-eden-waterfalls 03-eden-rainbow 04-eden-moonlight 05-eden-butterflies 06-eden-orchard; do
+  [ -s "$assets/wallpapers/$name.png" ] || { echo "Missing $name.png" >&2; exit 1; }
+done
+python3 - "$assets" <<'PY'
+import pathlib, struct, sys
+root=pathlib.Path(sys.argv[1])
+files=[root/'logo/edenos-logo.png', *sorted((root/'wallpapers').glob('*.png'))]
+for file in files:
+    header=file.read_bytes()[:24]
+    if len(header)<24 or header[:8]!=b'\x89PNG\r\n\x1a\n' or header[12:16]!=b'IHDR':
+        raise SystemExit(f'Invalid PNG: {file}')
+    width,height=struct.unpack('>II',header[16:24])
+    if width<512 or height<512:
+        raise SystemExit(f'Artwork too small: {file} ({width}x{height})')
+    print(f'Validated {file.name}: {width}x{height}')
+PY
 wallpapers="$includes/usr/share/backgrounds/edenos"
 mkdir -p "$wallpapers" "$includes/usr/share/pixmaps"
 cp "$assets/wallpapers/"*.png "$wallpapers/"
