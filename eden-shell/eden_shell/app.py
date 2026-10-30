@@ -117,6 +117,12 @@ class EdenWindow(Gtk.ApplicationWindow):
         header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         if self.state.page != "home":
             header.append(self._text_button("Home", self._go_home))
+        logo_path = Path("/usr/share/pixmaps/edenos-logo.png")
+        if logo_path.is_file():
+            logo = Gtk.Image.new_from_file(str(logo_path))
+            logo.set_pixel_size(88)
+            logo.set_tooltip_text("Eden OS")
+            header.append(logo)
         heading = Gtk.Label(label="Eden OS")
         heading.add_css_class("eden-title")
         heading.set_hexpand(True)
