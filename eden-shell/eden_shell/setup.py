@@ -15,7 +15,7 @@ except (ImportError, ValueError) as exc:  # pragma: no cover - Debian GTK runtim
         "Eden setup needs the Debian GTK 4 runtime (python3-gi and gir1.2-gtk-4.0)."
     ) from exc
 
-from .setup_model import ChildProfile, validate_child_profile
+from .setup_model import ChildProfile, UsernameInUseError, validate_child_profile
 from .setup_service import create_child_account
 
 
@@ -127,6 +127,9 @@ class SetupWindow(Gtk.ApplicationWindow):
     def _create_profile_worker(self, profile: ChildProfile, password: str) -> None:
         try:
             create_child_account(profile.nickname, profile.username, password)
+        except UsernameInUseError as exc:
+            GLib.idle_add(self._finish, False, str(exc))
+            return
         except Exception:  # surface a plain-language failure; details are not logged
             GLib.idle_add(
                 self._finish,
@@ -173,4 +176,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
 

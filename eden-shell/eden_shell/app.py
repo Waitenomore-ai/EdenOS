@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+import threading
 from pathlib import Path
 
 try:
@@ -385,6 +386,14 @@ class EdenWindow(Gtk.ApplicationWindow):
         dialog.present()
 
     def _request_power_off(self, dialog: Gtk.Window) -> None:
+        if getattr(self, "_shutdown_pending", False):
+            return
+        self._shutdown_pending = True
+        dialog.set_sensitive(False)
+        threading.Thread(target=self._power_off_worker, args=(dialog,), daemon=True).start()
+
+    def _power_off_worker(self, dialog: Gtk.Window) -> None:
+        failed = False
         try:
             connection = Gio.bus_get_sync(Gio.BusType.SYSTEM, None)
             connection.call_sync(
@@ -399,10 +408,17 @@ class EdenWindow(Gtk.ApplicationWindow):
                 None,
             )
         except GLib.Error:
-            dialog.close()
+            failed = True
+        GLib.idle_add(self._finish_power_off, dialog, failed)
+
+    def _finish_power_off(self, dialog: Gtk.Window, failed: bool) -> bool:
+        self._shutdown_pending = False
+        dialog.close()
+        if failed:
             self._show_status(
                 "Eden couldn't turn off the computer. Please ask an adult for help."
             )
+        return False
 
     def _store_preferences(self, preferences: AccessibilityPreferences) -> None:
         try:
@@ -474,4 +490,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
 

@@ -9,6 +9,10 @@ from dataclasses import dataclass
 _USERNAME = re.compile(r"^[a-z_][a-z0-9_-]{0,30}$")
 
 
+class UsernameInUseError(ValueError):
+    """A proposed sign-in name belongs to an existing local/NSS account."""
+
+
 @dataclass(frozen=True)
 class ChildProfile:
     nickname: str
@@ -36,3 +40,4 @@ def validate_child_profile(
     if password != password_confirmation:
         raise ValueError("The two passphrases do not match.")
     return ChildProfile(nickname=nickname, username=username)
+

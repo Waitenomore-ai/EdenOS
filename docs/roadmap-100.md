@@ -43,8 +43,8 @@ physical device or runtime evidence; **Pending** = not yet implemented/tested.
 32|Verify child has no admin privileges|Blocked: account runtime audit|
 33|Test child creation via PolicyKit|Blocked: Debian system bus/session|
 34|Test cancelled adult authentication|Blocked: Debian PolicyKit session|
-35|Test partial account cleanup|Blocked: disposable account runtime|
-36|Helpful existing-username message|Pending|
+35|Test partial account cleanup|Partial: transaction tests cover session/password failure and cleanup refusal; real PolicyKit test pending|
+36|Helpful existing-username message|Source: existing NSS usernames rejected before mutation; safe wizard message tested|
 37|Prevent duplicate setup submissions|Source existed: create button disabled; runtime check pending|
 38|Default child Eden session|Source existed: SetXSession; runtime check pending|
 39|Retain adult desktop|Blocked: login/session test|
@@ -55,7 +55,7 @@ physical device or runtime evidence; **Pending** = not yet implemented/tested.
 44|Audit terminal/file manager routes|Blocked: real session|
 45|Document child-session limitations|Source: release-evidence.md|
 46|Verify child shutdown|Blocked: disposable session|
-47|Handle blocked shutdown without UI freeze|Pending|
+47|Handle blocked shutdown without UI freeze|Source: worker thread with GTK main-loop completion; delayed/denied bus regression test|
 48|Test shutdown with unsaved activity|Blocked: real activity/session|
 49|Verify restart/sign-out|Blocked: installed session|
 50|Recover from launcher crash|Pending|
@@ -135,3 +135,24 @@ Branded image run https://github.com/Waitenomore-ai/EdenOS/actions/runs/41119927
 is building commit b706154eddda44272ac4e0615c0b4fbf9fa56318. Artwork presence and
 source tests passed; final ISO/branding/BIOS/UEFI artifact checks are not yet
 reported. No new ISO or completed installation is claimed at this checkpoint.
+
+
+## Account and shutdown batch
+
+Added validation and username lookup at the service boundary; password hashing
+finishes before creating any account. In-memory transaction tests cover standard
+user type, selected session, password completion, rollback, rollback refusal and
+helpful duplicate-name messages. These are not tests of real system accounts.
+Shutdown D-Bus work now runs outside the GTK UI thread; a controlled denied
+request verifies that the UI caller returns and the adult-help message appears.
+The missing-activity GTK test must run online. Local suite: 43 passed, one GTK
+runtime test skipped (44 total).
+
+Review: no important account/shutdown issues found. Deferred minor: closing and
+reopening the shutdown dialog while a request is pending can show a button that
+silently ignores another request; dialog lifecycle polish remains open.
+
+Build 41119927894 has completed ISO construction, checksum/boot-structure checks,
+and embedded-artwork verification. BIOS/UEFI diagnostics and artifact upload
+were still running when this checkpoint was recorded. This build does not
+include the later account/shutdown batch.

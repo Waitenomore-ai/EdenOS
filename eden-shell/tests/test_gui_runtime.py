@@ -12,6 +12,7 @@ class GtkRuntimeTests(unittest.TestCase):
         gi.require_version('Gtk', '4.0')
         from gi.repository import GLib
         from eden_shell.app import EdenApplication, EdenWindow
+        from eden_shell.catalogue import Activity
         from eden_shell.setup import SetupApplication, SetupWindow
         with tempfile.TemporaryDirectory() as directory:
             with patch.dict(os.environ, {'XDG_CONFIG_HOME': directory}):
@@ -26,6 +27,9 @@ class GtkRuntimeTests(unittest.TestCase):
                 self.assertIsNotNone(window.get_child())
                 window._open_category('create')(None)
                 self.assertEqual(window.state.category, 'create')
+                window._launch_activity(Activity('missing', 'Missing', 'Unavailable fixture',
+                                                 'create', 'eden-does-not-exist.desktop', True))
+                self.assertIn("couldn't open", window._status_label.get_text())
                 window._open_settings(None)
                 for _ in range(6):
                     window._bigger_text(None)
@@ -42,3 +46,4 @@ class GtkRuntimeTests(unittest.TestCase):
                 self.assertIsNotNone(setup_window.get_child())
                 setup_window.destroy()
                 setup.quit()
+

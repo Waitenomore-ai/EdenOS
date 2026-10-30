@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from pathlib import Path
+import pwd
 
 from .setup_crypto import hash_password
+from .setup_model import UsernameInUseError, validate_child_profile
 
 try:
     import gi
@@ -64,16 +66,25 @@ def create_child_account(nickname: str, username: str, password: str) -> None:
     outside the GTK main loop because PolicyKit may show an administrator
     authentication prompt.
     """
+    profile = validate_child_profile(nickname, username, password, password)
+    try:
+        pwd.getpwnam(profile.username)
+    except KeyError:
+        pass
+    else:
+        raise UsernameInUseError("That sign-in username is already in use. Choose another name.")
     if not Path("/usr/share/xsessions/eden-child.desktop").is_file():
         raise RuntimeError("The Eden Child Session is not installed.")
 
+    # Finish fallible local preparation before creating any system account.
+    encrypted_password = hash_password(password)
     connection = Gio.bus_get_sync(Gio.BusType.SYSTEM, None)
     created = _call(
         connection,
         _ACCOUNTS_PATH,
         _ACCOUNTS,
         "CreateUser",
-        GLib.Variant("(ssi)", (username, nickname, 0)),
+        GLib.Variant("(ssi)", (profile.username, profile.nickname, 0)),
         GLib.VariantType.new("(o)"),
     )
     user_path = created.unpack()[0]
@@ -86,7 +97,6 @@ def create_child_account(nickname: str, username: str, password: str) -> None:
             GLib.Variant("(s)", ("eden-child",)),
             None,
         )
-        encrypted_password = hash_password(password)
         _call(
             connection,
             user_path,
@@ -103,3 +113,4 @@ def create_child_account(nickname: str, username: str, password: str) -> None:
                 "Setup stopped partway through. An adult must check the new account before use."
             ) from cleanup_error
         raise RuntimeError("Account setup did not finish; the new account was removed.") from exc
+
