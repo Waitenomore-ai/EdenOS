@@ -123,3 +123,15 @@ physical device or runtime evidence; **Pending** = not yet implemented/tested.
 The first real GTK source check failed at launcher construction because
 Gtk.Button.update_property_value is not exposed by PyGObject. Both button
 creation paths now use update_property. A new online run must verify the fix.
+
+## Verified online result
+
+Source-check run https://github.com/Waitenomore-ai/EdenOS/actions/runs/41119914975
+passed all 36 tests, including the real GTK startup/navigation/accessibility-
+settings/adult-setup smoke, with no skipped tests. This is a virtual graphical
+runtime check, not a physical accessibility or hardware certification.
+
+Branded image run https://github.com/Waitenomore-ai/EdenOS/actions/runs/41119927894
+is building commit b706154eddda44272ac4e0615c0b4fbf9fa56318. Artwork presence and
+source tests passed; final ISO/branding/BIOS/UEFI artifact checks are not yet
+reported. No new ISO or completed installation is claimed at this checkpoint.
