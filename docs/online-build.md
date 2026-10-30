@@ -3,7 +3,7 @@
 The GitHub Actions workflow builds a development ISO on a temporary Ubuntu
 runner using a privileged Debian 13 container. It runs manually, needs no API
 keys, has read-only repository permission, and does not publish a release.
-The first remote build has not been run yet.
+A remote test ISO built successfully on 30 October 2026 (run 41072943583). That image predates the Garden of Eden branding. The rebuilt branded image has not yet been verified.
 
 1. Create a GitHub repository named `eden-os`. Private keeps development source
    private; build minutes and artifact storage are subject to your account's
@@ -28,3 +28,7 @@ The first remote build has not been run yet.
 The workflow uses GitHub's checkout and artifact actions v6 and Debian's
 `trixie` container tag. These version tags and package archives can change;
 this is an automated source build, not a byte-for-byte reproducible build.
+
+## Branding gate
+
+The manual workflow has `require_branding` enabled by default. To build a branded ISO, first place `edenos-artwork/logo/edenos-logo.png` and all six named Garden of Eden PNGs in `edenos-artwork/wallpapers/` in the repository. The build validates artwork and stages default LightDM and XFCE wallpapers. Leave `require_branding` enabled to avoid distributing an image without its artwork. A successful workflow still requires real BIOS/UEFI boot tests and checks of the actual desktop and child accounts.
