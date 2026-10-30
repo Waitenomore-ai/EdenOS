@@ -79,7 +79,7 @@ class EdenWindow(Gtk.ApplicationWindow):
 
     def _accessible_button(self, label: str, callback) -> Gtk.Button:
         button = Gtk.Button()
-        button.update_property_value([Gtk.AccessibleProperty.LABEL], [label])
+        button.update_property([Gtk.AccessibleProperty.LABEL], [label])
         button.add_css_class("eden-small-button")
         button.connect("clicked", callback)
         return button
@@ -91,7 +91,7 @@ class EdenWindow(Gtk.ApplicationWindow):
 
     def _tile(self, label: str, icon_name: str, callback) -> Gtk.Button:
         button = Gtk.Button()
-        button.update_property_value([Gtk.AccessibleProperty.LABEL], [label])
+        button.update_property([Gtk.AccessibleProperty.LABEL], [label])
         button.add_css_class("eden-card")
         button.connect("clicked", callback)
         content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)

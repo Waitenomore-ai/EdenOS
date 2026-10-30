@@ -64,7 +64,7 @@ physical device or runtime evidence; **Pending** = not yet implemented/tested.
 53|All screens at maximum text scaling|Partial: opt-in GTK smoke; allocation/visual checks pending|
 54|Predictable focus after navigation|Pending|
 55|Visible keyboard focus|Source: explicit button/high-contrast focus styles; visual check pending|
-56|Useful screen-reader labels|Blocked: actual assistive-technology test|
+56|Useful screen-reader labels|Source: corrected GTK update_property binding; real screen-reader check pending|
 57|Screen-reader test|Blocked: desktop/screen reader|
 58|Check high contrast throughout|Partial: ordinary buttons now explicit; visual audit pending|
 59|Reduced-motion behaviour|Source existed: no automatic animations; runtime audit pending|
@@ -117,3 +117,9 @@ physical device or runtime evidence; **Pending** = not yet implemented/tested.
   installation must identify and confirm the selected target at that time.
 - The image build can be run online, but real child/session/PolicyKit/accessibility
   and hardware results cannot be inferred from a successful build.
+
+## Runtime finding
+
+The first real GTK source check failed at launcher construction because
+Gtk.Button.update_property_value is not exposed by PyGObject. Both button
+creation paths now use update_property. A new online run must verify the fix.
