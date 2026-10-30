@@ -22,6 +22,7 @@ apt-get install -y --no-install-recommends live-build ca-certificates
 chmod +x auto/config scripts/prepare-chroot-assets
 chmod +x config/includes.chroot/usr/local/bin/eden-*
 bash scripts/prepare-chroot-assets
+bash scripts/stage-branding
 mkdir -p output
 {
     printf 'Eden OS DEVELOPMENT TEST IMAGE\n'
