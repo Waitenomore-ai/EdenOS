@@ -1,0 +1,26 @@
+name: EdenOS source checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Install graphical test runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends python3-gi gir1.2-gtk-4.0 xvfb xauth dbus-x11 librsvg2-common
+      - name: Run source and real GTK tests
+        run: |
+          xvfb-run -a dbus-run-session -- env EDEN_GUI_TESTS=1 PYTHONPATH=eden-shell /usr/bin/python3 -m unittest discover -s eden-shell/tests -v
+      - name: Check shell syntax
+        run: |
+          bash -n scripts/build-iso scripts/boot-smoke
+          sh -n auto/config scripts/prepare-chroot-assets scripts/stage-branding

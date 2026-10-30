@@ -13,3 +13,7 @@ window { background: #eef7f4; color: #193d38; }
 .contrast .eden-title, .contrast .eden-subtitle, .contrast .eden-card-label, .contrast .eden-status { color: #ffffff; }
 .contrast .eden-card, .contrast .eden-empty { background: #000000; color: #ffffff; border: 3px solid #ffffff; }
 .contrast .eden-card:focus { outline: 5px solid #ffeb3b; }
+
+.eden-small-button:focus { outline: 4px solid #174e46; outline-offset: 2px; }
+.contrast .eden-small-button { background: #000000; color: #ffffff; border: 3px solid #ffffff; }
+.contrast .eden-small-button:focus { outline: 5px solid #ffeb3b; }

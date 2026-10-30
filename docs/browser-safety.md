@@ -65,3 +65,17 @@ nearby and review the service and policy regularly.
 - [KidsTube privacy notice](https://www.kids-tube.com/privacy)
 - [Firefox WebsiteFilter policy](https://mozilla.github.io/policy-templates/#websitefilter)
 - [Firefox policy configuration](https://support.mozilla.org/en-US/kb/customizing-firefox-using-policiesjson)
+
+
+## Current release gate (supersedes pilot availability described above)
+
+New images default `browser_enabled` to false. Both Eden launch paths require
+that value to be exactly true AND browser_policy to be
+`kidstube_allowlist_verified`, plus the existing strict Firefox-policy check.
+Only an adult administrator can change the root-owned system defaults. Do not
+mark the policy verified until the runtime checks above are documented. The
+home button stays insensitive until that gate passes.
+
+This controls the Eden button and wrapper. Firefox is still installed, so
+alternate desktops and direct execution require separate testing/restriction;
+this change does not establish an OS-wide browser security boundary.

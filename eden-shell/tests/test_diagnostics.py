@@ -1,0 +1,50 @@
+import importlib
+import json
+from pathlib import Path
+import tempfile
+import unittest
+
+
+class DiagnosticsTests(unittest.TestCase):
+    def module(self):
+        try:
+            return importlib.import_module('eden_shell.diagnostics')
+        except ModuleNotFoundError:
+            self.fail('Read-only diagnostics module is missing')
+
+    def test_reports_hardware_firmware_memory_and_storage_without_serials(self):
+        module = self.module()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name, text in {
+                'sys/class/dmi/id/product_name': 'iMac12,2\n',
+                'sys/firmware/efi/fw_platform_size': '64\n',
+                'proc/meminfo': 'MemTotal:        4194304 kB\n',
+                'proc/cpuinfo': 'model name\t: Intel Test CPU\n',
+                'etc/eden-os/build.json': json.dumps({'version':'0.1-dev','commit':'a'*40,'built_at':'today'}),
+            }.items():
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(text)
+            report = module.collect_report(root)
+            self.assertEqual(report['hardware_model'], 'iMac12,2')
+            self.assertEqual(report['firmware_bits'], '64')
+            self.assertEqual(report['memory_bytes'], 4294967296)
+            self.assertIn('free_bytes', report['storage'])
+            self.assertNotIn('serial', json.dumps(report).lower())
+            self.assertNotIn('hostname', report)
+            self.assertNotIn('username', report)
+
+    def test_storage_budget_uses_binary_thresholds(self):
+        assess = self.module().assess_storage
+        self.assertTrue(assess(30*2**30, 10*2**30)['within_budget'])
+        self.assertFalse(assess(30*2**30, 5*2**30)['within_budget'])
+        self.assertFalse(assess(40*2**30, 10*2**30)['within_budget'])
+
+    def test_missing_hardware_data_is_unknown(self):
+        module = self.module()
+        with tempfile.TemporaryDirectory() as directory:
+            report = module.collect_report(Path(directory))
+            self.assertEqual(report['hardware_model'], 'unknown')
+            self.assertEqual(report['firmware_bits'], 'unknown')
+            self.assertIsNone(report['memory_bytes'])

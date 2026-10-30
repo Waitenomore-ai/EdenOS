@@ -42,3 +42,12 @@ is explicitly **inconclusive**: it is not proof that the guest reached a login
 screen. A normal emulator exit without a detected error is also not a verified
 boot. Explicit kernel panic, missing-root, and boot-device errors fail the check.
 This helper tests BIOS only; Intel iMac UEFI boot still needs a separate check.
+
+## Roadmap build update — 30 October 2026
+
+The approved logo and all six wallpapers are now committed under edenos-artwork.
+Builds embed /etc/eden-os/build.json (version, UTC build time and source commit).
+The build first runs a real GTK construction/navigation smoke test under Xvfb.
+The optional boot_smoke input now runs both BIOS and UEFI/OVMF diagnostics with
+4 GB guest RAM; timeouts remain inconclusive. See roadmap-100.md for per-item
+status and release-evidence.md for outstanding device tests.

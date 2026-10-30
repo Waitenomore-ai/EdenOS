@@ -5,11 +5,11 @@ from __future__ import annotations
 import os
 import sys
 
-from .browser import kidstube_policy_ready
+from .browser import browser_access_ready
 
 
 def main() -> int:
-    if not kidstube_policy_ready():
+    if not browser_access_ready():
         print("KidsTube is unavailable: the browser policy is missing or invalid.", file=sys.stderr)
         return 1
     os.execv(
@@ -25,3 +25,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

@@ -31,7 +31,10 @@ class SetupWindow(Gtk.ApplicationWindow):
         root.set_margin_bottom(30)
         root.set_margin_start(36)
         root.set_margin_end(36)
-        self.set_child(root)
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroll.set_child(root)
+        self.set_child(scroll)
 
         title = Gtk.Label(label="Create a child profile")
         title.add_css_class("eden-title")
@@ -170,3 +173,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

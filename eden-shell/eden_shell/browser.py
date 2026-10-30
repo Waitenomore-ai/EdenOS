@@ -8,6 +8,7 @@ from typing import Any
 
 
 POLICY_PATH = Path("/etc/firefox/policies/policies.json")
+CONFIG_PATH = Path("/etc/eden-os/defaults.json")
 _KIDSTUBE_EXCEPTIONS = {
     "https://kids-tube.com/*",
     "https://www.kids-tube.com/*",
@@ -16,6 +17,23 @@ _KIDSTUBE_EXCEPTIONS = {
     "https://*.ytimg.com/*",
     "https://*.googlevideo.com/*",
 }
+
+
+def browser_access_ready(config_path: Path = CONFIG_PATH, policy_path: Path = POLICY_PATH) -> bool:
+    """Require explicit adult-managed enablement after the pilot is reviewed.
+
+    This gate covers Eden launch paths only; it is not an OS security boundary.
+    """
+    try:
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return False
+    return (
+        isinstance(config, dict)
+        and config.get("browser_enabled") is True
+        and config.get("browser_policy") == "kidstube_allowlist_verified"
+        and kidstube_policy_ready(policy_path)
+    )
 
 
 def kidstube_policy_ready(path: Path = POLICY_PATH) -> bool:
@@ -64,3 +82,4 @@ def kidstube_policy_ready(path: Path = POLICY_PATH) -> bool:
         and homepage.get("StartPage") == "homepage-locked"
         and homepage.get("Locked") is True
     )
+

@@ -58,7 +58,7 @@ disk. The qcow2 file grows as data is written, so it does not immediately use
 
 ```sh
 sudo apt install qemu-system-x86 qemu-utils
-qemu-img create -f qcow2 eden-test.qcow2 32G
+qemu-img create -f qcow2 eden-test.qcow2 32000000000
 qemu-system-x86_64 \
   -m 4096 \
   -smp 2 \
@@ -114,3 +114,4 @@ details before changing the image.
   touch navigation, screen reader output, high contrast, text scaling, and
   recovery after interrupted installation/update.
 - No hardware or ISO compatibility result is claimed yet.
+

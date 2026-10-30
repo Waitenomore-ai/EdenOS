@@ -10,12 +10,12 @@ SCRIPT = Path(__file__).resolve().parents[2] / 'scripts' / 'boot-smoke'
 
 
 class BootSmokeTests(unittest.TestCase):
-    def run_diagnostic(self, status=0, message='', iso_exists=True):
+    def run_diagnostic(self, status=0, message='', iso_exists=True, mode='bios', firmware=True):
         with tempfile.TemporaryDirectory(prefix='eden boot ') as directory:
             root = Path(directory)
             emulator = root / 'qemu-system-x86_64'
             emulator.write_text(
-                '#!/bin/sh\nprintf "%s\\n" "$EDEN_TEST_MESSAGE"\nexit "$EDEN_TEST_STATUS"\n'
+                '#!/bin/sh\nprintf "%s\\n" "$EDEN_TEST_MESSAGE" "$@"\nexit "$EDEN_TEST_STATUS"\n'
             )
             emulator.chmod(0o755)
             iso = root / 'test image.iso'
@@ -24,8 +24,15 @@ class BootSmokeTests(unittest.TestCase):
             log = root / 'logs' / 'boot.log'
             env = dict(os.environ, PATH=str(root) + os.pathsep + os.environ['PATH'],
                        EDEN_TEST_STATUS=str(status), EDEN_TEST_MESSAGE=message)
-            result = subprocess.run(['bash', str(SCRIPT), str(iso), str(log)],
+            code, variables = root / 'CODE.fd', root / 'VARS.fd'
+            if firmware:
+                code.write_bytes(b'firmware fixture')
+                variables.write_bytes(b'unchanged variable fixture')
+            env.update(EDEN_OVMF_CODE=str(code), EDEN_OVMF_VARS=str(variables))
+            result = subprocess.run(['bash', str(SCRIPT), str(iso), str(log), mode],
                                     env=env, capture_output=True, text=True, timeout=5)
+            if firmware:
+                self.assertEqual(variables.read_bytes(), b'unchanged variable fixture')
             return result, log.read_text() if log.exists() else ''
 
     def test_emulator_startup_failure_fails_diagnostic_and_preserves_log(self):
@@ -64,3 +71,18 @@ class BootSmokeTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('ISO not found', result.stderr)
         self.assertEqual(log, '')
+
+    def test_uefi_uses_read_only_code_and_disposable_variables(self):
+        result, log = self.run_diagnostic(mode='uefi')
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('if=pflash,format=raw,readonly=on', log)
+        self.assertIn('eden-uefi-', log)
+
+    def test_uefi_rejects_missing_firmware(self):
+        result, _ = self.run_diagnostic(mode='uefi', firmware=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('firmware', result.stderr.lower())
+
+    def test_unknown_firmware_mode_is_rejected(self):
+        result, _ = self.run_diagnostic(mode='unknown')
+        self.assertNotEqual(result.returncode, 0)

@@ -1,16 +1,31 @@
 #!/usr/bin/env bash
-# Non-destructive BIOS boot smoke check for a built EdenOS live ISO.
+# Non-destructive BIOS or UEFI diagnostic for a built EdenOS live ISO.
 # Uses a disposable QEMU guest. It never attaches a host disk.
 set -euo pipefail
 iso="${1:-output/eden-os-amd64-test.iso}"
 log="${2:-output/qemu-bios-smoke.log}"
+mode="${3:-bios}"
+firmware_args=()
+case "$mode" in
+  bios) ;;
+  uefi)
+    code="${EDEN_OVMF_CODE:-/usr/share/OVMF/OVMF_CODE_4M.fd}"
+    variables="${EDEN_OVMF_VARS:-/usr/share/OVMF/OVMF_VARS_4M.fd}"
+    [[ -s "$code" && -s "$variables" ]] || { echo 'UEFI firmware missing: install ovmf or set EDEN_OVMF_CODE and EDEN_OVMF_VARS.' >&2; exit 1; }
+    temporary=$(mktemp -d -t eden-uefi-XXXXXXXX)
+    trap 'rm -rf -- "$temporary"' EXIT
+    cp -- "$variables" "$temporary/vars.fd"
+    firmware_args=(-drive "if=pflash,format=raw,readonly=on,file=$code" -drive "if=pflash,format=raw,file=$temporary/vars.fd")
+    ;;
+  *) echo 'Firmware mode must be bios or uefi.' >&2; exit 1 ;;
+esac
 [[ -s "$iso" ]] || { echo "ISO not found: $iso" >&2; exit 1; }
 command -v qemu-system-x86_64 >/dev/null || { echo "Install qemu-system-x86" >&2; exit 1; }
 mkdir -p "$(dirname "$log")"
 # Smoke only: an attempted firmware-to-kernel boot, not a desktop or installer certification.
 set +e
 timeout --signal=TERM --kill-after=5s 100s qemu-system-x86_64 \
-  -machine pc,accel=tcg -cpu max -m 2048 -smp 2 \
+  -machine pc,accel=tcg -cpu max -m 4096 -smp 2 "${firmware_args[@]}" \
   -cdrom "$iso" -boot order=d -no-reboot -display none \
   -serial stdio -monitor none -nic none >"$log" 2>&1
 status=$?

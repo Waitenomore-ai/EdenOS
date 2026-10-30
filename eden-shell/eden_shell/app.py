@@ -16,7 +16,8 @@ except (ImportError, ValueError) as exc:  # pragma: no cover - requires Debian G
     ) from exc
 
 from .catalogue import CATEGORIES, Activity, load_catalogue
-from .browser import kidstube_policy_ready
+from .browser import browser_access_ready
+from .version import build_label
 from .navigation import ScreenState
 from .preferences import (
     AccessibilityPreferences,
@@ -160,25 +161,32 @@ class EdenWindow(Gtk.ApplicationWindow):
         prompt.set_xalign(0)
         content.append(prompt)
 
-        grid = Gtk.Grid(column_spacing=18, row_spacing=18)
-        grid.set_column_homogeneous(True)
+        grid = Gtk.FlowBox()
+        grid.set_selection_mode(Gtk.SelectionMode.NONE)
+        grid.set_min_children_per_line(1)
+        grid.set_max_children_per_line(2)
+        grid.set_column_spacing(18)
+        grid.set_row_spacing(18)
+        grid.set_homogeneous(True)
         grid.set_hexpand(True)
-        for index, category in enumerate(CATEGORIES):
-            grid.attach(
-                self._tile(category.label, category.icon, self._open_category(category.slug)),
-                index % 2,
-                index // 2,
-                1,
-                1,
-            )
+        for category in CATEGORIES:
+            grid.insert(self._tile(category.label, category.icon, self._open_category(category.slug)), -1)
         content.append(grid)
 
-        footer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
-        footer.append(self._text_button("My Progress", self._open_progress))
-        footer.append(self._text_button("Watch KidsTube online", self._open_kidstube))
-        footer.append(self._text_button("Ask an adult for help", self._open_help))
-        footer.append(self._text_button("Turn off computer", self._confirm_power_off))
+        footer = Gtk.FlowBox()
+        footer.set_selection_mode(Gtk.SelectionMode.NONE)
+        footer.set_min_children_per_line(1)
+        footer.set_max_children_per_line(2)
+        footer.set_column_spacing(16)
+        footer.set_row_spacing(16)
+        footer.insert(self._text_button("My Progress", self._open_progress), -1)
+        browser_button = self._text_button("Watch KidsTube online", self._open_kidstube)
+        browser_button.set_sensitive(browser_access_ready())
+        footer.insert(browser_button, -1)
+        footer.insert(self._text_button("Ask an adult for help", self._open_help), -1)
+        footer.insert(self._text_button("Turn off computer", self._confirm_power_off), -1)
         content.append(footer)
+        self._append_empty(content, "Your included activities work offline. Online video needs an internet connection and adult setup.")
 
     def _render_category(self, content: Gtk.Box) -> None:
         category = next(item for item in CATEGORIES if item.slug == self.state.category)
@@ -241,6 +249,7 @@ class EdenWindow(Gtk.ApplicationWindow):
         title.set_xalign(0)
         content.append(title)
         self._append_empty(content, "Please find an adult and ask them to help you.")
+        self._append_empty(content, build_label())
         content.append(
             self._text_button("Return to the sign-in screen", self._return_to_login)
         )
@@ -316,7 +325,7 @@ class EdenWindow(Gtk.ApplicationWindow):
         self._update()
 
     def _open_kidstube(self, _button: Gtk.Button) -> None:
-        if not kidstube_policy_ready():
+        if not browser_access_ready():
             self._show_status(
                 "KidsTube is unavailable until its adult-approved browser settings are ready."
             )
