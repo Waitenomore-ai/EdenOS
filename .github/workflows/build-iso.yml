@@ -3,6 +3,11 @@ name: Build Eden OS ISO
 on:
   workflow_dispatch:
     inputs:
+      boot_smoke:
+        description: 'Run optional headless QEMU BIOS smoke check'
+        type: boolean
+        required: true
+        default: false
       require_branding:
         description: 'Require logo and all six wallpapers (recommended)'
         type: boolean
@@ -87,6 +92,14 @@ jobs:
           echo 'Verified EdenOS logo, six wallpapers, and login theme inside ISO.'
           rm -f output/iso-inspection/filesystem.squashfs
 
+      - name: QEMU BIOS smoke test (diagnostic)
+        if: ${{ inputs.boot_smoke }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get install -y -qq qemu-system-x86
+          bash scripts/boot-smoke output/eden-os-amd64-test.iso output/qemu-bios-smoke.log
+
       - name: Save test ISO and checksum
         uses: actions/upload-artifact@v6
         with:
@@ -104,6 +117,8 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: eden-os-build-log-${{ github.run_number }}
-          path: output/build.log
+          path: |
+            output/build.log
+            output/qemu-bios-smoke.log
           if-no-files-found: ignore
           retention-days: 7
