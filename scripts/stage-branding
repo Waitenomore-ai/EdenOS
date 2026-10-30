@@ -1,0 +1,42 @@
+#!/bin/sh
+# Stage optional branding and configure it only when artwork is present.
+set -eu
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+assets="$root/edenos-artwork"
+includes="$root/config/includes.chroot"
+if [ ! -f "$assets/logo/edenos-logo.png" ]; then
+  echo "EdenOS artwork not present; building with existing theme."
+  exit 0
+fi
+count=$(find "$assets/wallpapers" -maxdepth 1 -type f -name '*.png' | wc -l)
+[ "$count" -eq 6 ] || { echo "Expected six EdenOS wallpapers, found $count" >&2; exit 1; }
+wallpapers="$includes/usr/share/backgrounds/edenos"
+mkdir -p "$wallpapers" "$includes/usr/share/pixmaps"
+cp "$assets/wallpapers/"*.png "$wallpapers/"
+cp "$assets/logo/edenos-logo.png" "$includes/usr/share/pixmaps/edenos-logo.png"
+# LightDM GTK greeter reads system-wide defaults. The child launcher uses its own GTK view.
+mkdir -p "$includes/etc/lightdm/lightdm-gtk-greeter.conf.d"
+cat > "$includes/etc/lightdm/lightdm-gtk-greeter.conf.d/50-edenos.conf" <<'EOF'
+[greeter]
+background=/usr/share/backgrounds/edenos/01-eden-sunrise.png
+theme-name=Adwaita
+icon-theme-name=Adwaita
+EOF
+# XFCE desktop channel default, used when a profile has no existing desktop preferences.
+mkdir -p "$includes/etc/xdg/xfce4/xfconf/xfce-perchannel-xml"
+cat > "$includes/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml" <<'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xfce4-desktop" version="1.0">
+  <property name="backdrop" type="empty">
+    <property name="screen0" type="empty">
+      <property name="monitor0" type="empty">
+        <property name="workspace0" type="empty">
+          <property name="last-image" type="string" value="/usr/share/backgrounds/edenos/01-eden-sunrise.png"/>
+          <property name="image-style" type="int" value="5"/>
+        </property>
+      </property>
+    </property>
+  </property>
+</channel>
+EOF
+echo "Staged EdenOS logo, six wallpapers, greeter and XFCE defaults."
