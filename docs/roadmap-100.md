@@ -148,9 +148,9 @@ request verifies that the UI caller returns and the adult-help message appears.
 The missing-activity GTK test must run online. Local suite: 43 passed, one GTK
 runtime test skipped (44 total).
 
-Review: no important account/shutdown issues found. Deferred minor: closing and
-reopening the shutdown dialog while a request is pending can show a button that
-silently ignores another request; dialog lifecycle polish remains open.
+Review: no important account/shutdown issues found. The shutdown close/reopen minor noted in review is now fixed: the dialog
+refuses window-manager closure while a request is pending, and completion
+clears that state before closing it.
 
 Build 41119927894 has completed ISO construction, checksum/boot-structure checks,
 and embedded-artwork verification. BIOS/UEFI diagnostics and artifact upload
@@ -165,3 +165,11 @@ shows the existing adult-help message. Local suite: 44 passed, one graphical
 runtime test skipped (45 total). Build 41119927894 produced branded artifact
 13008502831; this earlier ISO does not include the account/shutdown batch or
 this missing-activity fix.
+
+## Error-message and dialog follow-up
+
+Repeated launcher errors reuse one status row instead of growing the screen.
+The pending-shutdown dialog has a close guard, with a regression test. The
+missing-activity constructor exception has a regression test and is caught.
+Local verification: 46 passed, one graphical runtime test skipped (47 total).
+Focused review found no important issues. Real GTK CI remains queued.

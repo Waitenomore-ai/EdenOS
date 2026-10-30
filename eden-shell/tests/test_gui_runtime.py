@@ -30,6 +30,10 @@ class GtkRuntimeTests(unittest.TestCase):
                 window._launch_activity(Activity('missing', 'Missing', 'Unavailable fixture',
                                                  'create', 'eden-does-not-exist.desktop', True))
                 self.assertIn("couldn't open", window._status_label.get_text())
+                status_label = window._status_label
+                window._launch_activity(Activity('missing', 'Missing', 'Unavailable fixture',
+                                                 'create', 'eden-does-not-exist.desktop', True))
+                self.assertIs(window._status_label, status_label)
                 window._open_settings(None)
                 for _ in range(6):
                     window._bigger_text(None)

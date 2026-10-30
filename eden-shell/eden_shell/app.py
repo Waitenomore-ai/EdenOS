@@ -109,6 +109,7 @@ class EdenWindow(Gtk.ApplicationWindow):
         return button
 
     def _render(self) -> None:
+        self._status_label = None
         root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
         root.set_margin_top(22)
         root.set_margin_bottom(22)
@@ -298,6 +299,9 @@ class EdenWindow(Gtk.ApplicationWindow):
         content.append(label)
 
     def _show_status(self, message: str) -> None:
+        if getattr(self, "_status_label", None) is not None:
+            self._status_label.set_label(message)
+            return
         self._status_label = Gtk.Label(label=message)
         self._status_label.add_css_class("eden-status")
         self._status_label.set_wrap(True)
@@ -352,6 +356,7 @@ class EdenWindow(Gtk.ApplicationWindow):
 
     def _confirm_power_off(self, _button: Gtk.Button) -> None:
         dialog = Gtk.Window(application=self.get_application())
+        dialog.connect("close-request", self._close_power_off_dialog)
         dialog.set_title("Turn off Eden OS")
         dialog.set_default_size(560, 360)
         dialog.set_modal(True)
@@ -387,6 +392,9 @@ class EdenWindow(Gtk.ApplicationWindow):
         actions.append(power_off)
         box.append(actions)
         dialog.present()
+
+    def _close_power_off_dialog(self, _dialog: Gtk.Window) -> bool:
+        return getattr(self, "_shutdown_pending", False)
 
     def _request_power_off(self, dialog: Gtk.Window) -> None:
         if getattr(self, "_shutdown_pending", False):
