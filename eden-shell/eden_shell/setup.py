@@ -17,6 +17,8 @@ except (ImportError, ValueError) as exc:  # pragma: no cover - Debian GTK runtim
 
 from .setup_model import ChildProfile, UsernameInUseError, validate_child_profile
 from .setup_service import create_child_account
+from .version import build_label
+from .diagnostics import is_live_session
 
 
 class SetupWindow(Gtk.ApplicationWindow):
@@ -50,6 +52,22 @@ class SetupWindow(Gtk.ApplicationWindow):
         explanation.set_wrap(True)
         explanation.set_xalign(0)
         root.append(explanation)
+        instructions = Gtk.Label(label=(
+            "1. Use your adult administrator account for this setup.\n"
+            "2. Choose a child nickname, a separate sign-in username and a passphrase. No email is needed.\n"
+            "3. After setup, sign out and select the child's account to open Eden."
+        ))
+        instructions.set_wrap(True)
+        instructions.set_xalign(0)
+        root.append(instructions)
+        if is_live_session():
+            live_note = Gtk.Label(label=(
+                "You are using a live USB session. New profiles and saved work may be lost "
+                "when you restart. Install Eden before creating permanent child profiles."
+            ))
+            live_note.set_wrap(True)
+            live_note.set_xalign(0)
+            root.append(live_note)
 
         self.nickname = self._add_entry(
             root, "Child nickname", "Name shown at the sign-in screen"
@@ -82,6 +100,10 @@ class SetupWindow(Gtk.ApplicationWindow):
         note.set_wrap(True)
         note.set_xalign(0)
         root.append(note)
+        version = Gtk.Label(label=build_label())
+        version.set_wrap(True)
+        version.set_xalign(0)
+        root.append(version)
 
     @staticmethod
     def _add_entry(
@@ -91,6 +113,8 @@ class SetupWindow(Gtk.ApplicationWindow):
         caption = Gtk.Label(label=label)
         caption.set_xalign(0)
         entry = Gtk.Entry()
+        entry.update_property([Gtk.AccessibleProperty.LABEL], [label])
+        caption.set_mnemonic_widget(entry)
         entry.set_placeholder_text(placeholder)
         entry.set_hexpand(True)
         if password:

@@ -20,12 +20,17 @@ def assess_storage(total: int, free: int) -> dict:
             'within_budget': used <= 20 * 2**30 and free >= 6 * 2**30}
 
 
+def is_live_session(root: Path = Path('/')) -> bool:
+    return (root / 'run/live/medium').is_dir()
+
+
 def collect_report(root: Path = Path('/')) -> dict:
     memory = re.search(r'^MemTotal:\s+(\d+) kB$', _read(root / 'proc/meminfo'), re.M)
     cpu = re.search(r'^model name\s*:\s*(.+)$', _read(root / 'proc/cpuinfo'), re.M)
     usage = shutil.disk_usage(root)
     return {
         'build': build_label(root / 'etc/eden-os/build.json'),
+        'live_session': is_live_session(root),
         'hardware_model': _read(root / 'sys/class/dmi/id/product_name') or 'unknown',
         'firmware_bits': _read(root / 'sys/firmware/efi/fw_platform_size') or 'unknown',
         'cpu': cpu.group(1) if cpu else 'unknown',
@@ -41,3 +46,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
+

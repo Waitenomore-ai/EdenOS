@@ -48,3 +48,14 @@ class DiagnosticsTests(unittest.TestCase):
             self.assertEqual(report['hardware_model'], 'unknown')
             self.assertEqual(report['firmware_bits'], 'unknown')
             self.assertIsNone(report['memory_bytes'])
+
+
+    def test_live_session_is_detected_from_live_boot_mount(self):
+        module = self.module()
+        detect = getattr(module, 'is_live_session', None)
+        self.assertTrue(callable(detect), 'Live-session detection is missing')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.assertFalse(detect(root))
+            (root / 'run/live/medium').mkdir(parents=True)
+            self.assertTrue(detect(root))

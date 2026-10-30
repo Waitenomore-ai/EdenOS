@@ -51,3 +51,8 @@ The build first runs a real GTK construction/navigation smoke test under Xvfb.
 The optional boot_smoke input now runs both BIOS and UEFI/OVMF diagnostics with
 4 GB guest RAM; timeouts remain inconclusive. See roadmap-100.md for per-item
 status and release-evidence.md for outstanding device tests.
+
+
+ISO structure validation now checks both bootable firmware catalogue entries
+and the extracted EFI fallback loader header. mtools reads only the extracted
+image file; it never receives a host disk device.

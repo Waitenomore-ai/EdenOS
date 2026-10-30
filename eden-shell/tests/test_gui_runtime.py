@@ -10,7 +10,7 @@ class GtkRuntimeTests(unittest.TestCase):
     def test_navigation_accessibility_controls_and_adult_setup_construct(self):
         import gi
         gi.require_version('Gtk', '4.0')
-        from gi.repository import GLib
+        from gi.repository import GLib, Gtk
         from eden_shell.app import EdenApplication, EdenWindow
         from eden_shell.catalogue import Activity
         from eden_shell.setup import SetupApplication, SetupWindow
@@ -49,8 +49,20 @@ class GtkRuntimeTests(unittest.TestCase):
                 app.quit()
                 setup = SetupApplication()
                 self.assertTrue(setup.register(None))
-                setup_window = SetupWindow(setup)
+                with patch('eden_shell.setup.is_live_session', return_value=True):
+                    setup_window = SetupWindow(setup)
                 self.assertIsNotNone(setup_window.get_child())
+                widgets = [setup_window.get_child()]
+                labels = []
+                while widgets:
+                    widget = widgets.pop()
+                    if isinstance(widget, Gtk.Label):
+                        labels.append(widget.get_text())
+                    child = widget.get_first_child()
+                    while child is not None:
+                        widgets.append(child)
+                        child = child.get_next_sibling()
+                self.assertTrue(any('live USB session' in label for label in labels))
                 setup_window.destroy()
                 setup.quit()
 

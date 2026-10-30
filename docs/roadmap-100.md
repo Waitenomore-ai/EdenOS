@@ -14,7 +14,7 @@ physical device or runtime evidence; **Pending** = not yet implemented/tested.
 3|Diagnose wrong boot device|Blocked: firmware/media evidence|
 4|Inspect USB boot files and partitions|Blocked: USB read access|
 5|Identify iMac EFI width|Blocked: system report includes firmware_bits|
-6|Verify required EFI loader in ISO|Pending: inspect built ISO|
+6|Verify required EFI loader in ISO|Partial: catalogue requires BIOS+UEFI and extracted BOOTX64.EFI header check added; verify in next ISO run|
 7|Verify legacy BIOS boot|Pending: diagnostic available, visual boot required|
 8|Separate UEFI diagnostic|Source: boot-smoke uefi, disposable OVMF vars; tests pass|
 9|Record boot results with ISO|Pending: real boot evidence|
@@ -37,7 +37,7 @@ physical device or runtime evidence; **Pending** = not yet implemented/tested.
 26|Check adult desktop wallpaper|Blocked: real graphical session|
 27|Check child launcher branding|Blocked: real graphical session|
 28|Remove stale version/build instructions|Source: current addendum in online-build.md|
-29|Show installed version in adult settings|Partial: build identity shown in adult-help screen|
+29|Show installed version in adult settings|Source: version/build information in adult setup and adult-help screen|
 30|Show build date/source commit|Source: build.json writer and help label, tests pass|
 31|Verify installer adult account creation|Blocked: disposable installation|
 32|Verify child has no admin privileges|Blocked: account runtime audit|
@@ -70,7 +70,7 @@ physical device or runtime evidence; **Pending** = not yet implemented/tested.
 59|Reduced-motion behaviour|Source existed: no automatic animations; runtime audit pending|
 60|Touch targets and scrolling|Blocked: supported touch device|
 61|Adult setup fits small displays|Source: scroll container; visual check pending|
-62|Improve first-profile instructions|Pending|
+62|Improve first-profile instructions|Source: numbered adult/child sign-in steps, no-email explanation and detected live-USB persistence warning|
 63|Explain offline features|Source: home-screen explanation|
 64|Label internet activities|Source: KidsTube labelled online; browser disabled pending review|
 65|Helpful unavailable-activity messages|Source: handle PyGObject NULL-constructor exception; unit regression passes; real GTK rerun required|
@@ -188,3 +188,14 @@ checks now cancel superseded runs on the same branch to reduce queue buildup.
 Online source run 41122191904 for commit 4d43618 passed, including the real GTK
 missing-activity and repeated-status checks. That result predates the new focus
 and rapid-click changes; those need their own online run.
+
+## Setup guidance and ISO inspection batch
+
+Adult setup now includes build identity, screen-reader labels for entries,
+numbered profile-creation guidance and a detected live-session persistence
+warning. The system report includes a local live_session flag. The ISO pipeline
+requires bootable BIOS and UEFI catalogue records and extracts BOOTX64.EFI from
+the known /boot/grub/efi.img to check its amd64 PE32+ EFI application header.
+This is structural inspection, not a cryptographic signature or boot proof.
+Local verification: 54 passed, one real GTK test skipped (55 total). Review
+found no important issues. Online GTK and the next ISO must verify integration.
