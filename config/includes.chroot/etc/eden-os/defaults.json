@@ -1,0 +1,7 @@
+{
+  "setup_complete": false,
+  "browser_enabled": true,
+  "browser_policy": "kidstube_allowlist_unverified",
+  "progress_enabled": false,
+  "progress_storage": "local"
+}

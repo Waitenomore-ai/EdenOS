@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eden-os-shell"
+version = "0.1.0"
+description = "Child-friendly home screen prototype for Eden OS"
+requires-python = ">=3.11"
+license = "GPL-3.0-or-later"
+authors = [{ name = "Eden OS contributors" }]
+
+[project.scripts]
+eden-shell = "eden_shell.app:main"
+
+[tool.setuptools.package-data]
+eden_shell = ["data/*.json", "data/*.css", "data/icons/*.svg"]

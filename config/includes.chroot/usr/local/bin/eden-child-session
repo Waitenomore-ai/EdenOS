@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+# A dedicated X session with no desktop panel, terminal, or adult settings UI.
+# The window manager gives activity and kiosk windows a usable close shortcut.
+# Exiting Eden returns to LightDM, which requires the adult's normal credentials.
+/usr/bin/xfwm4 --replace &
+exec /usr/local/bin/eden-shell

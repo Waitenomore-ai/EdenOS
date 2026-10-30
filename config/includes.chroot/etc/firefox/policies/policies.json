@@ -1,0 +1,30 @@
+{
+  "policies": {
+    "BlockAboutAddons": true,
+    "BlockAboutConfig": true,
+    "BlockAboutProfiles": true,
+    "BlockAboutSupport": true,
+    "DisableDeveloperTools": true,
+    "DisableFirefoxAccounts": true,
+    "DisableFirefoxStudies": true,
+    "DisablePrivateBrowsing": true,
+    "DisableTelemetry": true,
+    "Homepage": {
+      "URL": "https://www.kids-tube.com/",
+      "StartPage": "homepage-locked",
+      "Locked": true
+    },
+    "SanitizeOnShutdown": true,
+    "WebsiteFilter": {
+      "Block": ["<all_urls>"],
+      "Exceptions": [
+        "https://kids-tube.com/*",
+        "https://www.kids-tube.com/*",
+        "https://www.youtube-nocookie.com/embed/*",
+        "https://youtube-nocookie.com/embed/*",
+        "https://*.ytimg.com/*",
+        "https://*.googlevideo.com/*"
+      ]
+    }
+  }
+}

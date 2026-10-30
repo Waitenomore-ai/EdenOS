@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Eden Child Session
+Comment=Simple learning and play home screen
+Exec=/usr/local/bin/eden-child-session
+Type=Application
+DesktopNames=Eden

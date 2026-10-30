@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+
+lb config noauto \
+    --mode debian \
+    --distribution trixie \
+    --architectures amd64 \
+    --binary-images iso-hybrid \
+    --debian-installer live \
+    --archive-areas main \
+    --apt-recommends false \
+    --iso-application "Eden OS" \
+    --iso-publisher "Eden OS project" \
+    --iso-volume "EDEN_OS_DEV"

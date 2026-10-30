@@ -1,0 +1,36 @@
+# Debian Live and installer support
+live-boot
+live-config
+systemd-sysv
+dbus-x11
+
+# Minimal graphical desktop for the adult session; the child session will use
+# the Eden launcher without the standard XFCE panel or desktop menu.
+xserver-xorg
+lightdm
+lightdm-gtk-greeter
+xfce4-session
+xfce4-panel
+xfdesktop4
+xfwm4
+xfce4-settings
+thunar
+
+# Network setup for adult configuration
+network-manager
+network-manager-applet
+nm-connection-editor
+sudo
+firefox-esr
+accountsservice
+mate-polkit
+openssl
+
+# Eden GTK 4 launcher runtime and accessibility plumbing
+python3
+python3-gi
+gir1.2-gtk-4.0
+at-spi2-core
+adwaita-icon-theme
+fonts-dejavu-core
+librsvg2-common

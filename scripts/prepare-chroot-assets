@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+destination="$root/config/includes.chroot/usr/share/eden-os/eden_shell"
+
+rm -rf -- "$destination"
+mkdir -p -- "$(dirname -- "$destination")"
+cp -a -- "$root/eden-shell/eden_shell" "$destination"
+find "$destination" -type d -name __pycache__ -prune -exec rm -rf -- {} +

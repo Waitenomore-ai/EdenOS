@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+
+# Fail closed if the expected allowlist is missing or has been changed.
+export PYTHONPATH="/usr/share/eden-os${PYTHONPATH:+:$PYTHONPATH}"
+exec /usr/bin/python3 -m eden_shell.kidstube

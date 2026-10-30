@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Eden authorization service
+Comment=Ask an administrator before system changes
+Exec=/usr/libexec/polkit-mate-authentication-agent-1
+OnlyShowIn=XFCE;
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

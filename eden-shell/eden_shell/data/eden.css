@@ -1,0 +1,15 @@
+window { background: #eef7f4; color: #193d38; }
+.eden-title { color: #174e46; font-size: 34px; font-weight: 800; }
+.eden-subtitle { color: #365d56; font-size: 21px; }
+.eden-card { min-height: 142px; border-radius: 24px; padding: 20px; background: #ffffff; border: 2px solid #d5e8e1; }
+.eden-card:hover { background: #f7fcfa; border-color: #5b9b89; }
+.eden-card:focus { outline: 4px solid #174e46; outline-offset: 3px; }
+.eden-card-label { color: #174e46; font-size: 25px; font-weight: 700; }
+.eden-small-button { min-height: 58px; border-radius: 18px; padding: 10px 18px; font-size: 20px; }
+.eden-content { padding: 28px; }
+.eden-empty { border-radius: 20px; padding: 30px; background: #ffffff; font-size: 21px; }
+.eden-status { color: #365d56; font-size: 18px; }
+.contrast { background: #000000; color: #ffffff; }
+.contrast .eden-title, .contrast .eden-subtitle, .contrast .eden-card-label, .contrast .eden-status { color: #ffffff; }
+.contrast .eden-card, .contrast .eden-empty { background: #000000; color: #ffffff; border: 3px solid #ffffff; }
+.contrast .eden-card:focus { outline: 5px solid #ffeb3b; }

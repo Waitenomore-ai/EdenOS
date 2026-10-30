@@ -1,0 +1,11 @@
+[
+  {
+    "id": "tux-paint",
+    "title": "Tux Paint",
+    "description": "Draw pictures with friendly painting tools.",
+    "category": "create",
+    "desktop_id": "tuxpaint.desktop",
+    "offline": true,
+    "reviewed": true
+  }
+]

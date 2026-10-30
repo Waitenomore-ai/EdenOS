@@ -1,0 +1,37 @@
+#!/bin/bash
+# Run only in a disposable Debian 13 build environment as root.
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+source /etc/os-release
+if [[ "$ID" != debian || "$VERSION_ID" != 13 ]]; then
+    echo 'Build requires Debian 13.' >&2
+    exit 1
+fi
+if [[ "$(id -u)" != 0 ]]; then
+    echo 'Build requires root in a disposable builder.' >&2
+    exit 1
+fi
+if [[ "$(dpkg --print-architecture)" != amd64 ]]; then
+    echo 'Build requires an amd64 builder.' >&2
+    exit 1
+fi
+export DEBIAN_FRONTEND=noninteractive
+apt-get update
+apt-get install -y --no-install-recommends live-build ca-certificates
+chmod +x auto/config scripts/prepare-chroot-assets
+chmod +x config/includes.chroot/usr/local/bin/eden-*
+bash scripts/prepare-chroot-assets
+mkdir -p output
+{
+    printf 'Eden OS DEVELOPMENT TEST IMAGE\n'
+    printf 'Built at: '
+    date -u --iso-8601=seconds
+    cat /etc/os-release
+    dpkg-query -W live-build
+} > output/build-info.txt
+lb config
+lb build
+test -s live-image-amd64.hybrid.iso
+cp live-image-amd64.hybrid.iso output/eden-os-amd64-test.iso
+(cd output && sha256sum eden-os-amd64-test.iso > eden-os-amd64-test.iso.sha256)

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=KidsTube
+Comment=Watch child-friendly videos online
+Exec=/usr/local/bin/eden-kidstube
+Icon=applications-internet
+Terminal=false
+Categories=Education;Network;
+StartupNotify=false
