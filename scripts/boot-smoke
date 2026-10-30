@@ -16,9 +16,23 @@ timeout --signal=TERM --kill-after=5s 100s qemu-system-x86_64 \
 status=$?
 set -e
 echo "QEMU exit status: $status" >>"$log"
+# timeout uses 124 for its normal time limit. Every other nonzero status
+# indicates an emulator/tool failure, not evidence about the guest's boot.
+case "$status" in
+  0|124) ;;
+  *)
+    echo "QEMU diagnostic failed (exit $status); see $log" >&2
+    exit 1
+    ;;
+esac
 # Do not mistake a timeout for proof of a successful boot.
 if grep -Eiq 'Kernel panic|VFS: Unable to mount root|No bootable device|Boot failed' "$log"; then
   echo "Detected an explicit boot error; see $log" >&2
   exit 1
 fi
-echo "Smoke run finished. Serial output may be unavailable; visual VM testing remains mandatory."
+if [[ "$status" -eq 124 ]]; then
+  echo "Diagnostic time limit reached: inconclusive. Guest boot is not verified; inspect $log and test visually."
+else
+  echo "Emulator exited without a detected boot error. Guest boot is not verified; visual VM testing remains mandatory."
+fi
+

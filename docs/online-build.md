@@ -32,3 +32,13 @@ this is an automated source build, not a byte-for-byte reproducible build.
 ## Branding gate
 
 The manual workflow has `require_branding` enabled by default. To build a branded ISO, first place `edenos-artwork/logo/edenos-logo.png` and all six named Garden of Eden PNGs in `edenos-artwork/wallpapers/` in the repository. The build validates artwork and stages default LightDM and XFCE wallpapers. Leave `require_branding` enabled to avoid distributing an image without its artwork. A successful workflow still requires real BIOS/UEFI boot tests and checks of the actual desktop and child accounts.
+
+
+## Interpreting the optional boot diagnostic
+
+The BIOS smoke helper fails if QEMU cannot start or exits unexpectedly, and
+keeps its output in `output/qemu-bios-smoke.log`. A normal 100-second timeout
+is explicitly **inconclusive**: it is not proof that the guest reached a login
+screen. A normal emulator exit without a detected error is also not a verified
+boot. Explicit kernel panic, missing-root, and boot-device errors fail the check.
+This helper tests BIOS only; Intel iMac UEFI boot still needs a separate check.

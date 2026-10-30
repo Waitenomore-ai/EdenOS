@@ -396,8 +396,15 @@ class EdenWindow(Gtk.ApplicationWindow):
             )
 
     def _store_preferences(self, preferences: AccessibilityPreferences) -> None:
+        try:
+            save_preferences(preferences)
+        except OSError:
+            self._show_status(
+                "Eden couldn't save these choices. Your current settings are unchanged. "
+                "Please ask an adult for help."
+            )
+            return
         self.preferences = preferences
-        save_preferences(preferences)
         self._apply_preferences()
         self._update()
 
@@ -458,3 +465,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
