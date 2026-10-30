@@ -1,0 +1,12 @@
+#!/bin/sh
+# Install the optional EdenOS artwork pack into Debian live-build source.
+# Run from any directory after extracting the artwork ZIP into this repository.
+set -eu
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+source_dir="$root/edenos-artwork"
+target="$root/config/includes.chroot/usr/share/backgrounds/edenos"
+[ -f "$source_dir/logo/edenos-logo.png" ] || { echo "Extract EdenOS artwork pack into $root/edenos-artwork first." >&2; exit 1; }
+mkdir -p "$target" "$root/config/includes.chroot/usr/share/pixmaps"
+cp "$source_dir"/wallpapers/*.png "$target/"
+cp "$source_dir/logo/edenos-logo.png" "$root/config/includes.chroot/usr/share/pixmaps/edenos-logo.png"
+echo "Installed EdenOS artwork into the live-build configuration. Rebuild the ISO to include it."
