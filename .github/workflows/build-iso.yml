@@ -69,6 +69,24 @@ jobs:
           xorriso -indev eden-os-amd64-test.iso -report_el_torito plain 2>&1 | tee iso-boot-catalog.txt
           grep -qi 'El Torito' iso-boot-catalog.txt
 
+      - name: Verify branding inside finished ISO
+        if: ${{ inputs.require_branding }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get install -y -qq squashfs-tools
+          mkdir -p output/iso-inspection
+          xorriso -osirrox on -indev output/eden-os-amd64-test.iso \
+            -extract /live/filesystem.squashfs output/iso-inspection/filesystem.squashfs
+          unsquashfs -ll output/iso-inspection/filesystem.squashfs > output/iso-inspection/files.txt
+          grep -Fq 'usr/share/pixmaps/edenos-logo.png' output/iso-inspection/files.txt
+          for name in 01-eden-sunrise 02-eden-waterfalls 03-eden-rainbow 04-eden-moonlight 05-eden-butterflies 06-eden-orchard; do
+            grep -Fq "usr/share/backgrounds/edenos/$name.png" output/iso-inspection/files.txt
+          done
+          grep -Fq 'etc/lightdm/lightdm-gtk-greeter.conf.d/50-edenos.conf' output/iso-inspection/files.txt
+          echo 'Verified EdenOS logo, six wallpapers, and login theme inside ISO.'
+          rm -f output/iso-inspection/filesystem.squashfs
+
       - name: Save test ISO and checksum
         uses: actions/upload-artifact@v6
         with:
