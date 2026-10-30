@@ -34,6 +34,20 @@ jobs:
             debian:trixie \
             bash scripts/build-iso 2>&1 | tee output/build.log
 
+      - name: Validate ISO structure and checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xorriso
+          cd output
+          sha256sum --check eden-os-amd64-test.iso.sha256
+          test -s eden-os-amd64-test.iso
+          xorriso -indev eden-os-amd64-test.iso -ls /live 2>&1 | tee iso-live-files.txt
+          grep -q 'filesystem.squashfs' iso-live-files.txt
+          xorriso -indev eden-os-amd64-test.iso -report_el_torito plain 2>&1 | tee iso-boot-catalog.txt
+          grep -qi 'El Torito' iso-boot-catalog.txt
+
       - name: Save test ISO and checksum
         uses: actions/upload-artifact@v6
         with:
