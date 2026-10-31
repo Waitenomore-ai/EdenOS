@@ -40,6 +40,12 @@ class UpdatePackageTests(unittest.TestCase):
                 self.assertIn('export PYTHONPATH=', wrapper.read_text(), game)
                 self.assertTrue((extracted / 'usr/share/applications' /
                                  f'eden-{game}.desktop').is_file(), game)
+            for picture in ('number-meadow', 'word-woodland', 'story-garden',
+                            'art-studio', 'puzzle-pond', 'time-routines',
+                            'nature-explorer', 'feelings-quiet-space'):
+                asset = extracted / 'usr/share/eden-os/eden_shell/data/activity-art' / f'{picture}.svg'
+                self.assertTrue(asset.is_file(), picture)
+                self.assertIn('<svg', asset.read_text(), picture)
             self.assertTrue((extracted / 'usr/share/applications/eden-shell.desktop').is_file())
             self.assertTrue((extracted / 'usr/share/eden-os/eden_shell/profile_chooser_model.py').is_file())
             self.assertTrue((extracted / 'usr/share/sounds/edenos/startup.wav').is_file())
