@@ -35,6 +35,21 @@ class CatalogueTests(unittest.TestCase):
             self.assertEqual(category.icon, category.slug)
             self.assertTrue(package_data.joinpath(f"{category.slug}.svg").is_file())
 
+    def test_every_bundled_activity_has_a_child_safe_desktop_launcher(self):
+        catalogue = load_module(self, "eden_shell.catalogue")
+        root = Path(__file__).parents[2]
+        applications = root / "config/includes.chroot/usr/share/applications"
+        packages = (
+            root / "config/package-lists/eden-activities.list.chroot_install"
+        ).read_text(encoding="utf-8")
+        for activity in catalogue.load_catalogue():
+            with self.subTest(activity=activity.id):
+                self.assertRegex(activity.desktop_id, r"^[a-z0-9-]+\.desktop$")
+                if activity.desktop_id.startswith("eden-"):
+                    self.assertTrue((applications / activity.desktop_id).is_file())
+                else:
+                    self.assertIn("tuxpaint", packages)
+
     def test_catalogue_accepts_only_reviewed_local_activities_with_safe_desktop_ids(self):
         catalogue = load_module(self, "eden_shell.catalogue")
         entries = [
