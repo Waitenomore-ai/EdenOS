@@ -7,6 +7,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import sys
 
 
 def build(output: Path, version: str) -> Path:
@@ -27,6 +28,9 @@ def build(output: Path, version: str) -> Path:
             shutil.rmtree(modules)
         shutil.copytree(root / 'eden-shell/eden_shell', modules,
                         ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+        sys.path.insert(0, str(root / 'eden-shell'))
+        from eden_shell.find_eden_assets import stage_pack
+        stage_pack(root / 'find-eden', package / 'usr/share/eden-os/find-eden')
         for wrapper in (package / 'usr/local/bin').glob('eden-*'):
             wrapper.chmod(0o755)
         (package / 'usr/share/eden-os/update.json').write_text(
@@ -53,6 +57,11 @@ def build(output: Path, version: str) -> Path:
         conffiles = sorted('/' + str(p.relative_to(package))
                            for p in (package / 'etc').rglob('*') if p.is_file())
         (metadata / 'conffiles').write_text('\n'.join(conffiles) + '\n')
+        # Build output must remain readable under restrictive developer umasks.
+        package.chmod(0o755)
+        for path in package.rglob('*'):
+            if path.is_dir(): path.chmod(0o755)
+            elif path.is_file(): path.chmod(0o755 if path.stat().st_mode & 0o111 else 0o644)
         subprocess.run(['dpkg-deb', '--build', '--root-owner-group', str(package),
                         str(destination)], check=True)
     return destination

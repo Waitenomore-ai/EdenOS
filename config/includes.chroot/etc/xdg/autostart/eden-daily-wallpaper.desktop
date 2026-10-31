@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Eden daily garden wallpaper
+Exec=/usr/bin/python3 /usr/share/eden-os/find-eden/daily-wallpaper/rotator.py --manifest /usr/share/eden-os/find-eden/wallpapers.json --watch
+OnlyShowIn=XFCE;
+Terminal=false

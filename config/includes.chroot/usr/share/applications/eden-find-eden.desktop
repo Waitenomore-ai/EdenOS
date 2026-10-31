@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Find Eden!
+Comment=Find Eden in 28 calm offline gardens
+Exec=/usr/local/bin/eden-find-eden
+Icon=applications-games
+Categories=Education;Game;
+Terminal=false

@@ -42,6 +42,14 @@ class UpdatePackageTests(unittest.TestCase):
             self.assertFalse((extracted / 'etc/passwd').exists())
             self.assertFalse((extracted / 'etc/fstab').exists())
             self.assertFalse(list(extracted.rglob('*.pyc')))
+            pack = extracted / 'usr/share/eden-os/find-eden'
+            scenes = json.loads((pack / 'wallpapers.json').read_text())
+            self.assertEqual(len(scenes), 28)
+            self.assertTrue(all((pack / row['file']).is_file() for row in scenes))
+            self.assertTrue((pack / 'Find-Eden.html').is_file())
+            self.assertTrue((extracted / 'usr/share/applications/eden-find-eden.desktop').is_file())
+            self.assertTrue((extracted / 'etc/xdg/autostart/eden-daily-wallpaper.desktop').is_file())
+            self.assertIn('gir1.2-webkit-6.0', control)
             manifest = json.loads((extracted / 'usr/share/eden-os/update.json').read_text())
             self.assertEqual(manifest['package_version'], '0.1.0~dev6+g123456789abc')
 

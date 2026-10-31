@@ -79,6 +79,14 @@
     "desktop_id": "eden-feelings.desktop",
     "offline": true,
     "reviewed": true
+  },
+  {
+    "id": "find-eden",
+    "title": "Find Eden!",
+    "description": "Find our little explorer in 28 offline gardens, including today\u2019s wallpaper.",
+    "category": "play",
+    "desktop_id": "eden-find-eden.desktop",
+    "offline": true,
+    "reviewed": true
   }
 ]
-

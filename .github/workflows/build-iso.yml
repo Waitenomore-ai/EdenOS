@@ -67,7 +67,7 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y -qq xorriso mtools
+          sudo apt-get install -y -qq xorriso mtools squashfs-tools
           cd output
           sha256sum --check eden-os-amd64-test.iso.sha256
           test -s eden-os-amd64-test.iso
@@ -78,6 +78,9 @@ jobs:
           mcopy -i efi.img ::/EFI/BOOT/BOOTX64.EFI BOOTX64.EFI
           PYTHONPATH=../eden-shell python3 -m eden_shell.iso_checks iso-boot-catalog.txt BOOTX64.EFI
           rm -f efi.img BOOTX64.EFI
+          xorriso -osirrox on -indev eden-os-amd64-test.iso -extract /live/filesystem.squashfs find-eden-filesystem.squashfs
+          python3 ../scripts/verify-find-eden-iso find-eden-filesystem.squashfs
+          rm -f find-eden-filesystem.squashfs
 
       - name: Verify branding inside finished ISO
         if: ${{ inputs.require_branding }}

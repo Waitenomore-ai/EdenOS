@@ -21,6 +21,7 @@ from .browser import browser_access_ready
 from .version import build_label
 from .navigation import ScreenState
 from .launch_control import LaunchCooldown
+from .find_eden_assets import today_image
 from .preferences import (
     AccessibilityPreferences,
     accessibility_preset,
@@ -173,6 +174,19 @@ class EdenWindow(Gtk.ApplicationWindow):
         prompt.add_css_class("eden-subtitle")
         prompt.set_xalign(0)
         content.append(prompt)
+        # The child session has no xfdesktop: show its daily garden here too.
+        try:
+            image = today_image()
+        except ValueError:
+            image = None
+        if image is not None:
+            garden = Gtk.Picture.new_for_filename(str(image))
+            garden.set_content_fit(Gtk.ContentFit.CONTAIN)
+            garden.set_can_shrink(True)
+            garden.set_size_request(-1, 210)
+            garden.set_alternative_text("Today's garden: can you find Eden?")
+            content.append(garden)
+            content.append(self._text_button("Find Eden in today's garden", lambda _button: self._launch_activity(Activity('find-eden', 'Find Eden!', 'Find our little explorer.', 'play', 'eden-find-eden.desktop', True))))
 
         grid = Gtk.FlowBox()
         grid.set_selection_mode(Gtk.SelectionMode.NONE)

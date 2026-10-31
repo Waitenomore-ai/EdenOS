@@ -1,0 +1,15 @@
+#!/usr/bin/python3
+"""Validate and stage the complete offline game into an ISO/package tree."""
+import argparse
+from pathlib import Path
+import sys
+ROOT=Path(__file__).resolve().parent.parent
+sys.path.insert(0,str(ROOT/'eden-shell'))
+from eden_shell.find_eden_assets import stage_pack
+
+if __name__=='__main__':
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('destination',type=Path)
+    args=parser.parse_args()
+    stage_pack(ROOT/'find-eden',args.destination)
+    print('Staged Find Eden: game, daily changer and 28 verified wallpapers')

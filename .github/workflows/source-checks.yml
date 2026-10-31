@@ -23,6 +23,10 @@ jobs:
       - name: Run source and real GTK tests
         run: |
           xvfb-run -a dbus-run-session -- env EDEN_GUI_TESTS=1 PYTHONPATH=eden-shell /usr/bin/python3 -m unittest discover -s eden-shell/tests -v
+      - name: Check daily wallpaper and game logic
+        run: |
+          python3 -m unittest discover -s find-eden/daily-wallpaper -p 'test_*.py' -v
+          node --test find-eden/tests/logic.test.cjs
       - name: Check shell syntax
         run: |
           bash -n scripts/build-iso scripts/boot-smoke
