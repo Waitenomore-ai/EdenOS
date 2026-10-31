@@ -33,6 +33,7 @@ fi
 
 printf '%s\n' "$paths" | sed '/^$/d' | tar --create --gzip --file="$temporary" \
     --directory="$HOME" --exclude='.cache' --files-from=-
+tar --test --file="$temporary"
 mv --no-clobber "$temporary" "$archive"
 trap - EXIT HUP INT TERM
 echo "Backup created: $archive"

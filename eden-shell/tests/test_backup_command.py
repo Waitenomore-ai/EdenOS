@@ -10,3 +10,4 @@ class BackupCommandTests(unittest.TestCase):
         self.assertIn('mv --no-clobber', command)
         self.assertIn("--exclude='.cache'", command)
         self.assertIn('eden-backup-$USER-$timestamp.tar.gz', command)
+        self.assertIn('tar --test --file="$temporary"', command)

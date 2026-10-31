@@ -39,8 +39,9 @@ eden-backup /path/to/external/backup-folder
 
 The command creates a new private timestamped archive and never overwrites an
 existing archive. It includes common Eden work folders and `.config/eden-os`,
-but excludes `.cache`. It is a convenience backup, not a full disk image; open
-sample files from the archive before treating it as verified.
+but excludes `.cache`. The command tests the completed tar archive before
+publishing it. It is a convenience backup, not a full disk image; open sample
+files from the archive before treating it as verified.
 
 1. Have each child save and close their activities; sign them out.
 2. In the adult desktop, copy the selected child's personal work directories
