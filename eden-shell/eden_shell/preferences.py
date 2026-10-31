@@ -68,10 +68,12 @@ def save_preferences(
 ) -> None:
     destination = path or default_preferences_path()
     destination.parent.mkdir(parents=True, exist_ok=True)
+    os.chmod(destination.parent, 0o700)
     descriptor, temporary_name = tempfile.mkstemp(
         prefix=".eden-preferences-", suffix=".json", dir=destination.parent
     )
     try:
+        os.fchmod(descriptor, 0o600)
         with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
             json.dump(asdict(_normalise(asdict(preferences))), handle, indent=2)
             handle.write("\n")

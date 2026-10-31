@@ -13,6 +13,7 @@ import unittest
 from unittest.mock import patch
 
 from eden_shell.preferences import AccessibilityPreferences, load_preferences
+from eden_shell.preferences import save_preferences
 
 
 def load_window_class():
@@ -77,3 +78,12 @@ class PreferenceErrorTests(unittest.TestCase):
         self.assertEqual(window.preferences, requested)
         self.assertEqual(window.rendered_preferences, requested)
         self.assertEqual(window.messages, [])
+
+    def test_saved_preferences_are_private_to_the_user(self):
+        requested = AccessibilityPreferences(1.2, True, True)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'eden-os' / 'accessibility.json'
+            save_preferences(requested, path)
+            self.assertEqual(path.stat().st_mode & 0o077, 0)
+            self.assertEqual(path.parent.stat().st_mode & 0o077, 0)
+
