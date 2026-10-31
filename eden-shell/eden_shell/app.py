@@ -302,6 +302,7 @@ class EdenWindow(Gtk.ApplicationWindow):
         content.append(self._text_button("Calm default", self._use_calm_preset))
         content.append(self._text_button("Clear and large", self._use_clear_large_preset))
         content.append(self._text_button("High contrast", self._use_high_contrast_preset))
+        content.append(self._text_button("Reset accessibility", self._use_calm_preset))
         saved_note = Gtk.Label(label="These choices are saved on this computer only.")
         saved_note.add_css_class("eden-status")
         content.append(saved_note)
