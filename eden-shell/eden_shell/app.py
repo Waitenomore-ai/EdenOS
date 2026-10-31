@@ -254,7 +254,7 @@ class EdenWindow(Gtk.ApplicationWindow):
         body = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         body.set_halign(Gtk.Align.CENTER)
         body.set_valign(Gtk.Align.CENTER)
-        icon_path = Path(__file__).parent / "data" / "icons" / f"{activity.category}.svg"
+        icon_path = Path(__file__).parent / "data" / "activity-art" / f"{activity.id}.svg"
         if icon_path.is_file():
             picture = Gtk.Picture.new_for_filename(str(icon_path))
             picture.set_content_fit(Gtk.ContentFit.CONTAIN)
