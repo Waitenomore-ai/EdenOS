@@ -22,4 +22,4 @@ class NavigationFocusTests(unittest.TestCase):
 class HomeActivityReachabilityTests(unittest.TestCase):
     def test_explore_opens_read_category_for_story_garden(self):
         source = (Path(__file__).resolve().parents[1] / "eden_shell" / "app.py").read_text()
-        self.assertIn('("Explore", "explore", self._open_category("read"), True, "nature-explorer")', source)
+        self.assertIn('("Explore", "explore", self._open_category("read"), True, "explore")', source)
