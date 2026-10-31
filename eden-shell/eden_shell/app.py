@@ -188,11 +188,15 @@ class EdenWindow(Gtk.ApplicationWindow):
     def _render_home(self, content: Gtk.Box) -> None:
         welcome = Gtk.Label(label=f"Hello, {getpass.getuser()}!")
         welcome.add_css_class("eden-welcome")
+        welcome.set_halign(Gtk.Align.START)
         welcome.set_xalign(0)
+        welcome.set_hexpand(False)
         content.append(welcome)
         prompt = Gtk.Label(label="What would you like to do today?")
         prompt.add_css_class("eden-home-prompt")
+        prompt.set_halign(Gtk.Align.START)
         prompt.set_xalign(0)
+        prompt.set_hexpand(False)
         content.append(prompt)
 
         # Keep every shortcut functional. Picture assets are decoration, never hit targets.
