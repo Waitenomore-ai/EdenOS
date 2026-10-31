@@ -142,3 +142,25 @@ scrolledwindow, scrolledwindow > viewport, viewport { background: transparent; }
 .contrast .eden-wooden-heading, .contrast .eden-header-control {
  background: black; color: white; text-shadow: none; border: 3px solid white;
 }
+
+/* Illustrated home dashboard — vivid glass-like tiles from the approved reference. */
+.eden-dashboard-grid { padding: 10px 16px; }
+.eden-home-button {
+ min-width: 212px; min-height: 94px; border-radius: 25px;
+ padding: 6px 10px; border: 4px solid rgba(255,255,255,.93);
+ box-shadow: 0 5px 0 rgba(31,58,49,.46),0 9px 17px rgba(14,37,36,.30);
+}
+.eden-home-label {
+ color: white; font-size: 21px; font-weight: 900;
+ text-shadow: 0 2px 3px rgba(17,40,41,.96);
+}
+.eden-learn,.eden-numbers { background: #30ac4e; }
+.eden-play,.eden-puzzles { background: #298be1; }
+.eden-create,.eden-studio { background: #f4a421; }
+.eden-read,.eden-words { background: #bd53df; }
+.eden-explore { background: #16b7b2; }
+.eden-stuff { background: #f0b432; }
+.eden-settings { background: #349cc7; }
+.eden-help { background: #9158c9; }
+.eden-home-button:hover { border-color: #fff5b2; }
+.contrast .eden-home-label { color: white; text-shadow: none; }
