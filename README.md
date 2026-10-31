@@ -28,7 +28,7 @@ See [the adult first-run procedure](docs/first-run.md), [activity review](docs/a
 
 This is an early development project, not a ready-to-install child operating system. Do not use it with a child until account separation, adult controls, accessibility, updates, recovery, and browser policy have been implemented and reviewed. KidsTube is a restricted browser pilot with an unverified allowlist, not a guarantee that every page or video is appropriate.
 
-The initial reviewed activity candidate is Tux Paint, an offline drawing program. Its desktop access is not considered image-verified until it has been launched from a built child session. Other activities remain excluded until reviewed.
+The current catalogue includes Tux Paint and four Eden-native offline prototypes: Number Meadow, Word Woodland, Story Garden, and Art Studio. Their source tests and package inclusion pass, but physical child-session usability is still unverified.
 
 ## Debian references
 

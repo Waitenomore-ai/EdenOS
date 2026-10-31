@@ -7,6 +7,10 @@ the child shell displays it. A catalogue entry alone does not install software.
 | Activity | Category | Debian package / desktop ID | Offline | Licence and age notes | Accessibility and maintenance review |
 | --- | --- | --- | --- | --- | --- |
 | Tux Paint | Create | `tuxpaint` / `tuxpaint.desktop` | Yes, after installation | Free and open source, GPL-2.0; designed for children approximately 3–12 | No account, ads, or network needed for core drawing. Verify keyboard, touch, screen-reader, and sensory settings on target hardware before calling it accessible. Recheck package availability and upstream licence on each Debian release update. |
+| Number Meadow | Learn | Eden native / `eden-number-meadow.desktop` | Yes | Eden-native prototype; no network, account, or saved progress | Four-answer counting rounds with large controls. Display and child usability still need physical-image testing. |
+| Word Woodland | Learn | Eden native / `eden-word-woodland.desktop` | Yes | Eden-native prototype; no network, account, or saved progress | First-letter matching with familiar words and large controls. Phonics suitability and physical usability still need review. |
+| Story Garden | Read | Eden native / `eden-story-garden.desktop` | Yes | Eden-native prototype; no network, account, or saved progress | Four-scene picture story with restart control. Reading level and physical usability still need review. |
+| Art Studio | Create | Eden native / `eden-art-studio.desktop` | Yes | Eden-native prototype; no network, account, or saved progress | Sticker-board activity with undo and clear. It is not a replacement for full drawing software. |
 
 Sources checked 2026-10-30: [Debian Trixie package record](https://packages.debian.org/trixie/tuxpaint), [Tux Paint licence](https://tuxpaint.org/download/), and [Tux Paint age range](https://tuxpaint.org/).
 
@@ -21,3 +25,4 @@ Sources checked 2026-10-30: [Debian Trixie package record](https://packages.debi
   default and the adult-facing choice is clear.
 - Adult administrators should be able to remove an activity from the home screen
   independently from uninstalling its package.
+
