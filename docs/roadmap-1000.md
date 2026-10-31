@@ -1269,4 +1269,7 @@ must not be confused with the current LightDM account flow.
 - [ ] **E1023** — Add an adult setting to hide or show Feelings and Quiet Space.
 - [ ] **E1024** — Verify reset clears the session without saving a child’s mood.
 - [ ] **E1025** — Verify Feelings and Quiet Space remains fully offline in a built ISO.
+- [ ] **E1026** — Add a profile-editor preview model with a fixed account mapping.
+- [ ] **E1027** — Verify the editor cannot select custom avatar paths.
+- [ ] **E1028** — Verify adult reset returns the default avatar and original display name.
 

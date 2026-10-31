@@ -38,3 +38,8 @@ setup flow. It validates records again on load, writes atomically with mode
 `0600`, rejects duplicate accounts or unsafe avatars, and can remove one child
 profile without changing the others. This is storage groundwork only; it does
 not enable LightDM integration or claim physical iMac verification.
+
+The source now also includes a side-effect-free profile editor model. It keeps
+the local account mapping fixed, offers only the built-in avatar set, produces a
+greeter-safe preview, and supports an adult reset action. A graphical adult
+editor and LightDM adapter are still future work.
