@@ -32,3 +32,9 @@ The source now includes a validation-only profile-card model for the future
 greeter. It accepts only built-in avatar names and exposes only display name and
 avatar to the public card view; the local username remains an internal account
 mapping.
+
+The source also includes a private local profile store for the future adult
+setup flow. It validates records again on load, writes atomically with mode
+`0600`, rejects duplicate accounts or unsafe avatars, and can remove one child
+profile without changing the others. This is storage groundwork only; it does
+not enable LightDM integration or claim physical iMac verification.
