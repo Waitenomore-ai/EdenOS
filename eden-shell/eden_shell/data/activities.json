@@ -61,6 +61,15 @@
     "desktop_id": "eden-time-routines.desktop",
     "offline": true,
     "reviewed": true
+  },
+  {
+    "id": "nature-explorer",
+    "title": "Nature Explorer",
+    "description": "Notice friendly nature cards in a calm offline activity.",
+    "category": "play",
+    "desktop_id": "eden-nature-explorer.desktop",
+    "offline": true,
+    "reviewed": true
   }
 ]
 

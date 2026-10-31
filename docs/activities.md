@@ -11,6 +11,9 @@ the child shell displays it. A catalogue entry alone does not install software.
 | Word Woodland | Learn | Eden native / `eden-word-woodland.desktop` | Yes | Eden-native prototype; no network, account, or saved progress | First-letter matching with familiar words and large controls. Phonics suitability and physical usability still need review. |
 | Story Garden | Read | Eden native / `eden-story-garden.desktop` | Yes | Eden-native prototype; no network, account, or saved progress | Four-scene picture story with restart control. Reading level and physical usability still need review. |
 | Art Studio | Create | Eden native / `eden-art-studio.desktop` | Yes | Eden-native prototype; no network, account, or saved progress | Sticker-board activity with undo and clear. It is not a replacement for full drawing software. |
+| Puzzle Pond | Play | Eden native / `eden-puzzle-pond.desktop` | Yes | Eden-native prototype; no network, account, or saved progress | Four-pair matching game with no timer or score. Physical usability still needs review. |
+| Time and Routines | Play | Eden native / `eden-time-routines.desktop` | Yes | Eden-native prototype; no network, account, or saved progress | Four-step visual checklist with restart. It is a support tool, not a clinical schedule. |
+| Nature Explorer | Play | Eden native / `eden-nature-explorer.desktop` | Yes | Eden-native prototype; no network, account, or saved progress | Six-card observation activity with large controls and no timer or score. Outdoor safety and physical usability still need review. |
 
 Sources checked 2026-10-30: [Debian Trixie package record](https://packages.debian.org/trixie/tuxpaint), [Tux Paint licence](https://tuxpaint.org/download/), and [Tux Paint age range](https://tuxpaint.org/).
 

@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 19818)
-Total output lines: 1259
-
 # EdenOS — 1,000-task development and app backlog
 
 Prepared 30 October 2026. Proposed checklist, not a claim that 1,000 features are missing or approved for installation.
@@ -566,7 +563,126 @@ This document expands the earlier 100-item roadmap. Its IDs E0001–E1000 are a 
 - [ ] **E0422** — Show graphics driver and firmware status in an adult report.
 - [ ] **E0423** — Detect missing graphical-device nodes.
 - [ ] **E0424** — Report whether the current boot uses nomodeset.
-- [ ] **E0425** — R…1818 tokens truncated…may be disabled.
+- [ ] **E0425** — Report active display-manager status.
+- [ ] **E0426** — Provide a short network diagnostic without collecting Wi-Fi passwords.
+- [ ] **E0427** — Report root filesystem free space.
+- [ ] **E0428** — Report mounted storage by label and UUID.
+- [ ] **E0429** — Clearly distinguish installed and live sessions.
+- [ ] **E0430** — Provide a copyable support summary.
+- [ ] **E0431** — Let adults preview every line of a support export.
+- [ ] **E0432** — Use stable error identifiers for common launcher failures.
+- [ ] **E0433** — Link each common error to offline guidance.
+- [ ] **E0434** — Provide guidance for a text-only login.
+- [ ] **E0435** — Provide guidance for a graphical login loop.
+- [ ] **E0436** — Provide guidance for a black screen after graphics changes.
+- [ ] **E0437** — Provide guidance for wrong keyboard layouts at login.
+- [ ] **E0438** — Provide guidance for a forgotten child password.
+- [ ] **E0439** — Make diagnostic scripts read-only by default.
+- [ ] **E0440** — Test support commands on an installation lacking optional utilities.
+
+## 23. Automated verification
+
+- [ ] **E0441** — Run Python unit checks on every source change.
+- [ ] **E0442** — Run a real GTK startup test in CI.
+- [ ] **E0443** — Test category navigation in the GTK runtime.
+- [ ] **E0444** — Test launcher error rendering in the GTK runtime.
+- [ ] **E0445** — Test adult setup widgets in the GTK runtime.
+- [ ] **E0446** — Test shutdown cancellation using a fake service boundary.
+- [ ] **E0447** — Test password validation without real account creation.
+- [ ] **E0448** — Test standard-user creation through a fake AccountsService.
+- [ ] **E0449** — Test catalogue rejection of unreviewed entries.
+- [ ] **E0450** — Test corrupted preferences recovery.
+- [ ] **E0451** — Test read-only preferences storage.
+- [ ] **E0452** — Test missing artwork detection.
+- [ ] **E0453** — Test malformed build metadata handling.
+- [ ] **E0454** — Test EFI header validation with truncated files.
+- [ ] **E0455** — Test boot-smoke classification of timeouts.
+- [ ] **E0456** — Separate structural image checks from successful boot evidence.
+- [ ] **E0457** — Archive relevant test logs with release artifacts.
+- [ ] **E0458** — Verify test jobs do not require production credentials.
+- [ ] **E0459** — Add a regression case for each confirmed installation bug.
+- [ ] **E0460** — Document which behaviours automated checks cannot certify.
+
+## 24. Manual quality assurance
+
+- [ ] **E0461** — Create an adult first-run walkthrough.
+- [ ] **E0462** — Create a child first-login walkthrough.
+- [ ] **E0463** — Create a complete offline-use walkthrough.
+- [ ] **E0464** — Create a keyboard-only walkthrough.
+- [ ] **E0465** — Create a large-text walkthrough.
+- [ ] **E0466** — Test all app tiles on a fresh installation.
+- [ ] **E0467** — Test launching an activity after it is uninstalled.
+- [ ] **E0468** — Test closing apps using window controls.
+- [ ] **E0469** — Test closing apps through their own menus.
+- [ ] **E0470** — Test a nearly full child home folder.
+- [ ] **E0471** — Test a disconnected keyboard during setup.
+- [ ] **E0472** — Test a failed network download during setup.
+- [ ] **E0473** — Test shutdown after unsaved artwork.
+- [ ] **E0474** — Test restart after a preferences change.
+- [ ] **E0475** — Test two children using the same machine in succession.
+- [ ] **E0476** — Test a child profile with a long display name.
+- [ ] **E0477** — Test a non-Latin display name.
+- [ ] **E0478** — Record expected outcomes before each acceptance test.
+- [ ] **E0479** — Keep failed hardware cases linked to the tested image.
+- [ ] **E0480** — Require a second-person install walkthrough before public release.
+
+## 25. Packaging and build engineering
+
+- [ ] **E0481** — Package Eden launcher files instead of copying loose source indefinitely.
+- [ ] **E0482** — Package Eden setup files with declared dependencies.
+- [ ] **E0483** — Declare GTK and Python runtime requirements accurately.
+- [ ] **E0484** — Declare the display-manager greeter dependency.
+- [ ] **E0485** — Declare the window-manager dependency for child sessions.
+- [ ] **E0486** — Check executable permissions in installed wrappers.
+- [ ] **E0487** — Check Python module discovery in installed packages.
+- [ ] **E0488** — Build packages in an isolated Debian environment.
+- [ ] **E0489** — Pin the intended base release in build configuration.
+- [ ] **E0490** — Record package mirrors used for a build.
+- [ ] **E0491** — Distinguish reproducible inputs from time-varying package updates.
+- [ ] **E0492** — Verify source archives contain required artwork.
+- [ ] **E0493** — Remove build-only caches from finished images.
+- [ ] **E0494** — Create a machine-readable app catalogue schema.
+- [ ] **E0495** — Version system-default configuration formats.
+- [ ] **E0496** — Provide migrations for changed preference formats.
+- [ ] **E0497** — Validate migrations against older saved profiles.
+- [ ] **E0498** — Run shell syntax checks on installation helpers.
+- [ ] **E0499** — Prevent installer helper scripts from modifying host firmware.
+- [ ] **E0500** — Document a clean build starting from a new runner.
+
+## 26. Release management
+
+- [ ] **E0501** — Define alpha acceptance criteria.
+- [ ] **E0502** — Define beta acceptance criteria.
+- [ ] **E0503** — Define a first stable-release checklist.
+- [ ] **E0504** — List supported machines for each release.
+- [ ] **E0505** — List known graphics limitations for each release.
+- [ ] **E0506** — Publish an accurate list of bundled activities.
+- [ ] **E0507** — Publish the installed storage requirement.
+- [ ] **E0508** — Publish the memory requirement with test evidence.
+- [ ] **E0509** — Publish ISO writing instructions with screenshots.
+- [ ] **E0510** — Publish iMac-specific boot guidance.
+- [ ] **E0511** — Publish a checksum-verification guide for Windows.
+- [ ] **E0512** — Publish a checksum-verification guide for Linux.
+- [ ] **E0513** — Publish a checksum-verification guide for macOS.
+- [ ] **E0514** — Publish release notes separating fixes from proposals.
+- [ ] **E0515** — Label development images visibly.
+- [ ] **E0516** — Set a retention policy for build artifacts.
+- [ ] **E0517** — Provide a durable download location for approved releases.
+- [ ] **E0518** — Test the published download using a fresh account.
+- [ ] **E0519** — Define how to withdraw a broken image.
+- [ ] **E0520** — Assign an owner for release sign-off and unresolved blockers.
+
+## 27. Documentation and onboarding
+
+- [ ] **E0521** — Write a one-page adult quick start.
+- [ ] **E0522** — Write a child-friendly introduction to the home screen.
+- [ ] **E0523** — Explain why adults may see an XFCE desktop.
+- [ ] **E0524** — Explain how to open Eden manually for testing.
+- [ ] **E0525** — Explain how to create the first child account.
+- [ ] **E0526** — Explain how to select the child session at login.
+- [ ] **E0527** — Explain local saving and where work is stored.
+- [ ] **E0528** — Explain which activities require internet.
+- [ ] **E0529** — Explain why web access may be disabled.
 - [ ] **E0530** — Explain how to adjust volume.
 - [ ] **E0531** — Explain how to adjust text size.
 - [ ] **E0532** — Explain how to switch to high contrast.
@@ -1140,4 +1256,12 @@ must not be confused with the current LightDM account flow.
 - [ ] **E1013** — Provide a clear removal/reset action that returns to the default avatar.
 - [ ] **E1014** — Document that a picture is a sign-in aid, not an authentication factor.
 - [ ] **E1015** — Verify no avatar or display name is uploaded or synchronised online.
+
+## Roadmap extension: offline activity pilots
+
+- [ ] **E1016** — Pilot Nature Explorer with an adult and child on target hardware.
+- [ ] **E1017** — Review nature vocabulary and symbols for cultural and accessibility fit.
+- [ ] **E1018** — Add an adult setting to hide or show Nature Explorer.
+- [ ] **E1019** — Verify all Nature Explorer controls work with keyboard navigation.
+- [ ] **E1020** — Verify Nature Explorer remains fully offline in a built ISO.
 

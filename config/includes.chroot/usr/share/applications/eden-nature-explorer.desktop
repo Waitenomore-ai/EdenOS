@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Eden Nature Explorer
+Comment=Notice friendly nature cards offline
+Exec=/usr/local/bin/eden-nature-explorer
+Icon=applications-games
+Terminal=false
+Categories=Game;Education;
