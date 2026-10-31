@@ -7,3 +7,4 @@ __pycache__/
 build/
 
 config/includes.chroot/usr/share/eden-os/eden_shell/
+config/includes.chroot/usr/share/eden-os/find-eden/

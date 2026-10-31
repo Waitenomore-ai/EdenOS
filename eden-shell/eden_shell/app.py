@@ -21,6 +21,7 @@ from .browser import browser_access_ready
 from .version import build_label
 from .navigation import ScreenState
 from .launch_control import LaunchCooldown
+from .find_eden_assets import today_image
 from .preferences import (
     AccessibilityPreferences,
     accessibility_preset,
@@ -42,6 +43,7 @@ class EdenWindow(Gtk.ApplicationWindow):
         self._install_styles()
         self._apply_preferences()
         self._render()
+        self._daily_refresh_source = GLib.timeout_add_seconds(60, self._refresh_daily_garden)
         self._page_focus_target.grab_focus()
 
     def _install_styles(self) -> None:
@@ -173,6 +175,21 @@ class EdenWindow(Gtk.ApplicationWindow):
         prompt.add_css_class("eden-subtitle")
         prompt.set_xalign(0)
         content.append(prompt)
+        # The child session has no xfdesktop: show its daily garden here too.
+        try:
+            image = today_image()
+        except ValueError:
+            image = None
+        if image is not None:
+            garden = Gtk.Picture.new_for_filename(str(image))
+            garden.set_content_fit(Gtk.ContentFit.CONTAIN)
+            garden.set_can_shrink(True)
+            garden.set_size_request(-1, 210)
+            garden.set_alternative_text("Today's garden: can you find Eden?")
+            self._daily_picture = garden
+            self._daily_image_path = image
+            content.append(garden)
+            content.append(self._text_button("Find Eden in today's garden", lambda _button: self._launch_activity(Activity('find-eden', 'Find Eden!', 'Find our little explorer.', 'play', 'eden-find-eden.desktop', True))))
 
         grid = Gtk.FlowBox()
         grid.set_selection_mode(Gtk.SelectionMode.NONE)
@@ -203,6 +220,20 @@ class EdenWindow(Gtk.ApplicationWindow):
         footer.insert(self._text_button("Turn off computer", self._confirm_power_off), -1)
         content.append(footer)
         self._append_empty(content, "Your included activities work offline. Online video needs an internet connection and adult setup.")
+
+    def _refresh_daily_garden(self):
+        if not self.get_realized():
+            return GLib.SOURCE_REMOVE
+        picture = getattr(self, '_daily_picture', None)
+        if self.state.page == 'home' and picture is not None:
+            try:
+                image = today_image()
+            except ValueError:
+                return GLib.SOURCE_CONTINUE
+            if image != self._daily_image_path:
+                picture.set_filename(str(image))
+                self._daily_image_path = image
+        return GLib.SOURCE_CONTINUE
 
     def _render_category(self, content: Gtk.Box) -> None:
         category = next(item for item in CATEGORIES if item.slug == self.state.category)

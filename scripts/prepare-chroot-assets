@@ -8,3 +8,4 @@ rm -rf -- "$destination"
 mkdir -p -- "$(dirname -- "$destination")"
 cp -a -- "$root/eden-shell/eden_shell" "$destination"
 find "$destination" -type d -name __pycache__ -prune -exec rm -rf -- {} +
+python3 "$root/scripts/stage-find-eden" "$root/config/includes.chroot/usr/share/eden-os/find-eden"

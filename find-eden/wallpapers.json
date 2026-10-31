@@ -1,0 +1,226 @@
+[
+  {
+    "id": "sunrise",
+    "title": "Sunrise Garden",
+    "file": "wallpapers/find-eden-sunrise.png",
+    "sha256": "028e36cbfdbb2e243f9e85ed3f1fe4ef8cf76e2a90c84da4958951ccaa01adf9",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "lily-pond",
+    "title": "Lily Pond",
+    "file": "wallpapers/find-eden-lily-pond.png",
+    "sha256": "5a042ee7c888d14ac7c2f38d3b7813b64383f9f456ad95b275f1f1b0da1988a4",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "twilight",
+    "title": "Twilight Garden",
+    "file": "wallpapers/find-eden-twilight.png",
+    "sha256": "6113ab3f884baebcee3cecd40ed5b3b9a29f3dd65a69234b2c8e308fdd969c63",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-01",
+    "title": "Bluebell Woodland",
+    "file": "daily-wallpapers/01-bluebell-woodland.png",
+    "sha256": "b166c5bd24237960c19fc40a9c4c898f592aeab8d86455f276aba48c39f8b40b",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-02",
+    "title": "Cherry Blossom Orchard",
+    "file": "daily-wallpapers/02-cherry-blossom-orchard.png",
+    "sha256": "665e7bfe01080ba617e1b2d450dc360cc26851159a3336707a5d62d58e069bf3",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-03",
+    "title": "Autumn Pumpkin Garden",
+    "file": "daily-wallpapers/03-autumn-pumpkin-garden.png",
+    "sha256": "b748bf0027be7b628009cc19113b8a968380b97212537042321b55bf0a2ccd69",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-04",
+    "title": "Snowdrop Winter Garden",
+    "file": "daily-wallpapers/04-snowdrop-winter-garden.png",
+    "sha256": "b4ed701138e2483c7b887b51962689aa2309bd7433de71bf2706280d6dc891ea",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-05",
+    "title": "Sunflower Meadow",
+    "file": "daily-wallpapers/05-sunflower-meadow.png",
+    "sha256": "1a211fcd796fc7acefca0841c4a42b4c0251cd434cc466a324c360e36bd86088",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-06",
+    "title": "Rainbow Meadow",
+    "file": "daily-wallpapers/06-rainbow-meadow.png",
+    "sha256": "9c21f90b819e54120fa1c0201f267b1fadae1e401b41ca31da912fea3a8e0b9e",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-07",
+    "title": "Mushroom Fairy Glade",
+    "file": "daily-wallpapers/07-mushroom-fairy-glade.png",
+    "sha256": "45df8f0a01580ab08a92d113287555d7435beba4dbdf75e49589f89fc91be901",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-08",
+    "title": "Rose Garden Maze",
+    "file": "daily-wallpapers/08-rose-garden-maze.png",
+    "sha256": "3ecf8d4f005621d12149f0323a73c40663f519fb30e9b077bcad60c21084d2c8",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-09",
+    "title": "Lavender Garden",
+    "file": "daily-wallpapers/09-lavender-garden.png",
+    "sha256": "7994dd0e0682d48eeeda6dcee25205fb4dc68618d07c32c22f7d0cc504a8e304",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-10",
+    "title": "Waterfall Garden",
+    "file": "daily-wallpapers/10-waterfall-garden.png",
+    "sha256": "0ef5ec38179c71e26183036ec29b7a143713c881d81dc18d48d20a5cdf7c1b7a",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-11",
+    "title": "Seaside Garden",
+    "file": "daily-wallpapers/11-seaside-garden.png",
+    "sha256": "f077a8431441fb7d5cc22b51e54fae5b2fbeeb80c6a4e41be0bf9929fe50051f",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-12",
+    "title": "Apple Orchard",
+    "file": "daily-wallpapers/12-apple-orchard.png",
+    "sha256": "1ca8386bc41cf239310b035ebc5bb2a5d9a7884ecf21a48f7bc7e34191e1c49e",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-13",
+    "title": "Moonlit Lily Garden",
+    "file": "daily-wallpapers/13-moonlit-lily-garden.png",
+    "sha256": "eaad39e1d7f986cbfa6183daba6d4e040368d2f6e87713e2e16f8e9f1d388508",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-14",
+    "title": "Secret Tree Door",
+    "file": "daily-wallpapers/14-secret-tree-door.png",
+    "sha256": "615bf83cf747a0bcc4b6e2b8a55779ce6e342743a70762c6b2059b45662b2e38",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-15",
+    "title": "Tulip Garden",
+    "file": "daily-wallpapers/15-tulip-garden.png",
+    "sha256": "a45938d63bd373d292fa59086f3c44d575e1a0e61cb48cfd81361cb28ee10ac3",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-16",
+    "title": "Secret Greenhouse",
+    "file": "daily-wallpapers/16-secret-greenhouse.png",
+    "sha256": "34aee915b56b731e9a4903052d7cefe6ba5acd6837cca0a970ef587046183f17",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-17",
+    "title": "Pebble Brook",
+    "file": "daily-wallpapers/17-pebble-brook.png",
+    "sha256": "6713adc9e6d01d9042b775c95cf99786ef67ccb35b8d5a0602a68b36dd9b5041",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-18",
+    "title": "Butterfly Conservatory",
+    "file": "daily-wallpapers/18-butterfly-conservatory.png",
+    "sha256": "0fa298c6f2caef276950803ba2df501619ac87883548cf62f8d248d783a38b3e",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-19",
+    "title": "Dandelion Hills",
+    "file": "daily-wallpapers/19-dandelion-hills.png",
+    "sha256": "34241a8121aa4966c9d0dd90d22489b416673686749cc14115de27efea2f1036",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-20",
+    "title": "Autumn Maple Pond",
+    "file": "daily-wallpapers/20-autumn-maple-pond.png",
+    "sha256": "b8353b66e6df86fecaf6aa45d83357a3fac449a997fdc6258256684ef23f6440",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-21",
+    "title": "Frosted Crystal Garden",
+    "file": "daily-wallpapers/21-frosted-crystal-garden.png",
+    "sha256": "22eb8634847c1ef7a7655d4cdb88468aa3b9547f792daa3c6303ee9c44694c72",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-22",
+    "title": "Wishing Well Garden",
+    "file": "daily-wallpapers/22-wishing-well-garden.png",
+    "sha256": "5aee95d808b6aef2bb023a819f8a0bf3a43e754fa018dcc3028014310157d483",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-23",
+    "title": "Terraced Flower Garden",
+    "file": "daily-wallpapers/23-terraced-flower-garden.png",
+    "sha256": "73e7f8183c1669e3d8ab03cb6c77efb53d4415b9e373c81790ea6148fcafcd9f",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-24",
+    "title": "Golden Hour Garden",
+    "file": "daily-wallpapers/24-golden-hour-garden.png",
+    "sha256": "53927cd3ead7032132e6b595b68b7214b90b9a72bd474d648b3c9194ca1097f9",
+    "width": 1672,
+    "height": 941
+  },
+  {
+    "id": "new-25",
+    "title": "Starlight Firefly Garden",
+    "file": "daily-wallpapers/25-starlight-firefly-garden.png",
+    "sha256": "bc70fe6a53d76a3d0e73a93387f57eb3b35f58361e953ab013ed184230c1d8ff",
+    "width": 1672,
+    "height": 941
+  }
+]

@@ -1,0 +1,587 @@
+[
+  {
+    "id": "sunrise",
+    "name": "Sunrise Garden",
+    "file": "find-eden-sunrise.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.334,
+      0.498,
+      0.398,
+      0.728
+    ],
+    "hint": "Look around the big tree on the left.",
+    "choices": [
+      "By the big tree",
+      "Among the clouds",
+      "In the stream"
+    ],
+    "answer": 0
+  },
+  {
+    "id": "lily-pond",
+    "name": "Lily Pond",
+    "file": "find-eden-lily-pond.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.635,
+      0.36,
+      0.681,
+      0.51
+    ],
+    "hint": "Look at the flowers beside the little bridge.",
+    "choices": [
+      "At the distant waterfall",
+      "Beside the bridge",
+      "Under the lily pads"
+    ],
+    "answer": 1
+  },
+  {
+    "id": "twilight",
+    "name": "Twilight Garden",
+    "file": "find-eden-twilight.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.108,
+      0.292,
+      0.176,
+      0.572
+    ],
+    "hint": "Look beside the big tree on the left.",
+    "choices": [
+      "Up by the moon",
+      "Behind the tree",
+      "Among the faraway mountains"
+    ],
+    "answer": 1
+  },
+  {
+    "id": "new-01",
+    "name": "Bluebell Woodland",
+    "file": "01-bluebell-woodland.png",
+    "asset_path": "daily-wallpapers/01-bluebell-woodland.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.26,
+      0.325,
+      0.315,
+      0.55
+    ],
+    "hint": "Look by the tree on the left.",
+    "choices": [
+      "By the tree on the left",
+      "Near the faraway hills",
+      "Among the clouds"
+    ],
+    "answer": 0
+  },
+  {
+    "id": "new-02",
+    "name": "Cherry Blossom Orchard",
+    "file": "02-cherry-blossom-orchard.png",
+    "asset_path": "daily-wallpapers/02-cherry-blossom-orchard.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.83,
+      0.42,
+      0.89,
+      0.67
+    ],
+    "hint": "Look by the blossom tree on the right.",
+    "choices": [
+      "Near the faraway hills",
+      "By the blossom tree on the right",
+      "Among the clouds"
+    ],
+    "answer": 1
+  },
+  {
+    "id": "new-03",
+    "name": "Autumn Pumpkin Garden",
+    "file": "03-autumn-pumpkin-garden.png",
+    "asset_path": "daily-wallpapers/03-autumn-pumpkin-garden.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.15,
+      0.57,
+      0.255,
+      0.85
+    ],
+    "hint": "Look behind the pumpkin on the left.",
+    "choices": [
+      "Among the clouds",
+      "Near the faraway hills",
+      "Behind the pumpkin on the left"
+    ],
+    "answer": 2
+  },
+  {
+    "id": "new-04",
+    "name": "Snowdrop Winter Garden",
+    "file": "04-snowdrop-winter-garden.png",
+    "asset_path": "daily-wallpapers/04-snowdrop-winter-garden.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.77,
+      0.42,
+      0.835,
+      0.64
+    ],
+    "hint": "Look by the snowy tree on the right.",
+    "choices": [
+      "By the snowy tree on the right",
+      "Near the faraway hills",
+      "Among the clouds"
+    ],
+    "answer": 0
+  },
+  {
+    "id": "new-05",
+    "name": "Sunflower Meadow",
+    "file": "05-sunflower-meadow.png",
+    "asset_path": "daily-wallpapers/05-sunflower-meadow.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.175,
+      0.52,
+      0.23,
+      0.74
+    ],
+    "hint": "Look among the sunflowers on the left.",
+    "choices": [
+      "Near the faraway hills",
+      "Among the sunflowers on the left",
+      "Among the clouds"
+    ],
+    "answer": 1
+  },
+  {
+    "id": "new-06",
+    "name": "Rainbow Meadow",
+    "file": "06-rainbow-meadow.png",
+    "asset_path": "daily-wallpapers/06-rainbow-meadow.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.72,
+      0.35,
+      0.78,
+      0.6
+    ],
+    "hint": "Look by the flower bush on the right.",
+    "choices": [
+      "Among the clouds",
+      "Near the faraway hills",
+      "By the flower bush on the right"
+    ],
+    "answer": 2
+  },
+  {
+    "id": "new-07",
+    "name": "Mushroom Fairy Glade",
+    "file": "07-mushroom-fairy-glade.png",
+    "asset_path": "daily-wallpapers/07-mushroom-fairy-glade.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.085,
+      0.41,
+      0.165,
+      0.67
+    ],
+    "hint": "Look among the ferns on the left.",
+    "choices": [
+      "Among the ferns on the left",
+      "Near the faraway hills",
+      "Among the clouds"
+    ],
+    "answer": 0
+  },
+  {
+    "id": "new-08",
+    "name": "Rose Garden Maze",
+    "file": "08-rose-garden-maze.png",
+    "asset_path": "daily-wallpapers/08-rose-garden-maze.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.76,
+      0.46,
+      0.83,
+      0.8
+    ],
+    "hint": "Look by the rose pillar on the right.",
+    "choices": [
+      "Near the faraway hills",
+      "By the rose pillar on the right",
+      "Among the clouds"
+    ],
+    "answer": 1
+  },
+  {
+    "id": "new-09",
+    "name": "Lavender Garden",
+    "file": "09-lavender-garden.png",
+    "asset_path": "daily-wallpapers/09-lavender-garden.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.21,
+      0.49,
+      0.275,
+      0.76
+    ],
+    "hint": "Look among the lavender on the left.",
+    "choices": [
+      "Among the clouds",
+      "Near the faraway hills",
+      "Among the lavender on the left"
+    ],
+    "answer": 2
+  },
+  {
+    "id": "new-10",
+    "name": "Waterfall Garden",
+    "file": "10-waterfall-garden.png",
+    "asset_path": "daily-wallpapers/10-waterfall-garden.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.74,
+      0.36,
+      0.81,
+      0.63
+    ],
+    "hint": "Look by the flowers on the right.",
+    "choices": [
+      "By the flowers on the right",
+      "Near the faraway hills",
+      "Among the clouds"
+    ],
+    "answer": 0
+  },
+  {
+    "id": "new-11",
+    "name": "Seaside Garden",
+    "file": "11-seaside-garden.png",
+    "asset_path": "daily-wallpapers/11-seaside-garden.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.155,
+      0.36,
+      0.22,
+      0.75
+    ],
+    "hint": "Look by the fence on the left.",
+    "choices": [
+      "Near the faraway hills",
+      "By the fence on the left",
+      "Among the clouds"
+    ],
+    "answer": 1
+  },
+  {
+    "id": "new-12",
+    "name": "Apple Orchard",
+    "file": "12-apple-orchard.png",
+    "asset_path": "daily-wallpapers/12-apple-orchard.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.82,
+      0.4,
+      0.898,
+      0.77
+    ],
+    "hint": "Look by the apple tree on the right.",
+    "choices": [
+      "Among the clouds",
+      "Near the faraway hills",
+      "By the apple tree on the right"
+    ],
+    "answer": 2
+  },
+  {
+    "id": "new-13",
+    "name": "Moonlit Lily Garden",
+    "file": "13-moonlit-lily-garden.png",
+    "asset_path": "daily-wallpapers/13-moonlit-lily-garden.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.12,
+      0.3,
+      0.185,
+      0.62
+    ],
+    "hint": "Look by the flowers on the left.",
+    "choices": [
+      "By the flowers on the left",
+      "Near the faraway hills",
+      "Among the clouds"
+    ],
+    "answer": 0
+  },
+  {
+    "id": "new-14",
+    "name": "Secret Tree Door",
+    "file": "14-secret-tree-door.png",
+    "asset_path": "daily-wallpapers/14-secret-tree-door.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.71,
+      0.38,
+      0.765,
+      0.66
+    ],
+    "hint": "Look by the tree door on the right.",
+    "choices": [
+      "Near the faraway hills",
+      "By the tree door on the right",
+      "Among the clouds"
+    ],
+    "answer": 1
+  },
+  {
+    "id": "new-15",
+    "name": "Tulip Garden",
+    "file": "15-tulip-garden.png",
+    "asset_path": "daily-wallpapers/15-tulip-garden.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.17,
+      0.46,
+      0.235,
+      0.72
+    ],
+    "hint": "Look among the tulips on the left.",
+    "choices": [
+      "Among the clouds",
+      "Near the faraway hills",
+      "Among the tulips on the left"
+    ],
+    "answer": 2
+  },
+  {
+    "id": "new-16",
+    "name": "Secret Greenhouse",
+    "file": "16-secret-greenhouse.png",
+    "asset_path": "daily-wallpapers/16-secret-greenhouse.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.78,
+      0.56,
+      0.845,
+      0.82
+    ],
+    "hint": "Look by the plant pot on the right.",
+    "choices": [
+      "By the plant pot on the right",
+      "Near the faraway hills",
+      "Among the clouds"
+    ],
+    "answer": 0
+  },
+  {
+    "id": "new-17",
+    "name": "Pebble Brook",
+    "file": "17-pebble-brook.png",
+    "asset_path": "daily-wallpapers/17-pebble-brook.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.16,
+      0.275,
+      0.205,
+      0.46
+    ],
+    "hint": "Look by the bridge flowers on the left.",
+    "choices": [
+      "Near the faraway hills",
+      "By the bridge flowers on the left",
+      "Among the clouds"
+    ],
+    "answer": 1
+  },
+  {
+    "id": "new-18",
+    "name": "Butterfly Conservatory",
+    "file": "18-butterfly-conservatory.png",
+    "asset_path": "daily-wallpapers/18-butterfly-conservatory.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.815,
+      0.46,
+      0.878,
+      0.74
+    ],
+    "hint": "Look behind the big leaf on the right.",
+    "choices": [
+      "Among the clouds",
+      "Near the faraway hills",
+      "Behind the big leaf on the right"
+    ],
+    "answer": 2
+  },
+  {
+    "id": "new-19",
+    "name": "Dandelion Hills",
+    "file": "19-dandelion-hills.png",
+    "asset_path": "daily-wallpapers/19-dandelion-hills.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.16,
+      0.35,
+      0.225,
+      0.63
+    ],
+    "hint": "Look by the flowering bush on the left.",
+    "choices": [
+      "By the flowering bush on the left",
+      "Near the faraway hills",
+      "Among the clouds"
+    ],
+    "answer": 0
+  },
+  {
+    "id": "new-20",
+    "name": "Autumn Maple Pond",
+    "file": "20-autumn-maple-pond.png",
+    "asset_path": "daily-wallpapers/20-autumn-maple-pond.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.84,
+      0.33,
+      0.89,
+      0.55
+    ],
+    "hint": "Look by the maple tree on the right.",
+    "choices": [
+      "Near the faraway hills",
+      "By the maple tree on the right",
+      "Among the clouds"
+    ],
+    "answer": 1
+  },
+  {
+    "id": "new-21",
+    "name": "Frosted Crystal Garden",
+    "file": "21-frosted-crystal-garden.png",
+    "asset_path": "daily-wallpapers/21-frosted-crystal-garden.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.14,
+      0.38,
+      0.205,
+      0.74
+    ],
+    "hint": "Look by the snowy shrub on the left.",
+    "choices": [
+      "Among the clouds",
+      "Near the faraway hills",
+      "By the snowy shrub on the left"
+    ],
+    "answer": 2
+  },
+  {
+    "id": "new-22",
+    "name": "Wishing Well Garden",
+    "file": "22-wishing-well-garden.png",
+    "asset_path": "daily-wallpapers/22-wishing-well-garden.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.17,
+      0.43,
+      0.23,
+      0.71
+    ],
+    "hint": "Look behind the roses on the left.",
+    "choices": [
+      "Behind the roses on the left",
+      "Near the faraway hills",
+      "Among the clouds"
+    ],
+    "answer": 0
+  },
+  {
+    "id": "new-23",
+    "name": "Terraced Flower Garden",
+    "file": "23-terraced-flower-garden.png",
+    "asset_path": "daily-wallpapers/23-terraced-flower-garden.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.12,
+      0.49,
+      0.165,
+      0.7
+    ],
+    "hint": "Look by the steps on the left.",
+    "choices": [
+      "Near the faraway hills",
+      "By the steps on the left",
+      "Among the clouds"
+    ],
+    "answer": 1
+  },
+  {
+    "id": "new-24",
+    "name": "Golden Hour Garden",
+    "file": "24-golden-hour-garden.png",
+    "asset_path": "daily-wallpapers/24-golden-hour-garden.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.83,
+      0.4,
+      0.895,
+      0.66
+    ],
+    "hint": "Look by the swing tree on the right.",
+    "choices": [
+      "Among the clouds",
+      "Near the faraway hills",
+      "By the swing tree on the right"
+    ],
+    "answer": 2
+  },
+  {
+    "id": "new-25",
+    "name": "Starlight Firefly Garden",
+    "file": "25-starlight-firefly-garden.png",
+    "asset_path": "daily-wallpapers/25-starlight-firefly-garden.png",
+    "width": 1672,
+    "height": 941,
+    "rect": [
+      0.13,
+      0.34,
+      0.19,
+      0.6
+    ],
+    "hint": "Look by the tree on the left.",
+    "choices": [
+      "By the tree on the left",
+      "Near the faraway hills",
+      "Among the clouds"
+    ],
+    "answer": 0
+  }
+]

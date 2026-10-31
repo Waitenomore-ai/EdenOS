@@ -1,0 +1,26 @@
+#!/usr/bin/python3
+"""Verify the real ISO filesystem contains every Find Eden image and launcher."""
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+
+ROOT=Path(__file__).resolve().parent.parent
+def verify(filesystem):
+    def read(path):
+        return subprocess.check_output(['unsquashfs','-cat',str(filesystem),path])
+    prefix='usr/share/eden-os/find-eden/'
+    expected=json.loads((ROOT/'find-eden/wallpapers.json').read_text())
+    actual=json.loads(read(prefix+'wallpapers.json'))
+    if actual != expected or len(actual)!=28:
+        raise ValueError('ISO Find Eden wallpaper manifest differs from source')
+    for row in expected:
+        if hashlib.sha256(read(prefix+row['file'])).hexdigest()!=row['sha256']:
+            raise ValueError('ISO wallpaper checksum mismatch: '+row['file'])
+    for path in [prefix+'Find-Eden.html',prefix+'daily-wallpaper/rotator.py','usr/local/bin/eden-find-eden','usr/share/applications/eden-find-eden.desktop','etc/xdg/autostart/eden-daily-wallpaper.desktop']:
+        if not read(path):raise ValueError('Empty ISO Find Eden file: '+path)
+    print('Verified Find Eden game, all 28 wallpaper hashes, launcher and daily autostart inside ISO')
+if __name__=='__main__':
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('filesystem',type=Path)
+    verify(parser.parse_args().filesystem)
