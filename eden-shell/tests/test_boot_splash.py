@@ -18,6 +18,8 @@ class BootSplashTests(unittest.TestCase):
         grub_text = grub.read_text(encoding="utf-8")
         self.assertIn("quiet", grub_text)
         self.assertIn("splash", grub_text)
+        self.assertIn("GRUB_CMDLINE_LINUX_RECOVERY", grub_text)
+        self.assertIn("nomodeset", grub_text)
 
 
 if __name__ == "__main__":
