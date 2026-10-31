@@ -16,6 +16,15 @@
     "desktop_id": "eden-number-meadow.desktop",
     "offline": true,
     "reviewed": true
+  },
+  {
+    "id": "word-woodland",
+    "title": "Word Woodland",
+    "description": "Find the first letter in a friendly offline word game.",
+    "category": "learn",
+    "desktop_id": "eden-word-woodland.desktop",
+    "offline": true,
+    "reviewed": true
   }
 ]
 
