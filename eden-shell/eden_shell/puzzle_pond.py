@@ -9,7 +9,7 @@ try:
     import gi
 
     gi.require_version("Gtk", "4.0")
-    from gi.repository import Gio, Gtk
+    from gi.repository import Gio, GLib, Gtk
 except (ImportError, ValueError) as exc:  # pragma: no cover - Debian runtime only
     raise SystemExit("Puzzle Pond needs the Debian GTK 4 runtime.") from exc
 
@@ -22,6 +22,7 @@ class PuzzlePondWindow(Gtk.ApplicationWindow):
         self.set_title("Eden Puzzle Pond")
         self.set_default_size(820, 680)
         self.game = PuzzlePond()
+        self._mismatch_timeout_id = None
 
         root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=18)
         root.set_margin_top(30)
@@ -82,6 +83,8 @@ class PuzzlePondWindow(Gtk.ApplicationWindow):
             self.cards.attach(button, card.index % 4, card.index // 4, 1, 1)
 
     def _choose(self, index: int) -> None:
+        if self._mismatch_timeout_id is not None:
+            return
         result = self.game.choose(index)
         if result == "matched":
             self.status.set_label("A match! Find another pair.")
@@ -91,14 +94,25 @@ class PuzzlePondWindow(Gtk.ApplicationWindow):
                 second = self.game.cards[self.game.second]
                 if first.symbol != second.symbol:
                     self.status.set_label("Those are different. Try another pair.")
-                    self.game.finish_mismatch()
+                    self._render()
+                    self._mismatch_timeout_id = GLib.timeout_add(1100, self._finish_mismatch)
+                    return
                 else:
                     self.status.set_label("A match! Find another pair.")
         if self.game.complete:
             self.status.set_label("The pond is complete! Start again whenever you like.")
         self._render()
 
+    def _finish_mismatch(self) -> bool:
+        self._mismatch_timeout_id = None
+        self.game.finish_mismatch()
+        self._render()
+        return GLib.SOURCE_REMOVE
+
     def _restart(self, _button: Gtk.Button) -> None:
+        if self._mismatch_timeout_id is not None:
+            GLib.source_remove(self._mismatch_timeout_id)
+            self._mismatch_timeout_id = None
         self.game.restart()
         self.status.set_label("Choose a card when you are ready.")
         self._render()
