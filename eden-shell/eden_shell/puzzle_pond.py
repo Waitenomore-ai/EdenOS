@@ -39,8 +39,9 @@ class PuzzlePondWindow(Gtk.ApplicationWindow):
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroll.set_child(root)
         self.set_child(scroll)
+        root.add_css_class("eden-game-panel")
         title = Gtk.Label(label="Puzzle Pond")
-        title.add_css_class("eden-title")
+        title.add_css_class("eden-game-heading")
         title.set_xalign(0)
         root.append(title)
         prompt = Gtk.Label(label="Find the two matching pond friends. There is no timer.")
@@ -56,6 +57,7 @@ class PuzzlePondWindow(Gtk.ApplicationWindow):
         self.status = Gtk.Label(label="Choose a card when you are ready.")
         self.status.add_css_class("eden-status")
         self.status.set_xalign(0)
+        self.status.add_css_class("eden-game-feedback")
         self.status.set_wrap(True)
         root.append(self.status)
         root.append(self._button("Start again", self._restart))
@@ -63,7 +65,7 @@ class PuzzlePondWindow(Gtk.ApplicationWindow):
 
     def _button(self, label: str, callback) -> Gtk.Button:
         button = Gtk.Button(label=label)
-        button.add_css_class("eden-small-button")
+        button.add_css_class("eden-game-button")
         button.set_size_request(90, 64)
         button.update_property([Gtk.AccessibleProperty.LABEL], [label])
         button.connect("clicked", callback)
