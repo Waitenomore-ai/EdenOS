@@ -1,0 +1,149 @@
+#!/usr/bin/python3
+"""Eden OS adult-controlled, non-destructive USB ISO package updater."""
+import hashlib
+import os
+from pathlib import Path
+import re
+import shlex
+import shutil
+import subprocess
+import tempfile
+
+import gi
+gi.require_version("Gtk", "4.0")
+from gi.repository import Gtk
+
+CACHE = Path.home() / ".cache" / "eden-os-usb-updater"
+PACKAGE = re.compile(r"eden-os-desktop_[0-9][A-Za-z0-9.+~:-]*_all\.deb\Z")
+
+
+def run(*args):
+    return subprocess.run(args, text=True, capture_output=True, check=True)
+
+
+def verify_package(directory):
+    checksums = directory / "eden-os-update.sha256"
+    if not checksums.is_file():
+        raise ValueError("No Eden update checksum was found. This is not a supported update bundle.")
+    lines = checksums.read_text(encoding="utf-8").strip().splitlines()
+    if len(lines) != 1:
+        raise ValueError("Expected exactly one checksum entry.")
+    match = re.fullmatch(r"([0-9a-fA-F]{64})\s+\*?(eden-os-desktop_[A-Za-z0-9.+~:-]+_all\.deb)", lines[0])
+    if not match or not PACKAGE.fullmatch(match.group(2)):
+        raise ValueError("Invalid update checksum or package name.")
+    package = directory / match.group(2)
+    if not package.is_file() or package.is_symlink():
+        raise ValueError("The update package is missing or unsafe.")
+    digest = hashlib.sha256(package.read_bytes()).hexdigest()
+    if digest.lower() != match.group(1).lower():
+        raise ValueError("Package checksum mismatch. Update refused.")
+    fields = run("dpkg-deb", "-f", str(package), "Package", "Architecture", "Version").stdout.splitlines()
+    if len(fields) != 3 or fields[0] != "eden-os-desktop" or fields[1] != "all":
+        raise ValueError("This is not an Eden OS desktop update package.")
+    version = fields[2].strip()
+    current = subprocess.run(["dpkg-query", "-W", "-f=${Version}", "eden-os-desktop"],
+                             capture_output=True, text=True)
+    if current.returncode == 0 and current.stdout.strip():
+        installed = current.stdout.strip()
+        if subprocess.run(["dpkg", "--compare-versions", version, "gt", installed]).returncode != 0:
+            raise ValueError(f"Package {version} is not newer than installed {installed}. Downgrades are blocked.")
+    return package, version
+
+
+class Updater(Gtk.Application):
+    def __init__(self):
+        super().__init__(application_id="uk.edenos.UsbUpdater")
+        self.package = None
+
+    def do_activate(self):
+        self.window = Gtk.ApplicationWindow(application=self, title="Eden OS Updates")
+        self.window.set_default_size(580, 350)
+        column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        column.set_margin_top(22)
+        column.set_margin_bottom(22)
+        column.set_margin_start(24)
+        column.set_margin_end(24)
+        self.window.set_child(column)
+        heading = Gtk.Label(label="Update Eden OS from a USB stick", xalign=0)
+        heading.add_css_class("title-2")
+        column.append(heading)
+        column.append(Gtk.Label(label="Adult only • keeps accounts, home folders and disk partitions", xalign=0, wrap=True))
+        column.append(Gtk.Label(label="Choose an Eden OS ISO or a folder containing the update .deb and checksum.", xalign=0, wrap=True))
+        self.location = Gtk.Entry(placeholder_text="/media/.../eden-os-amd64-test.iso")
+        column.append(self.location)
+        chooser = Gtk.Button(label="Browse for Eden OS ISO")
+        chooser.connect("clicked", self.browse)
+        column.append(chooser)
+        check = Gtk.Button(label="Check and verify update")
+        check.connect("clicked", self.check)
+        column.append(check)
+        self.status = Gtk.Label(label="No update checked yet.", xalign=0, wrap=True, selectable=True)
+        column.append(self.status)
+        self.install = Gtk.Button(label="Review installation in terminal")
+        self.install.set_sensitive(False)
+        self.install.connect("clicked", self.install_package)
+        column.append(self.install)
+        column.append(Gtk.Label(label="Back up important work first. Never choose a fresh-install or erase-disk option.", xalign=0, wrap=True))
+        self.window.present()
+
+    def browse(self, _button):
+        dialog = Gtk.FileChooserNative(title="Choose Eden OS ISO", transient_for=self.window,
+                                       action=Gtk.FileChooserAction.OPEN, accept_label="Choose")
+        dialog.connect("response", self.file_selected)
+        dialog.show()
+
+    def file_selected(self, dialog, response):
+        if response == Gtk.ResponseType.ACCEPT:
+            file = dialog.get_file()
+            if file and file.get_path():
+                self.location.set_text(file.get_path())
+        dialog.destroy()
+
+    def check(self, _button):
+        self.install.set_sensitive(False)
+        self.package = None
+        try:
+            selected = Path(self.location.get_text().strip()).expanduser().resolve(strict=True)
+            if selected.is_dir():
+                folder = selected
+            elif selected.is_file() and selected.suffix.lower() == ".iso":
+                if not shutil.which("xorriso"):
+                    raise ValueError("xorriso is missing. Ask an adult to install the xorriso package.")
+                CACHE.mkdir(mode=0o700, parents=True, exist_ok=True)
+                os.chmod(CACHE, 0o700)
+                folder = Path(tempfile.mkdtemp(prefix="verified-", dir=CACHE))
+                # Extract only the two expected paths; never execute anything from the ISO.
+                for source, destination in (("/eden-update/eden-os-update.sha256", "eden-os-update.sha256"),):
+                    run("xorriso", "-osirrox", "on", "-indev", str(selected),
+                        "-extract", source, str(folder / destination))
+                checksum = (folder / "eden-os-update.sha256").read_text().strip()
+                match = re.fullmatch(r"[0-9a-fA-F]{64}\s+\*?(eden-os-desktop_[A-Za-z0-9.+~:-]+_all\.deb)", checksum)
+                if not match or not PACKAGE.fullmatch(match.group(1)):
+                    raise ValueError("The ISO has no valid Eden OS update package.")
+                run("xorriso", "-osirrox", "on", "-indev", str(selected),
+                    "-extract", "/eden-update/" + match.group(1), str(folder / match.group(1)))
+            else:
+                raise ValueError("Choose a readable .iso file or extracted update folder.")
+            package, version = verify_package(folder)
+            self.package = package
+            self.status.set_text(f"Verified Eden OS update {version}.\nChecksum OK. Ready for adult review.")
+            self.install.set_sensitive(True)
+        except (OSError, ValueError, subprocess.CalledProcessError) as exc:
+            self.status.set_text(f"Update not available: {exc}")
+
+    def install_package(self, _button):
+        if not self.package or not self.package.is_file():
+            return
+        # Apt's interactive dependency/removal prompt is deliberately NOT bypassed.
+        command = ("echo 'Eden OS update — review every proposed change carefully.'; "
+                   "sudo apt install " + shlex.quote(str(self.package)) +
+                   "; printf '\\nPress Enter to close...'; read answer")
+        try:
+            subprocess.Popen(["x-terminal-emulator", "-e", "bash", "-c", command])
+            self.status.set_text("Terminal opened. Review apt changes, authenticate and confirm there.")
+        except OSError as exc:
+            self.status.set_text(f"Could not open a terminal: {exc}")
+
+
+if __name__ == "__main__":
+    raise SystemExit(Updater().run())
