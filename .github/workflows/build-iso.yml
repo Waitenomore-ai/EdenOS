@@ -73,6 +73,12 @@ jobs:
           test -s eden-os-amd64-test.iso
           xorriso -indev eden-os-amd64-test.iso -ls /live 2>&1 | tee iso-live-files.txt
           grep -q 'filesystem.squashfs' iso-live-files.txt
+          mkdir -p iso-update-inspection
+          xorriso -osirrox on -indev eden-os-amd64-test.iso -extract /eden-update iso-update-inspection
+          (cd iso-update-inspection && sha256sum --check eden-os-update.sha256)
+          test "$(find iso-update-inspection -maxdepth 1 -name 'eden-os-desktop_*.deb' | wc -l)" -eq 1
+          dpkg-deb -f iso-update-inspection/eden-os-desktop_*.deb Package | grep -qx eden-os-desktop
+          rm -rf iso-update-inspection
           xorriso -indev eden-os-amd64-test.iso -report_el_torito plain 2>&1 | tee iso-boot-catalog.txt
           xorriso -osirrox on -indev eden-os-amd64-test.iso -extract /boot/grub/efi.img efi.img
           mcopy -i efi.img ::/EFI/BOOT/BOOTX64.EFI BOOTX64.EFI
