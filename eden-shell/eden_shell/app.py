@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sys
 import threading
+from datetime import date
 from pathlib import Path
 
 try:
@@ -128,7 +129,13 @@ class EdenWindow(Gtk.ApplicationWindow):
         # behind compact navigation controls. High contrast stays opaque.
         backdrop = Gtk.Overlay()
         if not self.preferences.high_contrast:
-            wallpaper_path = Path("/usr/share/backgrounds/edenos/01-eden-sunrise.png")
+            gallery = Path("/usr/share/backgrounds/edenos/daily")
+            daily_images = sorted(gallery.glob("*.png")) if gallery.is_dir() else []
+            wallpaper_path = (
+                daily_images[date.today().toordinal() % len(daily_images)]
+                if daily_images
+                else Path("/usr/share/backgrounds/edenos/01-eden-sunrise.png")
+            )
             if wallpaper_path.is_file():
                 backdrop_image = Gtk.Picture.new_for_filename(str(wallpaper_path))
                 backdrop_image.set_content_fit(Gtk.ContentFit.COVER)
