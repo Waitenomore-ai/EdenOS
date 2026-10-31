@@ -23,7 +23,8 @@ class CatalogueTests(unittest.TestCase):
             ["learn", "play", "read", "create"],
         )
         self.assertEqual(
-            [activity.id for activity in catalogue.load_catalogue()], ["tux-paint"]
+            [activity.id for activity in catalogue.load_catalogue()],
+            ["tux-paint", "number-meadow"],
         )
         self.assertEqual(catalogue.load_catalogue(Path("/no/such/eden-catalogue.json")), ())
 
@@ -264,3 +265,4 @@ class NavigationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

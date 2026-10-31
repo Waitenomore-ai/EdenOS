@@ -7,5 +7,15 @@
     "desktop_id": "tuxpaint.desktop",
     "offline": true,
     "reviewed": true
+  },
+  {
+    "id": "number-meadow",
+    "title": "Number Meadow",
+    "description": "Count flowers and practise numbers in a calm offline game.",
+    "category": "learn",
+    "desktop_id": "eden-number-meadow.desktop",
+    "offline": true,
+    "reviewed": true
   }
 ]
+
