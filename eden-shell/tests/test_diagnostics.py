@@ -59,3 +59,23 @@ class DiagnosticsTests(unittest.TestCase):
             self.assertFalse(detect(root))
             (root / 'run/live/medium').mkdir(parents=True)
             self.assertTrue(detect(root))
+
+    def test_reports_drm_driver_and_pci_identity_without_serials(self):
+        module = self.module()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            card = root / 'sys/class/drm/card0'
+            device = card / 'device'
+            device.mkdir(parents=True)
+            (device / 'vendor').write_text('0x1002\n')
+            (device / 'device').write_text('0x6738\n')
+            (device / 'uevent').write_text('PCI_SLOT_NAME=0000:01:00.0\n')
+            driver = root / 'sys/bus/pci/drivers/radeon'
+            driver.mkdir(parents=True)
+            (device / 'driver').symlink_to(driver)
+            report = module.collect_report(root)
+            self.assertEqual(report['graphics'], [{
+                'card': 'card0', 'driver': 'radeon', 'vendor': '0x1002',
+                'device': '0x6738', 'pci_slot': '0000:01:00.0',
+            }])
+            self.assertNotIn('serial', json.dumps(report).lower())

@@ -24,6 +24,37 @@ def is_live_session(root: Path = Path('/')) -> bool:
     return (root / 'run/live/medium').is_dir()
 
 
+def graphics_devices(root: Path = Path('/')) -> list[dict[str, str]]:
+    """Return non-identifying DRM device/driver details for support reports."""
+    drm = root / 'sys/class/drm'
+    devices: list[dict[str, str]] = []
+    try:
+        entries = sorted(drm.glob('card[0-9]'))
+    except OSError:
+        entries = []
+    for card in entries:
+        if not card.is_dir():
+            continue
+        device = card / 'device'
+        record = {'card': card.name}
+        record['driver'] = 'unknown'
+        try:
+            record['driver'] = (device / 'driver').resolve().name
+        except OSError:
+            pass
+        for field, filename in (('vendor', 'vendor'), ('device', 'device')):
+            value = _read(device / filename)
+            if value:
+                record[field] = value
+        name = _read(device / 'uevent')
+        if name:
+            model = re.search(r'^PCI_SLOT_NAME=(.+)$', name, re.M)
+            if model:
+                record['pci_slot'] = model.group(1)
+        devices.append(record)
+    return devices
+
+
 def collect_report(root: Path = Path('/')) -> dict:
     memory = re.search(r'^MemTotal:\s+(\d+) kB$', _read(root / 'proc/meminfo'), re.M)
     cpu = re.search(r'^model name\s*:\s*(.+)$', _read(root / 'proc/cpuinfo'), re.M)
@@ -36,6 +67,7 @@ def collect_report(root: Path = Path('/')) -> dict:
         'cpu': cpu.group(1) if cpu else 'unknown',
         'memory_bytes': int(memory.group(1)) * 1024 if memory else None,
         'storage': assess_storage(usage.total, usage.free),
+        'graphics': graphics_devices(root),
         'storage_scope': 'Root filesystem only; live media and other mounts are not installation measurements.',
     }
 
@@ -46,4 +78,3 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-
