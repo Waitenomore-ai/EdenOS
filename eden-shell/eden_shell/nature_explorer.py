@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 try:
     import gi
@@ -27,7 +28,16 @@ class NatureExplorerWindow(Gtk.ApplicationWindow):
         root.set_margin_bottom(34)
         root.set_margin_start(40)
         root.set_margin_end(40)
-        self.set_child(root)
+        provider = Gtk.CssProvider()
+        provider.load_from_path(str(Path(__file__).parent / "data" / "eden.css"))
+        Gtk.StyleContext.add_provider_for_display(
+            self.get_display(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+        self._style_provider = provider
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroll.set_child(root)
+        self.set_child(scroll)
 
         title = Gtk.Label(label="Nature Explorer")
         title.add_css_class("eden-title")
@@ -44,12 +54,14 @@ class NatureExplorerWindow(Gtk.ApplicationWindow):
         self.hint.set_xalign(0.5)
         root.append(self.hint)
         self.status = Gtk.Label()
+        self.status.add_css_class("eden-status")
         self.status.set_wrap(True)
         self.status.set_xalign(0.5)
         root.append(self.status)
 
         controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=14)
         controls.set_homogeneous(True)
+        controls.set_halign(Gtk.Align.FILL)
         root.append(controls)
         controls.append(self._button("Previous", self._previous))
         controls.append(self._button("I found it", self._found))
@@ -60,6 +72,7 @@ class NatureExplorerWindow(Gtk.ApplicationWindow):
     def _button(self, label: str, callback) -> Gtk.Button:
         button = Gtk.Button(label=label)
         button.add_css_class("eden-small-button")
+        button.set_size_request(90, 64)
         button.update_property([Gtk.AccessibleProperty.LABEL], [label])
         button.connect("clicked", callback)
         return button
