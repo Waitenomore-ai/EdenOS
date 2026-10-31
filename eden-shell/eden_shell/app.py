@@ -239,8 +239,34 @@ class EdenWindow(Gtk.ApplicationWindow):
         if not activities:
             self._append_empty(content, "Your adult can add activities here.")
             return
-        for activity in activities:
-            self._append_activity(content, activity)
+        activity_grid = Gtk.Grid(column_spacing=16, row_spacing=16)
+        activity_grid.set_halign(Gtk.Align.CENTER)
+        for index, activity in enumerate(activities):
+            activity_grid.attach(self._activity_tile(activity), index % 3, index // 3, 1, 1)
+        content.append(activity_grid)
+
+    def _activity_tile(self, activity: Activity) -> Gtk.Button:
+        button = self._accessible_button(
+            f"Open {activity.title}", lambda _button: self._launch_activity(activity)
+        )
+        button.add_css_class("eden-activity-tile")
+        button.set_size_request(230, 210)
+        body = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        body.set_halign(Gtk.Align.CENTER)
+        body.set_valign(Gtk.Align.CENTER)
+        icon_path = Path(__file__).parent / "data" / "icons" / f"{activity.category}.svg"
+        if icon_path.is_file():
+            picture = Gtk.Picture.new_for_filename(str(icon_path))
+            picture.set_content_fit(Gtk.ContentFit.CONTAIN)
+            picture.set_size_request(120, 105)
+            body.append(picture)
+        title = Gtk.Label(label=activity.title)
+        title.add_css_class("eden-card-label")
+        title.set_wrap(True)
+        title.set_justify(Gtk.Justification.CENTER)
+        body.append(title)
+        button.set_child(body)
+        return button
 
     def _append_activity(self, content: Gtk.Box, activity: Activity) -> None:
         row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=18)
