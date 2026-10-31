@@ -23,6 +23,10 @@ account before adult setup.
    The restricted browser is an unverified development pilot; supervise its use
    and review `browser-safety.md`.
 
+Picture-based child sign-in is planned but not enabled yet. The current build
+uses the standard text-based LightDM login; see `picture-profile-login.md` for
+the proposed safe design.
+
 The current offline activity set is Tux Paint, Number Meadow, Word Woodland,
 Story Garden, and Art Studio. The four Eden-native activities do not create
 accounts, require network access, or save scores.
