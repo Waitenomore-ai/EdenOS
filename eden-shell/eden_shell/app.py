@@ -347,6 +347,8 @@ class EdenWindow(Gtk.ApplicationWindow):
         self._status_label.set_wrap(True)
         self._status_label.set_xalign(0)
         child = getattr(self, "_root_container", None)
+        if child is None:
+            child = self.get_child()
         if isinstance(child, Gtk.Box):
             child.append(self._status_label)
 
