@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Eden OS Updates
+Comment=Safely check and install an Eden OS USB update
+Exec=eden-usb-updater
+Icon=system-software-update
+Terminal=false
+Categories=Settings;System;
+Keywords=Eden;USB;ISO;Update;
