@@ -103,27 +103,11 @@ class EdenWindow(Gtk.ApplicationWindow):
         button.update_property([Gtk.AccessibleProperty.LABEL], [label])
         button.add_css_class("eden-card")
         button.connect("clicked", callback)
-        content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        content = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         content.set_halign(Gtk.Align.CENTER)
-        # Use the six bundled Eden garden illustrations as real picture tiles.
-        # Keep labels, keyboard focus and SVG icons for accessible navigation.
-        garden = {
-            "learn": "02-eden-waterfalls.png",
-            "play": "05-eden-butterflies.png",
-            "read": "06-eden-orchard.png",
-            "create": "03-eden-rainbow.png",
-        }
-        picture_path = Path("/usr/share/backgrounds/edenos") / garden.get(icon_name, "")
-        if picture_path.is_file() and not self.preferences.high_contrast:
-            picture = Gtk.Picture.new_for_filename(str(picture_path))
-            picture.set_content_fit(Gtk.ContentFit.COVER)
-            picture.set_size_request(340, 170)
-            picture.add_css_class("eden-card-picture")
-            picture.set_focusable(False)
-            content.append(picture)
         icon_path = Path(__file__).parent / "data" / "icons" / f"{icon_name}.svg"
         image = Gtk.Image.new_from_file(str(icon_path))
-        image.set_pixel_size(48)
+        image.set_pixel_size(36)
         image.set_focusable(False)
         content.append(image)
         title = Gtk.Label(label=label)
@@ -140,7 +124,18 @@ class EdenWindow(Gtk.ApplicationWindow):
         root.set_margin_bottom(22)
         root.set_margin_start(28)
         root.set_margin_end(28)
-        self.set_child(root)
+        # A real GTK picture layer keeps the enchanted garden visible
+        # behind compact navigation controls. High contrast stays opaque.
+        backdrop = Gtk.Overlay()
+        if not self.preferences.high_contrast:
+            wallpaper_path = Path("/usr/share/backgrounds/edenos/01-eden-sunrise.png")
+            if wallpaper_path.is_file():
+                backdrop_image = Gtk.Picture.new_for_filename(str(wallpaper_path))
+                backdrop_image.set_content_fit(Gtk.ContentFit.COVER)
+                backdrop.set_child(backdrop_image)
+        backdrop.add_overlay(root)
+        self.set_child(backdrop)
+        self._root_container = root
 
         header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         if self.state.page != "home":
@@ -193,7 +188,7 @@ class EdenWindow(Gtk.ApplicationWindow):
         grid = Gtk.FlowBox()
         grid.set_selection_mode(Gtk.SelectionMode.NONE)
         grid.set_min_children_per_line(1)
-        grid.set_max_children_per_line(2)
+        grid.set_max_children_per_line(4)
         grid.set_column_spacing(18)
         grid.set_row_spacing(18)
         grid.set_homogeneous(True)
@@ -345,7 +340,7 @@ class EdenWindow(Gtk.ApplicationWindow):
         self._status_label.add_css_class("eden-status")
         self._status_label.set_wrap(True)
         self._status_label.set_xalign(0)
-        child = self.get_child()
+        child = getattr(self, "_root_container", None)
         if isinstance(child, Gtk.Box):
             child.append(self._status_label)
 
