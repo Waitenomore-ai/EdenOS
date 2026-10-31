@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 try:
     import gi
@@ -27,7 +28,16 @@ class PuzzlePondWindow(Gtk.ApplicationWindow):
         root.set_margin_bottom(30)
         root.set_margin_start(36)
         root.set_margin_end(36)
-        self.set_child(root)
+        provider = Gtk.CssProvider()
+        provider.load_from_path(str(Path(__file__).parent / "data" / "eden.css"))
+        Gtk.StyleContext.add_provider_for_display(
+            self.get_display(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+        self._style_provider = provider
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroll.set_child(root)
+        self.set_child(scroll)
         title = Gtk.Label(label="Puzzle Pond")
         title.add_css_class("eden-title")
         title.set_xalign(0)
@@ -53,6 +63,7 @@ class PuzzlePondWindow(Gtk.ApplicationWindow):
     def _button(self, label: str, callback) -> Gtk.Button:
         button = Gtk.Button(label=label)
         button.add_css_class("eden-small-button")
+        button.set_size_request(90, 64)
         button.update_property([Gtk.AccessibleProperty.LABEL], [label])
         button.connect("clicked", callback)
         return button
@@ -63,7 +74,11 @@ class PuzzlePondWindow(Gtk.ApplicationWindow):
         for card in self.game.cards:
             label = card.symbol if card.revealed or card.matched else "?"
             button = self._button(label, lambda _button, i=card.index: self._choose(i))
+            button.set_size_request(125, 110)
             button.set_sensitive(not card.matched and not card.revealed)
+            button.update_property([Gtk.AccessibleProperty.LABEL], [
+                f"Card {card.index + 1}: {card.symbol if card.revealed or card.matched else 'hidden'}"
+            ])
             self.cards.attach(button, card.index % 4, card.index // 4, 1, 1)
 
     def _choose(self, index: int) -> None:
