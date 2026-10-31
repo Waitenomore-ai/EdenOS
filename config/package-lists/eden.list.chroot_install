@@ -5,6 +5,7 @@ systemd-sysv
 dbus-x11
 plymouth
 plymouth-themes
+alsa-utils
 
 # Minimal graphical desktop for the adult session; the child session will use
 # the Eden launcher without the standard XFCE panel or desktop menu.

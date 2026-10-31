@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+
+# Recovery/basic-graphics boots stay silent so troubleshooting is predictable.
+grep -qw nomodeset /proc/cmdline 2>/dev/null && exit 0
+# An adult can mute the sound without changing the boot image.
+[ ! -e /etc/eden-os/startup-sound.disabled ] || exit 0
+[ -r /usr/share/sounds/edenos/startup.wav ] || exit 0
+command -v aplay >/dev/null 2>&1 || exit 0
+
+# Do not delay LightDM while the short original Eden piece plays.
+aplay -q /usr/share/sounds/edenos/startup.wav >/dev/null 2>&1 &
+exit 0

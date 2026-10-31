@@ -27,6 +27,12 @@ EdenOS logo centred until LightDM appears. A recovery/text boot entry remains
 available for diagnosing graphics failures. The splash can only display the
 wallpaper and logo when the branding pack is present.
 
+The approved original Eden magical music preview is packaged as the login
+sound. It starts once when the LightDM login screen is prepared, stays silent
+for `nomodeset` recovery boots, and can be muted by creating
+`/etc/eden-os/startup-sound.disabled`. The physical iMac firmware chime is a
+separate pre-OS setting and is not modified by the Eden package.
+
 If artwork is absent, the build explicitly reports that and proceeds without
 the theme. This allows ordinary source builds to remain functional but means
 **a successful ISO build alone does not prove branding is embedded**.
