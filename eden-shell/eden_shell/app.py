@@ -185,32 +185,34 @@ class EdenWindow(Gtk.ApplicationWindow):
         prompt.set_xalign(0)
         content.append(prompt)
 
-        choices = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=14)
-        choices.set_halign(Gtk.Align.CENTER)
-        choices.set_hexpand(False)
-        for category in CATEGORIES:
-            button = self._tile(category.label, category.icon, self._open_category(category.slug))
-            button.set_size_request(180, 74)
-            button.set_hexpand(False)
-            choices.append(button)
-            if self._page_focus_target is None:
+        # Approved twelve-button home: online actions remain gated by adult-reviewed policy.
+        actions = [
+            ("Learn", "learn", self._open_category("learn"), True),
+            ("Play Games", "play", self._open_category("play"), True),
+            ("Create", "create", self._open_category("create"), True),
+            ("Watch", "watch", self._open_kidstube, browser_access_ready()),
+            ("Explore", "explore", self._open_category("learn"), True),
+            ("Kidstube", "kidstube", self._open_kidstube, browser_access_ready()),
+            ("Activities", "activities", self._open_category("play"), True),
+            ("My Stuff", "stuff", self._open_progress, True),
+            ("Internet (Safe)", "internet", self._open_kidstube, browser_access_ready()),
+            ("Settings", "settings", self._open_settings, True),
+            ("Help", "help", self._open_help, True),
+            ("Eden's Games", "games", self._open_category("play"), True),
+        ]
+        grid = Gtk.Grid(column_spacing=20, row_spacing=22)
+        grid.set_halign(Gtk.Align.CENTER)
+        grid.set_valign(Gtk.Align.CENTER)
+        for index, (label, style, action, enabled) in enumerate(actions):
+            button = self._text_button(label, action)
+            button.add_css_class("eden-home-button")
+            button.add_css_class("eden-" + style)
+            button.set_size_request(220, 78)
+            button.set_sensitive(enabled)
+            grid.attach(button, index % 4, index // 4, 1, 1)
+            if self._page_focus_target is None and enabled:
                 self._page_focus_target = button
-        content.append(choices)
-
-        footer = Gtk.FlowBox()
-        footer.set_selection_mode(Gtk.SelectionMode.NONE)
-        footer.set_min_children_per_line(1)
-        footer.set_max_children_per_line(2)
-        footer.set_column_spacing(16)
-        footer.set_row_spacing(16)
-        footer.insert(self._text_button("My Progress", self._open_progress), -1)
-        browser_button = self._text_button("Watch KidsTube online", self._open_kidstube)
-        browser_button.set_sensitive(browser_access_ready())
-        footer.insert(browser_button, -1)
-        footer.insert(self._text_button("Ask an adult for help", self._open_help), -1)
-        footer.insert(self._text_button("Turn off computer", self._confirm_power_off), -1)
-        content.append(footer)
-        self._append_empty(content, "Your included activities work offline. Online video needs an internet connection and adult setup.")
+        content.append(grid)
 
     def _render_category(self, content: Gtk.Box) -> None:
         category = next(item for item in CATEGORIES if item.slug == self.state.category)
