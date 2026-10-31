@@ -199,7 +199,7 @@ class EdenWindow(Gtk.ApplicationWindow):
             ("Play Games", "play", self._open_category("play"), True),
             ("Create", "create", self._open_category("create"), True),
             ("Watch", "watch", self._open_kidstube, browser_access_ready()),
-            ("Explore", "explore", self._open_category("learn"), True),
+            ("Explore", "explore", self._open_category("read"), True),
             ("Kidstube", "kidstube", self._open_kidstube, browser_access_ready()),
             ("Activities", "activities", self._open_category("play"), True),
             ("My Stuff", "stuff", self._open_progress, True),
