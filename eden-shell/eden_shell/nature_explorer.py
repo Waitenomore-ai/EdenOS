@@ -44,6 +44,12 @@ class NatureExplorerWindow(Gtk.ApplicationWindow):
         title.add_css_class("eden-game-heading")
         title.set_xalign(0)
         root.append(title)
+        illustration = Gtk.Image.new_from_file(str(
+            Path(__file__).parent / "data" / "activity-art" / "nature-explorer.svg"
+        ))
+        illustration.set_pixel_size(150)
+        illustration.set_halign(Gtk.Align.CENTER)
+        root.append(illustration)
         self.card = Gtk.Label()
         self.card.add_css_class("eden-game-picture")
         self.card.set_wrap(True)
