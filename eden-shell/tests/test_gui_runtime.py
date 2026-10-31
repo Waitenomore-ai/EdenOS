@@ -25,6 +25,11 @@ class GtkRuntimeTests(unittest.TestCase):
                     if context.pending():
                         context.iteration(False)
                 self.assertIsNotNone(window.get_child())
+                from pathlib import Path
+                next_garden = Path(__file__).resolve().parents[2] / 'find-eden/wallpapers/find-eden-lily-pond.png'
+                with patch('eden_shell.app.today_image', return_value=next_garden):
+                    self.assertTrue(window._refresh_daily_garden())
+                    self.assertEqual(window._daily_picture.get_file().get_path(), str(next_garden))
                 self.assertEqual(window.get_focus(), window._page_focus_target)
                 window._open_category('create')(None)
                 self.assertEqual(window.state.category, 'create')
