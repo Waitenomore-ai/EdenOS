@@ -38,6 +38,7 @@ def graphics_devices(root: Path = Path('/')) -> list[dict[str, str]]:
         device = card / 'device'
         record = {'card': card.name}
         record['driver'] = 'unknown'
+        record['status'] = _read(card / 'status') or 'unknown'
         try:
             record['driver'] = (device / 'driver').resolve().name
         except OSError:
@@ -55,6 +56,13 @@ def graphics_devices(root: Path = Path('/')) -> list[dict[str, str]]:
     return devices
 
 
+def graphics_boot_flags(root: Path = Path('/')) -> list[str]:
+    """Expose only graphics-related kernel flags, never root or identity data."""
+    cmdline = _read(root / 'proc/cmdline')
+    allowed = ('nomodeset', 'radeon.', 'amdgpu.', 'drm.debug')
+    return [token for token in cmdline.split() if token == 'nomodeset' or token.startswith(allowed[1:])]
+
+
 def collect_report(root: Path = Path('/')) -> dict:
     memory = re.search(r'^MemTotal:\s+(\d+) kB$', _read(root / 'proc/meminfo'), re.M)
     cpu = re.search(r'^model name\s*:\s*(.+)$', _read(root / 'proc/cpuinfo'), re.M)
@@ -68,6 +76,7 @@ def collect_report(root: Path = Path('/')) -> dict:
         'memory_bytes': int(memory.group(1)) * 1024 if memory else None,
         'storage': assess_storage(usage.total, usage.free),
         'graphics': graphics_devices(root),
+        'graphics_boot_flags': graphics_boot_flags(root),
         'storage_scope': 'Root filesystem only; live media and other mounts are not installation measurements.',
     }
 

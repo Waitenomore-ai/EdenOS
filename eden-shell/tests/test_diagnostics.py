@@ -21,6 +21,7 @@ class DiagnosticsTests(unittest.TestCase):
                 'sys/firmware/efi/fw_platform_size': '64\n',
                 'proc/meminfo': 'MemTotal:        4194304 kB\n',
                 'proc/cpuinfo': 'model name\t: Intel Test CPU\n',
+                'proc/cmdline': 'BOOT_IMAGE=/vmlinuz root=UUID=secret ro nomodeset radeon.modeset=0\n',
                 'etc/eden-os/build.json': json.dumps({'version':'0.1-dev','commit':'a'*40,'built_at':'today'}),
             }.items():
                 path = root / name
@@ -34,6 +35,7 @@ class DiagnosticsTests(unittest.TestCase):
             self.assertNotIn('serial', json.dumps(report).lower())
             self.assertNotIn('hostname', report)
             self.assertNotIn('username', report)
+            self.assertEqual(report['graphics_boot_flags'], ['nomodeset', 'radeon.modeset=0'])
 
     def test_storage_budget_uses_binary_thresholds(self):
         assess = self.module().assess_storage
@@ -70,12 +72,13 @@ class DiagnosticsTests(unittest.TestCase):
             (device / 'vendor').write_text('0x1002\n')
             (device / 'device').write_text('0x6738\n')
             (device / 'uevent').write_text('PCI_SLOT_NAME=0000:01:00.0\n')
+            (card / 'status').write_text('connected\n')
             driver = root / 'sys/bus/pci/drivers/radeon'
             driver.mkdir(parents=True)
             (device / 'driver').symlink_to(driver)
             report = module.collect_report(root)
             self.assertEqual(report['graphics'], [{
-                'card': 'card0', 'driver': 'radeon', 'vendor': '0x1002',
+                'card': 'card0', 'driver': 'radeon', 'status': 'connected', 'vendor': '0x1002',
                 'device': '0x6738', 'pci_slot': '0000:01:00.0',
             }])
             self.assertNotIn('serial', json.dumps(report).lower())
