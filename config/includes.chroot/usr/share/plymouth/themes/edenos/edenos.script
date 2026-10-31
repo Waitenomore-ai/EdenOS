@@ -1,0 +1,12 @@
+wallpaper = Image("/usr/share/backgrounds/edenos/01-eden-sunrise.png");
+wallpaper = wallpaper.Scale(Window.GetWidth(), Window.GetHeight());
+wallpaper_sprite = Sprite(wallpaper);
+wallpaper_sprite.SetX(0);
+wallpaper_sprite.SetY(0);
+wallpaper_sprite.SetZ(-100);
+
+logo = Image("/usr/share/pixmaps/edenos-logo.png");
+logo_sprite = Sprite(logo);
+logo_sprite.SetX((Window.GetWidth() - logo.GetWidth()) / 2);
+logo_sprite.SetY((Window.GetHeight() - logo.GetHeight()) / 2);
+logo_sprite.SetZ(100);

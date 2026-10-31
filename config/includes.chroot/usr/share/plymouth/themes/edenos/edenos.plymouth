@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=EdenOS
+Description=EdenOS quiet branded boot screen
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/edenos
+ScriptFile=/usr/share/plymouth/themes/edenos/edenos.script

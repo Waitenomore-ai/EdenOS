@@ -21,6 +21,12 @@ the artwork into `/usr/share/backgrounds/edenos/`, installs the logo in
 `/usr/share/pixmaps/`, and configures a sunrise background for the LightDM GTK
 greeter and a default XFCE desktop profile.
 
+The image also includes an EdenOS Plymouth theme and quiet `splash` boot
+defaults. During a normal boot, Plymouth uses the sunrise wallpaper with the
+EdenOS logo centred until LightDM appears. A recovery/text boot entry remains
+available for diagnosing graphics failures. The splash can only display the
+wallpaper and logo when the branding pack is present.
+
 If artwork is absent, the build explicitly reports that and proceeds without
 the theme. This allows ordinary source builds to remain functional but means
 **a successful ISO build alone does not prove branding is embedded**.
@@ -39,3 +45,4 @@ the theme. This allows ordinary source builds to remain functional but means
 
 This branding work is for a development ISO. Parent account isolation, browser
 restriction and child safety gates still need direct VM/hardware verification.
+
