@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import getpass
 import sys
 import threading
 from datetime import date
@@ -153,15 +154,14 @@ class EdenWindow(Gtk.ApplicationWindow):
         if not logo_path.is_file():
             logo_path = Path("/usr/share/pixmaps/edenos-logo.png")
         if logo_path.is_file():
-            logo = Gtk.Image.new_from_file(str(logo_path))
-            logo.set_pixel_size(88)
+            logo = Gtk.Picture.new_for_filename(str(logo_path))
+            logo.set_content_fit(Gtk.ContentFit.CONTAIN)
+            logo.set_size_request(255, 150)
             logo.set_tooltip_text("Eden OS")
             header.append(logo)
-        heading = Gtk.Label(label="Eden OS")
-        heading.add_css_class("eden-title")
-        heading.set_hexpand(True)
-        heading.set_xalign(0)
-        header.append(heading)
+        header_spacer = Gtk.Box()
+        header_spacer.set_hexpand(True)
+        header.append(header_spacer)
         header.append(self._text_button("Accessibility settings", self._open_settings))
         root.append(header)
 
@@ -185,7 +185,7 @@ class EdenWindow(Gtk.ApplicationWindow):
             self._render_settings(content)
 
     def _render_home(self, content: Gtk.Box) -> None:
-        welcome = Gtk.Label(label="Hello, explorer!")
+        welcome = Gtk.Label(label=f"Hello, {getpass.getuser()}!")
         welcome.add_css_class("eden-title")
         welcome.set_xalign(0)
         content.append(welcome)
