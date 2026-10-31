@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Eden Art Studio
+Comment=Make a picture offline
+Exec=/usr/local/bin/eden-art-studio
+Icon=applications-graphics
+Terminal=false
+Categories=Education;Graphics;Accessibility;
+StartupNotify=true

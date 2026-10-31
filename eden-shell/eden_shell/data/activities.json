@@ -34,6 +34,15 @@
     "desktop_id": "eden-story-garden.desktop",
     "offline": true,
     "reviewed": true
+  },
+  {
+    "id": "art-studio",
+    "title": "Art Studio",
+    "description": "Make a picture with friendly offline stickers.",
+    "category": "create",
+    "desktop_id": "eden-art-studio.desktop",
+    "offline": true,
+    "reviewed": true
   }
 ]
 
