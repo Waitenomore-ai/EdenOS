@@ -105,6 +105,22 @@ class EdenWindow(Gtk.ApplicationWindow):
         button.connect("clicked", callback)
         content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
         content.set_halign(Gtk.Align.CENTER)
+        # Use the six bundled Eden garden illustrations as real picture tiles.
+        # Keep labels, keyboard focus and SVG icons for accessible navigation.
+        garden = {
+            "learn": "02-eden-waterfalls.png",
+            "play": "05-eden-butterflies.png",
+            "read": "06-eden-orchard.png",
+            "create": "03-eden-rainbow.png",
+        }
+        picture_path = Path("/usr/share/backgrounds/edenos") / garden.get(icon_name, "")
+        if picture_path.is_file() and not self.preferences.high_contrast:
+            picture = Gtk.Picture.new_for_filename(str(picture_path))
+            picture.set_content_fit(Gtk.ContentFit.COVER)
+            picture.set_size_request(340, 170)
+            picture.add_css_class("eden-card-picture")
+            picture.set_focusable(False)
+            content.append(picture)
         icon_path = Path(__file__).parent / "data" / "icons" / f"{icon_name}.svg"
         image = Gtk.Image.new_from_file(str(icon_path))
         image.set_pixel_size(48)
