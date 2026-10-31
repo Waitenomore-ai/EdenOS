@@ -14,7 +14,14 @@ xfce4-panel
 xfdesktop4
 xfwm4
 xfce4-settings
+xfce4-terminal
 thunar
+
+# Radeon firmware and local hardware diagnostics. Firmware presence does not
+# certify accelerated graphics on every old iMac; retain basic graphics recovery.
+firmware-amd-graphics
+pciutils
+usbutils
 
 # Network setup for adult configuration
 network-manager
@@ -34,3 +41,4 @@ at-spi2-core
 adwaita-icon-theme
 fonts-dejavu-core
 librsvg2-common
+

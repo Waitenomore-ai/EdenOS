@@ -28,6 +28,8 @@ chmod +x config/includes.chroot/usr/local/bin/eden-*
 bash scripts/prepare-chroot-assets
 bash scripts/stage-branding
 python3 scripts/write-build-info config/includes.chroot/etc/eden-os/build.json
+python3 scripts/build-update-package --output output \
+    --version "${EDEN_PACKAGE_VERSION:-0.1.0~dev0}"
 mkdir -p output
 {
     printf 'Eden OS DEVELOPMENT TEST IMAGE\n'
@@ -41,4 +43,6 @@ lb build
 test -s live-image-amd64.hybrid.iso
 cp live-image-amd64.hybrid.iso output/eden-os-amd64-test.iso
 (cd output && sha256sum eden-os-amd64-test.iso > eden-os-amd64-test.iso.sha256)
+(cd output && sha256sum eden-os-desktop_*.deb > eden-os-update.sha256)
+
 

@@ -7,8 +7,9 @@ lb config noauto \
     --architectures amd64 \
     --binary-images iso-hybrid \
     --debian-installer live \
-    --archive-areas main \
+    --archive-areas "main non-free-firmware" \
     --apt-recommends false \
     --iso-application "Eden OS" \
     --iso-publisher "Eden OS project" \
     --iso-volume "EDEN_OS_DEV"
+

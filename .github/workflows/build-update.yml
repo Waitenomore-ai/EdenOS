@@ -1,0 +1,47 @@
+name: Build EdenOS installed-system update
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eden-update-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Test and package in Debian 13
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            --env EDEN_SOURCE_COMMIT="${{ github.sha }}" \
+            --env EDEN_PACKAGE_VERSION="0.1.0~dev${{ github.run_id }}+g${{ github.sha }}" \
+            --volume "$GITHUB_WORKSPACE:/work" --workdir /work debian:trixie \
+            bash -euc '
+              apt-get update
+              apt-get install -y --no-install-recommends python3 python3-gi gir1.2-gtk-4.0 xvfb xauth dbus-x11 librsvg2-common
+              xvfb-run -a dbus-run-session -- env EDEN_GUI_TESTS=1 PYTHONPATH=eden-shell python3 -m unittest discover -s eden-shell/tests -v
+              sh scripts/prepare-chroot-assets
+              sh scripts/stage-branding
+              python3 scripts/write-build-info config/includes.chroot/etc/eden-os/build.json
+              python3 scripts/build-update-package --output output --version "$EDEN_PACKAGE_VERSION"
+              cd output
+              sha256sum eden-os-desktop_*.deb > eden-os-update.sha256
+            '
+      - name: Save update and checksum
+        uses: actions/upload-artifact@v6
+        with:
+          name: eden-os-update-${{ github.run_number }}
+          path: |
+            output/eden-os-desktop_*.deb
+            output/eden-os-update.sha256
+          if-no-files-found: error
+          retention-days: 30

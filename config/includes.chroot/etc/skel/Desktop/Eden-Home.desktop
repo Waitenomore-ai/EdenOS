@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Eden Home
+Comment=Open the Eden child-friendly launcher
+Exec=/usr/local/bin/eden-shell
+Icon=applications-education
+Terminal=false
+Categories=Education;

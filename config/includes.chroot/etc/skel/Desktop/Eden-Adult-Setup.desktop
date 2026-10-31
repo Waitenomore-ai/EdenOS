@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Eden Adult Setup
+Comment=Create a child account for the Eden session
+Exec=/usr/local/bin/eden-setup
+Icon=preferences-system-users
+Terminal=false
+Categories=Settings;

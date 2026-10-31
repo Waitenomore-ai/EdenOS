@@ -56,6 +56,7 @@ jobs:
           mkdir -p output
           docker run --rm --privileged \
             --env EDEN_SOURCE_COMMIT="${{ github.sha }}" \
+            --env EDEN_PACKAGE_VERSION="0.1.0~dev${{ github.run_id }}+g${{ github.sha }}" \
             --volume "$GITHUB_WORKSPACE:/work" \
             --workdir /work \
             debian:trixie \
@@ -113,6 +114,8 @@ jobs:
             output/eden-os-amd64-test.iso
             output/eden-os-amd64-test.iso.sha256
             output/build-info.txt
+            output/eden-os-desktop_*.deb
+            output/eden-os-update.sha256
           if-no-files-found: error
           compression-level: 0
           retention-days: 7

@@ -1,0 +1,66 @@
+#!/usr/bin/python3
+"""Build an adult-installed Debian package; never install or run its contents."""
+import argparse
+import json
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import tempfile
+
+
+def build(output: Path, version: str) -> Path:
+    if not re.fullmatch(r'[0-9][A-Za-z0-9.+~:-]*', version):
+        raise ValueError('Invalid Debian package version')
+    subprocess.run(['dpkg', '--validate-version', version], check=True,
+                   capture_output=True)
+    root = Path(__file__).resolve().parent.parent
+    output = output.resolve()
+    output.mkdir(parents=True, exist_ok=True)
+    destination = output / f'eden-os-desktop_{version}_all.deb'
+    with tempfile.TemporaryDirectory(prefix='eden-package-') as directory:
+        package = Path(directory) / 'package'
+        shutil.copytree(root / 'config/includes.chroot', package,
+                        ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+        modules = package / 'usr/share/eden-os/eden_shell'
+        if modules.exists():
+            shutil.rmtree(modules)
+        shutil.copytree(root / 'eden-shell/eden_shell', modules,
+                        ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+        for wrapper in (package / 'usr/local/bin').glob('eden-*'):
+            wrapper.chmod(0o755)
+        (package / 'usr/share/eden-os/update.json').write_text(
+            json.dumps({'package_version': version, 'format': 1}, indent=2) + '\n')
+        metadata = package / 'DEBIAN'
+        metadata.mkdir()
+        packages = []
+        for name in ('eden.list.chroot_install', 'eden-activities.list.chroot_install'):
+            for line in (root / 'config/package-lists' / name).read_text().splitlines():
+                item = line.partition('#')[0].strip()
+                # Live image support does not belong in an update dependency set.
+                if item and item not in ('live-boot', 'live-config', 'systemd-sysv'):
+                    if not re.fullmatch(r'[a-z0-9][a-z0-9+.-]*', item):
+                        raise ValueError(f'Unsupported package-list entry: {item}')
+                    packages.append(item)
+        (metadata / 'control').write_text(
+            'Package: eden-os-desktop\n'
+            f'Version: {version}\n'
+            'Section: education\nPriority: optional\nArchitecture: all\n'
+            'Maintainer: EdenOS Project <edenos@users.noreply.github.com>\n'
+            f'Depends: {", ".join(dict.fromkeys(packages))}\n'
+            'Description: EdenOS child launcher and adult setup\n'
+            ' Update the Eden interface without replacing user accounts or disks.\n')
+        conffiles = sorted('/' + str(p.relative_to(package))
+                           for p in (package / 'etc').rglob('*') if p.is_file())
+        (metadata / 'conffiles').write_text('\n'.join(conffiles) + '\n')
+        subprocess.run(['dpkg-deb', '--build', '--root-owner-group', str(package),
+                        str(destination)], check=True)
+    return destination
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', type=Path, default=Path('output'))
+    parser.add_argument('--version', required=True)
+    args = parser.parse_args()
+    print(build(args.output, args.version))

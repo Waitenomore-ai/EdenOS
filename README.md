@@ -46,3 +46,14 @@ The initial reviewed activity candidate is Tux Paint, an offline drawing program
 ## Build online
 
 See [online build instructions](docs/online-build.md).
+
+
+## Installed iMac updates
+
+Use the development `eden-os-desktop` Debian artifact to update an existing EdenOS
+installation without reinstalling the disk. See [installed update instructions](docs/updating-installed-eden.md).
+The ISO remains installation/live-test media. Normal Radeon startup on the pilot
+iMac is not yet reliable; its basic-graphics boot entry is the working fallback.
+
+The [1,000-task backlog](docs/roadmap-1000.md) contains proposed OS work, app reviews
+and custom-app projects. It is not a list of shipped features.
