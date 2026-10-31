@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Eden Puzzle Pond
+Comment=Find matching pairs offline
+Exec=/usr/local/bin/eden-puzzle-pond
+Icon=applications-games
+Terminal=false
+Categories=Education;Game;Accessibility;
+StartupNotify=true

@@ -43,6 +43,15 @@
     "desktop_id": "eden-art-studio.desktop",
     "offline": true,
     "reviewed": true
+  },
+  {
+    "id": "puzzle-pond",
+    "title": "Puzzle Pond",
+    "description": "Find matching pond friends without a timer or score.",
+    "category": "play",
+    "desktop_id": "eden-puzzle-pond.desktop",
+    "offline": true,
+    "reviewed": true
   }
 ]
 
