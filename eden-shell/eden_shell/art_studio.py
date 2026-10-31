@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 try:
     import gi
@@ -28,7 +29,16 @@ class ArtStudioWindow(Gtk.ApplicationWindow):
         root.set_margin_bottom(30)
         root.set_margin_start(36)
         root.set_margin_end(36)
-        self.set_child(root)
+        provider = Gtk.CssProvider()
+        provider.load_from_path(str(Path(__file__).parent / "data" / "eden.css"))
+        Gtk.StyleContext.add_provider_for_display(
+            self.get_display(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+        self._style_provider = provider
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroll.set_child(root)
+        self.set_child(scroll)
         title = Gtk.Label(label="Art Studio")
         title.add_css_class("eden-title")
         title.set_xalign(0)
@@ -70,6 +80,7 @@ class ArtStudioWindow(Gtk.ApplicationWindow):
     def _button(self, label: str, callback) -> Gtk.Button:
         button = Gtk.Button(label=label)
         button.add_css_class("eden-small-button")
+        button.set_size_request(90, 64)
         button.update_property([Gtk.AccessibleProperty.LABEL], [label])
         button.connect("clicked", callback)
         return button
@@ -84,7 +95,10 @@ class ArtStudioWindow(Gtk.ApplicationWindow):
         while child := self.canvas.get_first_child():
             self.canvas.remove(child)
         for stamp in self.board.stamps:
-            self.canvas.insert(self._button(stamp.symbol, lambda _button: None), -1)
+            sticker = Gtk.Label(label=stamp.symbol)
+            sticker.add_css_class("eden-card-label")
+            sticker.set_size_request(65, 65)
+            self.canvas.insert(sticker, -1)
         count = len(self.board.stamps)
         self.status.set_label(f"Your picture has {count} sticker{'s' if count != 1 else ''}.")
 
