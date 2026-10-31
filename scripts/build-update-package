@@ -42,7 +42,7 @@ def build(output: Path, version: str) -> Path:
                     if not re.fullmatch(r'[a-z0-9][a-z0-9+.-]*', item):
                         raise ValueError(f'Unsupported package-list entry: {item}')
                     packages.append(item)
-        (metadata / 'control').write_text(
+        packages.append('xorriso')  # Read-only extraction of the verified ISO update payload.\n        (metadata / 'control').write_text(
             'Package: eden-os-desktop\n'
             f'Version: {version}\n'
             'Section: education\nPriority: optional\nArchitecture: all\n'
