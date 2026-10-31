@@ -32,6 +32,14 @@ class UpdatePackageTests(unittest.TestCase):
             self.assertEqual((extracted / 'usr/share/eden-os/eden_shell/app.py').read_bytes(),
                              (ROOT / 'eden-shell/eden_shell/app.py').read_bytes())
             self.assertTrue(os.access(extracted / 'usr/local/bin/eden-shell', os.X_OK))
+            for game in ('number-meadow', 'word-woodland', 'story-garden',
+                         'art-studio', 'puzzle-pond', 'time-routines',
+                         'nature-explorer', 'feelings'):
+                wrapper = extracted / 'usr/local/bin' / f'eden-{game}'
+                self.assertTrue(os.access(wrapper, os.X_OK), game)
+                self.assertIn('export PYTHONPATH=', wrapper.read_text(), game)
+                self.assertTrue((extracted / 'usr/share/applications' /
+                                 f'eden-{game}.desktop').is_file(), game)
             self.assertTrue((extracted / 'usr/share/applications/eden-shell.desktop').is_file())
             self.assertTrue((extracted / 'usr/share/eden-os/eden_shell/profile_chooser_model.py').is_file())
             self.assertTrue((extracted / 'usr/share/sounds/edenos/startup.wav').is_file())
