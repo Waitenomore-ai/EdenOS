@@ -214,9 +214,16 @@ class EdenWindow(Gtk.ApplicationWindow):
         grid.set_valign(Gtk.Align.CENTER)
         for index, (label, style, action, enabled) in enumerate(actions):
             button = self._text_button(label, action)
+            artwork = Path("/usr/share/eden-os/branding/buttons") / (style + ".png")
+            if artwork.is_file() and not self.preferences.high_contrast:
+                picture = Gtk.Picture.new_for_filename(str(artwork))
+                picture.set_content_fit(Gtk.ContentFit.CONTAIN)
+                picture.set_size_request(220, 110)
+                button.set_child(picture)
+                button.add_css_class("eden-image-button")
             button.add_css_class("eden-home-button")
             button.add_css_class("eden-" + style)
-            button.set_size_request(220, 78)
+            button.set_size_request(220, 110 if artwork.is_file() else 78)
             button.set_sensitive(enabled)
             grid.attach(button, index % 4, index // 4, 1, 1)
             if self._page_focus_target is None and enabled:
