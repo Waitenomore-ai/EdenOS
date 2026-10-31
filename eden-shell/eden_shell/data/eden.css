@@ -107,3 +107,38 @@ scrolledwindow, scrolledwindow > viewport, viewport { background: transparent; }
 .eden-activity-tile:hover { background: #fff4d4; border-color: #edb347; }
 .eden-activity-tile:focus-visible { outline: 5px solid #2159a1; }
 .contrast .eden-activity-tile { background: black; color: white; border: 3px solid white; }
+
+/* Eden illustrated woodland template — readable, accessible overlays. */
+.eden-welcome {
+ color: #173f31; font-size: 32px; font-weight: 900;
+ background: rgba(255, 250, 217, .88);
+ border: 2px solid rgba(255,255,255,.92);
+ border-radius: 20px; padding: 9px 24px;
+ text-shadow: 0 1px 2px white;
+}
+.eden-home-prompt {
+ color: #173f31; font-weight: 750; font-size: 21px;
+ background: rgba(255, 252, 229, .9); border-radius: 16px;
+ padding: 6px 18px;
+}
+.eden-header-control {
+ min-width: 124px; min-height: 52px; padding: 8px 15px;
+ border-radius: 24px; border: 3px solid white;
+ color: #fff; font-weight: 800; background: #7943bd;
+ box-shadow: 0 4px 0 rgba(28, 58, 45, .42);
+}
+.eden-wooden-heading {
+ color: #fff9e6; font-size: 36px; font-weight: 900;
+ background: #996031;
+ border: 5px solid #e3b477;
+ border-radius: 35px; padding: 13px 48px;
+ text-shadow: 0 2px 3px #3d2a22;
+ box-shadow: 0 5px 0 rgba(64, 47, 35, .42);
+}
+.eden-home-label { color: white; font-weight: 900; font-size: 20px; }
+.eden-home-button { padding: 6px 13px; }
+.eden-home-button:focus-visible { outline: 5px solid #234b78; outline-offset: 3px; }
+.contrast .eden-welcome, .contrast .eden-home-prompt,
+.contrast .eden-wooden-heading, .contrast .eden-header-control {
+ background: black; color: white; text-shadow: none; border: 3px solid white;
+}
