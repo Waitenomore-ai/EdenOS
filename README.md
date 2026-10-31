@@ -57,3 +57,7 @@ iMac is not yet reliable; its basic-graphics boot entry is the working fallback.
 
 The [1,000-task backlog](docs/roadmap-1000.md) contains proposed OS work, app reviews
 and custom-app projects. It is not a list of shipped features.
+
+## Safe graphical updates from USB (development)
+
+The adult-only **Eden OS Updates** app can verify a matching update package embedded in a new Eden ISO, or in an extracted update artifact folder. It opens an interactive apt review in a terminal rather than running the disk installer. See [USB graphical update instructions](docs/usb-graphical-updates.md). Older ISOs cannot be assumed updatable. No actual iMac upgrade or rollback test has yet passed.
