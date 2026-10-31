@@ -1,0 +1,38 @@
+#!/bin/sh
+set -eu
+
+if [ "$#" -ne 1 ]; then
+    echo "Usage: eden-backup EXISTING_DESTINATION_DIRECTORY" >&2
+    exit 2
+fi
+
+destination=$1
+if [ ! -d "$destination" ] || [ ! -w "$destination" ]; then
+    echo "Backup destination must be an existing writable directory." >&2
+    exit 2
+fi
+
+umask 077
+timestamp=$(date -u +%Y%m%dT%H%M%SZ)
+archive="$destination/eden-backup-$USER-$timestamp.tar.gz"
+temporary="$archive.partial"
+trap 'rm -f "$temporary"' EXIT HUP INT TERM
+
+paths=''
+for candidate in Desktop Documents Pictures Music Videos .config/eden-os; do
+    if [ -e "$HOME/$candidate" ]; then
+        paths="$paths
+$candidate"
+    fi
+done
+
+if [ -z "$paths" ]; then
+    echo "No Eden work folders were found in the current home directory." >&2
+    exit 1
+fi
+
+printf '%s\n' "$paths" | sed '/^$/d' | tar --create --gzip --file="$temporary" \
+    --directory="$HOME" --exclude='.cache' --files-from=-
+mv --no-clobber "$temporary" "$archive"
+trap - EXIT HUP INT TERM
+echo "Backup created: $archive"

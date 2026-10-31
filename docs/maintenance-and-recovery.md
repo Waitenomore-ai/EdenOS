@@ -30,6 +30,18 @@ are not installation measurements.
 
 ## Children’s work backup and restore
 
+For a quick backup of the current adult or child home, create or connect an
+existing writable destination directory and run:
+
+```sh
+eden-backup /path/to/external/backup-folder
+```
+
+The command creates a new private timestamped archive and never overwrites an
+existing archive. It includes common Eden work folders and `.config/eden-os`,
+but excludes `.cache`. It is a convenience backup, not a full disk image; open
+sample files from the archive before treating it as verified.
+
 1. Have each child save and close their activities; sign them out.
 2. In the adult desktop, copy the selected child's personal work directories
    to adult-managed external storage. Check the app's actual save directory;
@@ -46,3 +58,4 @@ are not installation measurements.
 
 Never repartition, format or reinstall the user's current disk as a recovery
 shortcut without confirming the exact device and data-loss consequences.
+
