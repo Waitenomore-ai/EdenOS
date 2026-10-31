@@ -39,9 +39,10 @@ class NumberMeadowWindow(Gtk.ApplicationWindow):
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroll.set_child(root)
         self.set_child(scroll)
+        root.add_css_class("eden-game-panel")
 
         title = Gtk.Label(label="Number Meadow")
-        title.add_css_class("eden-title")
+        title.add_css_class("eden-game-heading")
         title.set_xalign(0)
         root.append(title)
         self.prompt = Gtk.Label()
@@ -50,7 +51,7 @@ class NumberMeadowWindow(Gtk.ApplicationWindow):
         self.prompt.set_xalign(0)
         root.append(self.prompt)
         self.flowers = Gtk.Label()
-        self.flowers.add_css_class("eden-card-label")
+        self.flowers.add_css_class("eden-game-picture")
         self.flowers.set_xalign(0)
         self.flowers.set_wrap(True)
         root.append(self.flowers)
@@ -65,6 +66,7 @@ class NumberMeadowWindow(Gtk.ApplicationWindow):
         root.append(self.choices)
 
         self.feedback = Gtk.Label(label="Choose an answer when you are ready.")
+        self.feedback.add_css_class("eden-game-feedback")
         self.feedback.set_wrap(True)
         self.feedback.set_xalign(0)
         root.append(self.feedback)
@@ -73,7 +75,7 @@ class NumberMeadowWindow(Gtk.ApplicationWindow):
 
     def _button(self, label: str, callback) -> Gtk.Button:
         button = Gtk.Button(label=label)
-        button.add_css_class("eden-small-button")
+        button.add_css_class("eden-game-button")
         button.set_size_request(90, 64)
         button.update_property([Gtk.AccessibleProperty.LABEL], [label])
         button.connect("clicked", callback)
@@ -81,10 +83,10 @@ class NumberMeadowWindow(Gtk.ApplicationWindow):
 
     def _new_round(self, _button: Gtk.Button | None = None) -> None:
         current = self.game.new_round()
-        self.prompt.set_label("How many flowers are in the meadow?")
-        flowers = " ".join("🌼" for _ in range(current.count))
+        self.prompt.set_label("How many butterflies can you see?")
+        flowers = " ".join("🦋" for _ in range(current.count))
         self.flowers.set_label(flowers)
-        self.flowers.update_property([Gtk.AccessibleProperty.LABEL], [f"{current.count} flowers"])
+        self.flowers.update_property([Gtk.AccessibleProperty.LABEL], [f"{current.count} butterflies"])
         while child := self.choices.get_first_child():
             self.choices.remove(child)
         for value in current.choices:
