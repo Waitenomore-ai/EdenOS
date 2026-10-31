@@ -87,3 +87,10 @@ class PreferenceErrorTests(unittest.TestCase):
             self.assertEqual(path.stat().st_mode & 0o077, 0)
             self.assertEqual(path.parent.stat().st_mode & 0o077, 0)
 
+    def test_reduced_motion_preference_has_a_visual_css_hook(self):
+        root = Path(__file__).resolve().parents[1]
+        app_source = (root / 'eden_shell' / 'app.py').read_text(encoding='utf-8')
+        css_source = (root / 'eden_shell' / 'data' / 'eden.css').read_text(encoding='utf-8')
+        self.assertIn('reduced-motion', app_source)
+        self.assertIn('.reduced-motion', css_source)
+

@@ -81,6 +81,10 @@ class EdenWindow(Gtk.ApplicationWindow):
             self.add_css_class("contrast")
         else:
             self.remove_css_class("contrast")
+        if self.preferences.reduced_motion:
+            self.add_css_class("reduced-motion")
+        else:
+            self.remove_css_class("reduced-motion")
 
     def _accessible_button(self, label: str, callback) -> Gtk.Button:
         button = Gtk.Button()
