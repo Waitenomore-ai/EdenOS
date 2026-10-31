@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Eden Story Garden
+Comment=Read a picture story offline
+Exec=/usr/local/bin/eden-story-garden
+Icon=applications-education
+Terminal=false
+Categories=Education;Accessibility;
+StartupNotify=true

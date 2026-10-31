@@ -24,7 +24,7 @@ class CatalogueTests(unittest.TestCase):
         )
         self.assertEqual(
             [activity.id for activity in catalogue.load_catalogue()],
-            ["tux-paint", "number-meadow", "word-woodland"],
+            ["tux-paint", "number-meadow", "word-woodland", "story-garden"],
         )
         self.assertEqual(catalogue.load_catalogue(Path("/no/such/eden-catalogue.json")), ())
 

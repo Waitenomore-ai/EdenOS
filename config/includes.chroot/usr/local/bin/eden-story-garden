@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+export PYTHONPATH="/usr/share/eden-os${PYTHONPATH:+:$PYTHONPATH}"
+exec /usr/bin/python3 -m eden_shell.story_garden "$@"

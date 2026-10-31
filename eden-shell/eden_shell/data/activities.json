@@ -25,6 +25,15 @@
     "desktop_id": "eden-word-woodland.desktop",
     "offline": true,
     "reviewed": true
+  },
+  {
+    "id": "story-garden",
+    "title": "Story Garden",
+    "description": "Read a gentle picture story one scene at a time.",
+    "category": "read",
+    "desktop_id": "eden-story-garden.desktop",
+    "offline": true,
+    "reviewed": true
   }
 ]
 
