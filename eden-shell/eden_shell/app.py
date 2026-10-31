@@ -149,7 +149,9 @@ class EdenWindow(Gtk.ApplicationWindow):
             home_button = self._text_button("Home", self._go_home)
             header.append(home_button)
             self._page_focus_target = home_button
-        logo_path = Path("/usr/share/pixmaps/edenos-logo.png")
+        logo_path = Path("/usr/share/eden-os/branding/eden-logo.png")
+        if not logo_path.is_file():
+            logo_path = Path("/usr/share/pixmaps/edenos-logo.png")
         if logo_path.is_file():
             logo = Gtk.Image.new_from_file(str(logo_path))
             logo.set_pixel_size(88)
