@@ -28,3 +28,20 @@ scrolledwindow, scrolledwindow > viewport, viewport { background: transparent; }
 .contrast .eden-small-button:focus { outline: 5px solid #ffeb3b; }
 .reduced-motion * { transition: none; animation: none; }
 
+
+/* Approved compact 12-button Eden home screen */
+.eden-home-button { min-width:220px; min-height:78px; border-radius:36px;
+ color:white; font-weight:900; font-size:22px;
+ text-shadow:0 2px 3px rgba(30,31,60,.85);
+ border:3px solid rgba(255,255,255,.78);
+ box-shadow:0 5px 0 rgba(18,58,54,.38),0 8px 16px rgba(0,0,0,.24); }
+.eden-learn,.eden-help {background:#188aee;}
+.eden-play,.eden-explore {background:#ffab16;}
+.eden-create,.eden-games,.eden-stuff {background:#aa51d8;}
+.eden-watch {background:#52bd3b;}
+.eden-kidstube {background:#e84899;}
+.eden-activities {background:#18bcd1;}
+.eden-internet {background:#ec6049;}
+.eden-settings {background:#15aaa9;}
+.eden-home-button:disabled {opacity:.62;}
+.contrast .eden-home-button {background:#000; color:#fff; text-shadow:none; border:3px solid #fff;}
