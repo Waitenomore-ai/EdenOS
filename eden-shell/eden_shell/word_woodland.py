@@ -38,9 +38,10 @@ class WordWoodlandWindow(Gtk.ApplicationWindow):
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroll.set_child(root)
         self.set_child(scroll)
+        root.add_css_class("eden-game-panel")
 
         title = Gtk.Label(label="Word Woodland")
-        title.add_css_class("eden-title")
+        title.add_css_class("eden-game-heading")
         title.set_xalign(0)
         root.append(title)
         self.prompt = Gtk.Label(label="Which letter starts this word?")
@@ -48,7 +49,7 @@ class WordWoodlandWindow(Gtk.ApplicationWindow):
         self.prompt.set_xalign(0)
         root.append(self.prompt)
         self.picture = Gtk.Label()
-        self.picture.add_css_class("eden-title")
+        self.picture.add_css_class("eden-game-picture")
         self.picture.set_xalign(0)
         root.append(self.picture)
         self.word = Gtk.Label()
@@ -65,6 +66,7 @@ class WordWoodlandWindow(Gtk.ApplicationWindow):
         self.choices.set_homogeneous(True)
         root.append(self.choices)
         self.feedback = Gtk.Label(label="Choose a letter when you are ready.")
+        self.feedback.add_css_class("eden-game-feedback")
         self.feedback.set_wrap(True)
         self.feedback.set_xalign(0)
         root.append(self.feedback)
@@ -73,7 +75,7 @@ class WordWoodlandWindow(Gtk.ApplicationWindow):
 
     def _button(self, label: str, callback) -> Gtk.Button:
         button = Gtk.Button(label=label)
-        button.add_css_class("eden-small-button")
+        button.add_css_class("eden-game-button")
         button.set_size_request(90, 64)
         button.update_property([Gtk.AccessibleProperty.LABEL], [label])
         button.connect("clicked", callback)
