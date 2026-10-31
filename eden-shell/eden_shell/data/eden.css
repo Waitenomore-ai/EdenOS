@@ -164,3 +164,15 @@ scrolledwindow, scrolledwindow > viewport, viewport { background: transparent; }
 .eden-help { background: #9158c9; }
 .eden-home-button:hover { border-color: #fff5b2; }
 .contrast .eden-home-label { color: white; text-shadow: none; }
+
+/* Update 40: uniform, roomy artwork-first dashboard tiles. */
+.eden-dashboard-grid { padding: 12px 12px 22px; }
+.eden-home-button {
+ min-width: 222px; min-height: 112px; border-radius: 27px;
+ border: 4px solid rgba(255,255,255,.98); padding: 8px 11px;
+ box-shadow: 0 5px 0 rgba(35,72,50,.40),0 9px 15px rgba(14,37,36,.22);
+}
+.eden-home-label { font-size: 20px; font-weight: 900; }
+.eden-welcome { font-size: 30px; }
+.eden-activity-tile { min-height: 208px; }
+.contrast .eden-home-button { background: black; border: 4px solid white; }
