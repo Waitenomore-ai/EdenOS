@@ -42,6 +42,15 @@ class FeelingsWindow(Gtk.ApplicationWindow):
         title.add_css_class("eden-game-heading")
         title.set_xalign(0)
         root.append(title)
+        back_home = Gtk.Button(label="← Back to Eden Home")
+        back_home.add_css_class("eden-game-back")
+        back_home.set_halign(Gtk.Align.START)
+        back_home.set_size_request(200, 62)
+        back_home.update_property(
+            [Gtk.AccessibleProperty.LABEL], ["Close game and return to Eden Home"]
+        )
+        back_home.connect("clicked", lambda _button: self.close())
+        root.append(back_home)
         illustration = Gtk.Image.new_from_file(str(
             Path(__file__).parent / "data" / "activity-art" / "feelings-quiet-space.svg"
         ))
