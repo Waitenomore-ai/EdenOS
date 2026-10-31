@@ -195,63 +195,48 @@ class EdenWindow(Gtk.ApplicationWindow):
         prompt.set_xalign(0)
         content.append(prompt)
 
-        # Approved twelve-button home: online actions remain gated by adult-reviewed policy.
+        # Keep every shortcut functional. Picture assets are decoration, never hit targets.
+        # Network features remain disabled until adult-reviewed policy is verified.
         actions = [
-            ("Learn", "learn", self._open_category("learn"), True),
-            ("Play Games", "play", self._open_category("play"), True),
-            ("Create", "create", self._open_category("create"), True),
-            ("Watch", "watch", self._open_kidstube, browser_access_ready()),
-            ("Explore", "explore", self._open_category("read"), True),
-            ("Kidstube", "kidstube", self._open_kidstube, browser_access_ready()),
-            ("Activities", "activities", self._open_category("play"), True),
-            ("My Stuff", "stuff", self._open_progress, True),
-            ("Internet (Safe)", "internet", self._open_kidstube, browser_access_ready()),
-            ("Settings", "settings", self._open_settings, True),
-            ("Help", "help", self._open_help, True),
-            ("Eden's Games", "games", self._open_category("play"), True),
+            ("Learn", "learn", self._open_category("learn"), True, "number-meadow"),
+            ("Play Games", "play", self._open_category("play"), True, "puzzle-pond"),
+            ("Create", "create", self._open_category("create"), True, "art-studio"),
+            ("Read", "read", self._open_category("read"), True, "story-garden"),
+            ("Number Meadow", "numbers", self._open_category("learn"), True, "number-meadow"),
+            ("Word Woodland", "words", self._open_category("learn"), True, "word-woodland"),
+            ("Puzzle Pond", "puzzles", self._open_category("play"), True, "puzzle-pond"),
+            ("Art Studio", "studio", self._open_category("create"), True, "art-studio"),
+            ("Explore", "explore", self._open_category("play"), True, "nature-explorer"),
+            ("My Stuff", "stuff", self._open_progress, True, "time-routines"),
+            ("Settings", "settings", self._open_settings, True, "feelings-quiet-space"),
+            ("Help", "help", self._open_help, True, "story-garden"),
         ]
-        grid = Gtk.Grid(column_spacing=20, row_spacing=22)
+        grid = Gtk.Grid(column_spacing=16, row_spacing=17)
         grid.set_halign(Gtk.Align.CENTER)
         grid.set_valign(Gtk.Align.CENTER)
-        for index, (label, style, action, enabled) in enumerate(actions):
-            button = self._text_button(label, action)
-            artwork = Path("/usr/share/eden-os/branding/buttons") / (style + ".png")
-            if artwork.is_file() and not self.preferences.high_contrast:
-                picture = Gtk.Picture.new_for_filename(str(artwork))
-                picture.set_content_fit(Gtk.ContentFit.CONTAIN)
-                picture.set_size_request(220, 110)
-                button.set_child(picture)
-                button.add_css_class("eden-image-button")
-            if not artwork.is_file():
-                home_icons = {
-                    "learn": ("number-meadow", "number-meadow"),
-                    "play": ("puzzle-pond", "puzzle-pond"),
-                    "create": ("art-studio", "art-studio"),
-                    "explore": ("nature-explorer", "nature-explorer"),
-                    "activities": ("time-routines", "time-routines"),
-                    "games": ("number-meadow", "number-meadow"),
-                    "stuff": ("story-garden", "story-garden"),
-                    "help": ("feelings-quiet-space", "feelings-quiet-space"),
-                }
-                icon_key = home_icons.get(style)
-                if icon_key and not self.preferences.high_contrast:
-                    icon_path = Path(__file__).parent / "data" / "activity-art" / (icon_key[1] + ".svg")
-                    if icon_path.is_file():
-                        body = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-                        body.set_halign(Gtk.Align.CENTER)
-                        body.set_valign(Gtk.Align.CENTER)
-                        icon = Gtk.Image.new_from_file(str(icon_path))
-                        icon.set_pixel_size(62)
-                        body.append(icon)
-                        name = Gtk.Label(label=label)
-                        name.set_wrap(True)
-                        name.set_justify(Gtk.Justification.CENTER)
-                        name.add_css_class("eden-home-label")
-                        body.append(name)
-                        button.set_child(body)
+        grid.add_css_class("eden-dashboard-grid")
+        for index, (label, style, action, enabled, illustration) in enumerate(actions):
+            button = self._accessible_button(label, action)
             button.add_css_class("eden-home-button")
             button.add_css_class("eden-" + style)
-            button.set_size_request(220, 110 if artwork.is_file() else 78)
+            button.set_size_request(212, 94)
+            picture_path = Path(__file__).parent / "data" / "activity-art" / (illustration + ".svg")
+            if picture_path.is_file() and not self.preferences.high_contrast:
+                body = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=9)
+                body.set_halign(Gtk.Align.CENTER)
+                body.set_valign(Gtk.Align.CENTER)
+                icon = Gtk.Image.new_from_file(str(picture_path))
+                icon.set_pixel_size(74)
+                body.append(icon)
+                name = Gtk.Label(label=label)
+                name.set_wrap(True)
+                name.set_max_width_chars(12)
+                name.set_justify(Gtk.Justification.CENTER)
+                name.add_css_class("eden-home-label")
+                body.append(name)
+                button.set_child(body)
+            else:
+                button.set_label(label)
             button.set_sensitive(enabled)
             grid.attach(button, index % 4, index // 4, 1, 1)
             if self._page_focus_target is None and enabled:
