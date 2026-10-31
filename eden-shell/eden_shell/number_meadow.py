@@ -39,6 +39,11 @@ class NumberMeadowWindow(Gtk.ApplicationWindow):
         self.prompt.set_wrap(True)
         self.prompt.set_xalign(0)
         root.append(self.prompt)
+        self.flowers = Gtk.Label()
+        self.flowers.add_css_class("eden-card-label")
+        self.flowers.set_xalign(0)
+        self.flowers.set_wrap(True)
+        root.append(self.flowers)
 
         self.choices = Gtk.FlowBox()
         self.choices.set_selection_mode(Gtk.SelectionMode.NONE)
@@ -65,7 +70,10 @@ class NumberMeadowWindow(Gtk.ApplicationWindow):
 
     def _new_round(self, _button: Gtk.Button | None = None) -> None:
         current = self.game.new_round()
-        self.prompt.set_label(f"How many flowers are in the meadow?  {current.count} flowers are shown.")
+        self.prompt.set_label("How many flowers are in the meadow?")
+        flowers = " ".join("🌼" for _ in range(current.count))
+        self.flowers.set_label(flowers)
+        self.flowers.update_property([Gtk.AccessibleProperty.LABEL], [f"{current.count} flowers"])
         while child := self.choices.get_first_child():
             self.choices.remove(child)
         for value in current.choices:
