@@ -128,6 +128,13 @@ class PreferencesTests(unittest.TestCase):
         self.assertFalse(actual.high_contrast)
         self.assertFalse(actual.reduced_motion)
 
+    def test_accessibility_presets_are_named_and_safe(self):
+        preferences = load_module(self, "eden_shell.preferences")
+        self.assertEqual(preferences.accessibility_preset("calm"), preferences.AccessibilityPreferences())
+        self.assertEqual(preferences.accessibility_preset("clear-large"), preferences.AccessibilityPreferences(1.3, False, True))
+        self.assertEqual(preferences.accessibility_preset("high-contrast"), preferences.AccessibilityPreferences(1.2, True, True))
+        self.assertEqual(preferences.accessibility_preset("unknown"), preferences.AccessibilityPreferences())
+
 
 class BrowserPilotTests(unittest.TestCase):
     def test_kidstube_shortcut_uses_deny_by_default_firefox_policy(self):

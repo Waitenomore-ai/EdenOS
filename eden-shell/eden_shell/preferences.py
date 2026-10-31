@@ -17,6 +17,16 @@ class AccessibilityPreferences:
     reduced_motion: bool = False
 
 
+def accessibility_preset(name: str) -> AccessibilityPreferences:
+    """Return a named, safe accessibility starting point."""
+    presets = {
+        "calm": AccessibilityPreferences(),
+        "clear-large": AccessibilityPreferences(1.3, False, True),
+        "high-contrast": AccessibilityPreferences(1.2, True, True),
+    }
+    return presets.get(name, AccessibilityPreferences())
+
+
 def default_preferences_path() -> Path:
     configured_home = os.environ.get("XDG_CONFIG_HOME")
     config_home = Path(configured_home) if configured_home else Path.home() / ".config"
@@ -74,3 +84,4 @@ def save_preferences(
         except FileNotFoundError:
             pass
         raise
+

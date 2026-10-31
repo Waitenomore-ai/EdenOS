@@ -23,6 +23,7 @@ from .navigation import ScreenState
 from .launch_control import LaunchCooldown
 from .preferences import (
     AccessibilityPreferences,
+    accessibility_preset,
     load_preferences,
     save_preferences,
 )
@@ -297,6 +298,10 @@ class EdenWindow(Gtk.ApplicationWindow):
                 f"Reduce motion: {motion_label}", self._toggle_reduced_motion
             )
         )
+        content.append(Gtk.Label(label="Quick choices"))
+        content.append(self._text_button("Calm default", self._use_calm_preset))
+        content.append(self._text_button("Clear and large", self._use_clear_large_preset))
+        content.append(self._text_button("High contrast", self._use_high_contrast_preset))
         saved_note = Gtk.Label(label="These choices are saved on this computer only.")
         saved_note.add_css_class("eden-status")
         content.append(saved_note)
@@ -496,6 +501,15 @@ class EdenWindow(Gtk.ApplicationWindow):
                 not self.preferences.reduced_motion,
             )
         )
+
+    def _use_calm_preset(self, _button: Gtk.Button) -> None:
+        self._store_preferences(accessibility_preset("calm"))
+
+    def _use_clear_large_preset(self, _button: Gtk.Button) -> None:
+        self._store_preferences(accessibility_preset("clear-large"))
+
+    def _use_high_contrast_preset(self, _button: Gtk.Button) -> None:
+        self._store_preferences(accessibility_preset("high-contrast"))
 
 
 class EdenApplication(Gtk.Application):
