@@ -44,6 +44,12 @@ class StoryGardenWindow(Gtk.ApplicationWindow):
         title.add_css_class("eden-game-heading")
         title.set_xalign(0)
         root.append(title)
+        illustration = Gtk.Image.new_from_file(str(
+            Path(__file__).parent / "data" / "activity-art" / "story-garden.svg"
+        ))
+        illustration.set_pixel_size(150)
+        illustration.set_halign(Gtk.Align.CENTER)
+        root.append(illustration)
         prompt = Gtk.Label(label="Read the story one picture at a time.")
         prompt.add_css_class("eden-subtitle")
         prompt.set_xalign(0)
