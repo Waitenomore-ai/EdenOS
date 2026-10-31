@@ -198,18 +198,18 @@ class EdenWindow(Gtk.ApplicationWindow):
         # Keep every shortcut functional. Picture assets are decoration, never hit targets.
         # Network features remain disabled until adult-reviewed policy is verified.
         actions = [
-            ("Learn", "learn", self._open_category("learn"), True, "number-meadow"),
-            ("Play Games", "play", self._open_category("play"), True, "puzzle-pond"),
-            ("Create", "create", self._open_category("create"), True, "art-studio"),
-            ("Read", "read", self._open_category("read"), True, "story-garden"),
-            ("Number Meadow", "numbers", self._open_named_activity("number-meadow"), True, "number-meadow"),
-            ("Word Woodland", "words", self._open_named_activity("word-woodland"), True, "word-woodland"),
-            ("Puzzle Pond", "puzzles", self._open_named_activity("puzzle-pond"), True, "puzzle-pond"),
-            ("Art Studio", "studio", self._open_named_activity("art-studio"), True, "art-studio"),
-            ("Explore", "explore", self._open_category("read"), True, "nature-explorer"),
-            ("My Stuff", "stuff", self._open_progress, True, "time-routines"),
-            ("Settings", "settings", self._open_settings, True, "feelings-quiet-space"),
-            ("Help", "help", self._open_help, True, "story-garden"),
+            ("Learn", "learn", self._open_category("learn"), True, "learn"),
+            ("Play Games", "play", self._open_category("play"), True, "play"),
+            ("Create", "create", self._open_category("create"), True, "create"),
+            ("Read", "read", self._open_category("read"), True, "read"),
+            ("Number Meadow", "numbers", self._open_named_activity("number-meadow"), True, "numbers"),
+            ("Word Woodland", "words", self._open_named_activity("word-woodland"), True, "words"),
+            ("Puzzle Pond", "puzzles", self._open_named_activity("puzzle-pond"), True, "puzzles"),
+            ("Art Studio", "studio", self._open_named_activity("art-studio"), True, "studio"),
+            ("Explore", "explore", self._open_category("read"), True, "explore"),
+            ("My Stuff", "stuff", self._open_progress, True, "stuff"),
+            ("Settings", "settings", self._open_settings, True, "settings"),
+            ("Help", "help", self._open_help, True, "help"),
         ]
         grid = Gtk.Grid(column_spacing=16, row_spacing=17)
         grid.set_halign(Gtk.Align.CENTER)
@@ -219,14 +219,14 @@ class EdenWindow(Gtk.ApplicationWindow):
             button = self._accessible_button(label, action)
             button.add_css_class("eden-home-button")
             button.add_css_class("eden-" + style)
-            button.set_size_request(212, 94)
-            picture_path = Path(__file__).parent / "data" / "activity-art" / (illustration + ".svg")
+            button.set_size_request(222, 112)
+            picture_path = Path(__file__).parent / "data" / "home-icons" / (illustration + ".svg")
             if picture_path.is_file() and not self.preferences.high_contrast:
                 body = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=9)
                 body.set_halign(Gtk.Align.CENTER)
                 body.set_valign(Gtk.Align.CENTER)
                 icon = Gtk.Image.new_from_file(str(picture_path))
-                icon.set_pixel_size(74)
+                icon.set_pixel_size(82)
                 body.append(icon)
                 name = Gtk.Label(label=label)
                 name.set_wrap(True)
