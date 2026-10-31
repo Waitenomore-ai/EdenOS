@@ -161,7 +161,9 @@ class EdenWindow(Gtk.ApplicationWindow):
         header_spacer = Gtk.Box()
         header_spacer.set_hexpand(True)
         header.append(header_spacer)
-        header.append(self._text_button("Accessibility settings", self._open_settings))
+        settings_button = self._text_button("Settings ⚙", self._open_settings)
+        settings_button.add_css_class("eden-header-control")
+        header.append(settings_button)
         root.append(header)
 
         scroll = Gtk.ScrolledWindow()
@@ -185,11 +187,11 @@ class EdenWindow(Gtk.ApplicationWindow):
 
     def _render_home(self, content: Gtk.Box) -> None:
         welcome = Gtk.Label(label=f"Hello, {getpass.getuser()}!")
-        welcome.add_css_class("eden-title")
+        welcome.add_css_class("eden-welcome")
         welcome.set_xalign(0)
         content.append(welcome)
         prompt = Gtk.Label(label="What would you like to do today?")
-        prompt.add_css_class("eden-subtitle")
+        prompt.add_css_class("eden-home-prompt")
         prompt.set_xalign(0)
         content.append(prompt)
 
@@ -220,6 +222,33 @@ class EdenWindow(Gtk.ApplicationWindow):
                 picture.set_size_request(220, 110)
                 button.set_child(picture)
                 button.add_css_class("eden-image-button")
+            if not artwork.is_file():
+                home_icons = {
+                    "learn": ("number-meadow", "number-meadow"),
+                    "play": ("puzzle-pond", "puzzle-pond"),
+                    "create": ("art-studio", "art-studio"),
+                    "explore": ("nature-explorer", "nature-explorer"),
+                    "activities": ("time-routines", "time-routines"),
+                    "games": ("number-meadow", "number-meadow"),
+                    "stuff": ("story-garden", "story-garden"),
+                    "help": ("feelings-quiet-space", "feelings-quiet-space"),
+                }
+                icon_key = home_icons.get(style)
+                if icon_key and not self.preferences.high_contrast:
+                    icon_path = Path(__file__).parent / "data" / "activity-art" / (icon_key[1] + ".svg")
+                    if icon_path.is_file():
+                        body = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+                        body.set_halign(Gtk.Align.CENTER)
+                        body.set_valign(Gtk.Align.CENTER)
+                        icon = Gtk.Image.new_from_file(str(icon_path))
+                        icon.set_pixel_size(62)
+                        body.append(icon)
+                        name = Gtk.Label(label=label)
+                        name.set_wrap(True)
+                        name.set_justify(Gtk.Justification.CENTER)
+                        name.add_css_class("eden-home-label")
+                        body.append(name)
+                        button.set_child(body)
             button.add_css_class("eden-home-button")
             button.add_css_class("eden-" + style)
             button.set_size_request(220, 110 if artwork.is_file() else 78)
@@ -232,8 +261,9 @@ class EdenWindow(Gtk.ApplicationWindow):
     def _render_category(self, content: Gtk.Box) -> None:
         category = next(item for item in CATEGORIES if item.slug == self.state.category)
         title = Gtk.Label(label=category.label)
-        title.add_css_class("eden-title")
-        title.set_xalign(0)
+        title.add_css_class("eden-wooden-heading")
+        title.set_halign(Gtk.Align.CENTER)
+        title.set_xalign(0.5)
         content.append(title)
         activities = [item for item in self.catalogue if item.category == category.slug]
         if not activities:
