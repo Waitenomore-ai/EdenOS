@@ -43,3 +43,9 @@ The source now also includes a side-effect-free profile editor model. It keeps
 the local account mapping fixed, offers only the built-in avatar set, produces a
 greeter-safe preview, and supports an adult reset action. A graphical adult
 editor and LightDM adapter are still future work.
+
+The source now also includes a side-effect-free profile chooser model. It
+turns validated profiles into name-and-avatar tiles, keeps the account
+username internal to the login hand-off, clears invalid selections, and
+explicitly preserves the normal text-login fallback. This remains integration
+groundwork until it is connected to a tested LightDM greeter.
