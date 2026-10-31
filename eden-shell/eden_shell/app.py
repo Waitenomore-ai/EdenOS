@@ -185,20 +185,17 @@ class EdenWindow(Gtk.ApplicationWindow):
         prompt.set_xalign(0)
         content.append(prompt)
 
-        grid = Gtk.FlowBox()
-        grid.set_selection_mode(Gtk.SelectionMode.NONE)
-        grid.set_min_children_per_line(1)
-        grid.set_max_children_per_line(4)
-        grid.set_column_spacing(18)
-        grid.set_row_spacing(18)
-        grid.set_homogeneous(True)
-        grid.set_hexpand(True)
+        choices = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=14)
+        choices.set_halign(Gtk.Align.CENTER)
+        choices.set_hexpand(False)
         for category in CATEGORIES:
-            tile = self._tile(category.label, category.icon, self._open_category(category.slug))
-            grid.insert(tile, -1)
+            button = self._tile(category.label, category.icon, self._open_category(category.slug))
+            button.set_size_request(180, 74)
+            button.set_hexpand(False)
+            choices.append(button)
             if self._page_focus_target is None:
-                self._page_focus_target = tile
-        content.append(grid)
+                self._page_focus_target = button
+        content.append(choices)
 
         footer = Gtk.FlowBox()
         footer.set_selection_mode(Gtk.SelectionMode.NONE)
