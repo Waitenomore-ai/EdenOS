@@ -202,10 +202,10 @@ class EdenWindow(Gtk.ApplicationWindow):
             ("Play Games", "play", self._open_category("play"), True, "puzzle-pond"),
             ("Create", "create", self._open_category("create"), True, "art-studio"),
             ("Read", "read", self._open_category("read"), True, "story-garden"),
-            ("Number Meadow", "numbers", self._open_category("learn"), True, "number-meadow"),
-            ("Word Woodland", "words", self._open_category("learn"), True, "word-woodland"),
-            ("Puzzle Pond", "puzzles", self._open_category("play"), True, "puzzle-pond"),
-            ("Art Studio", "studio", self._open_category("create"), True, "art-studio"),
+            ("Number Meadow", "numbers", self._open_named_activity("number-meadow"), True, "number-meadow"),
+            ("Word Woodland", "words", self._open_named_activity("word-woodland"), True, "word-woodland"),
+            ("Puzzle Pond", "puzzles", self._open_named_activity("puzzle-pond"), True, "puzzle-pond"),
+            ("Art Studio", "studio", self._open_named_activity("art-studio"), True, "art-studio"),
             ("Explore", "explore", self._open_category("play"), True, "nature-explorer"),
             ("My Stuff", "stuff", self._open_progress, True, "time-routines"),
             ("Settings", "settings", self._open_settings, True, "feelings-quiet-space"),
@@ -242,6 +242,15 @@ class EdenWindow(Gtk.ApplicationWindow):
             if self._page_focus_target is None and enabled:
                 self._page_focus_target = button
         content.append(grid)
+
+    def _open_named_activity(self, activity_id: str):
+        def open_activity(_button: Gtk.Button) -> None:
+            activity = next((item for item in self.catalogue if item.id == activity_id), None)
+            if activity is None:
+                self._show_status("Ask an adult to add this game.")
+                return
+            self._launch_activity(activity)
+        return open_activity
 
     def _render_category(self, content: Gtk.Box) -> None:
         category = next(item for item in CATEGORIES if item.slug == self.state.category)
