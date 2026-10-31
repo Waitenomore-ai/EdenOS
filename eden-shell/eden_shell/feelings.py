@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 try:
     import gi
@@ -26,12 +27,38 @@ class FeelingsWindow(Gtk.ApplicationWindow):
         root.set_margin_bottom(30)
         root.set_margin_start(38)
         root.set_margin_end(38)
-        self.set_child(root)
+        provider = Gtk.CssProvider()
+        provider.load_from_path(str(Path(__file__).parent / "data" / "eden.css"))
+        Gtk.StyleContext.add_provider_for_display(
+            self.get_display(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+        self._style_provider = provider
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroll.set_child(root)
+        self.set_child(scroll)
+        root.add_css_class("eden-game-panel")
         title = Gtk.Label(label="Feelings and Quiet Space")
-        title.add_css_class("eden-title")
+        title.add_css_class("eden-game-heading")
         title.set_xalign(0)
         root.append(title)
+        back_home = Gtk.Button(label="← Back to Eden Home")
+        back_home.add_css_class("eden-game-back")
+        back_home.set_halign(Gtk.Align.START)
+        back_home.set_size_request(200, 62)
+        back_home.update_property(
+            [Gtk.AccessibleProperty.LABEL], ["Close game and return to Eden Home"]
+        )
+        back_home.connect("clicked", lambda _button: self.close())
+        root.append(back_home)
+        illustration = Gtk.Image.new_from_file(str(
+            Path(__file__).parent / "data" / "activity-art" / "feelings-quiet-space.svg"
+        ))
+        illustration.set_pixel_size(150)
+        illustration.set_halign(Gtk.Align.CENTER)
+        root.append(illustration)
         intro = Gtk.Label(label="Choose a word for how you feel. There is no right answer.")
+        intro.add_css_class("eden-subtitle")
         intro.set_wrap(True)
         intro.set_xalign(0)
         root.append(intro)
@@ -48,6 +75,8 @@ class FeelingsWindow(Gtk.ApplicationWindow):
         for index, (symbol, label) in enumerate(CALM_ACTIONS):
             self.actions.append(self._button(f"{symbol}  {label}", lambda _b, i=index: self._action(i)))
         self.status = Gtk.Label()
+        self.status.add_css_class("eden-status")
+        self.status.add_css_class("eden-game-feedback")
         self.status.set_wrap(True)
         self.status.set_xalign(0)
         root.append(self.status)
@@ -56,7 +85,8 @@ class FeelingsWindow(Gtk.ApplicationWindow):
 
     def _button(self, label: str, callback) -> Gtk.Button:
         button = Gtk.Button(label=label)
-        button.add_css_class("eden-small-button")
+        button.add_css_class("eden-game-button")
+        button.set_size_request(90, 64)
         button.update_property([Gtk.AccessibleProperty.LABEL], [label])
         button.connect("clicked", callback)
         return button

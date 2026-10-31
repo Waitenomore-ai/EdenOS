@@ -23,6 +23,9 @@ def build(output: Path, version: str) -> Path:
         package = Path(directory) / 'package'
         shutil.copytree(root / 'config/includes.chroot', package,
                         ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+        # Debian's plymouth package owns this config; the Eden update must not overwrite it.
+        conflicting_plymouth_config = package / 'etc/plymouth/plymouthd.conf'
+        conflicting_plymouth_config.unlink(missing_ok=True)
         modules = package / 'usr/share/eden-os/eden_shell'
         if modules.exists():
             shutil.rmtree(modules)
@@ -46,6 +49,7 @@ def build(output: Path, version: str) -> Path:
                     if not re.fullmatch(r'[a-z0-9][a-z0-9+.-]*', item):
                         raise ValueError(f'Unsupported package-list entry: {item}')
                     packages.append(item)
+        packages.append('wpasupplicant')  # NetworkManager requires a Wi-Fi supplicant on the pilot iMac.
         (metadata / 'control').write_text(
             'Package: eden-os-desktop\n'
             f'Version: {version}\n'

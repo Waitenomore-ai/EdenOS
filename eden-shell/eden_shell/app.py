@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import getpass
 import sys
 import threading
+from datetime import date
 from pathlib import Path
 
 try:
@@ -105,11 +107,11 @@ class EdenWindow(Gtk.ApplicationWindow):
         button.update_property([Gtk.AccessibleProperty.LABEL], [label])
         button.add_css_class("eden-card")
         button.connect("clicked", callback)
-        content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        content = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         content.set_halign(Gtk.Align.CENTER)
         icon_path = Path(__file__).parent / "data" / "icons" / f"{icon_name}.svg"
         image = Gtk.Image.new_from_file(str(icon_path))
-        image.set_pixel_size(48)
+        image.set_pixel_size(36)
         image.set_focusable(False)
         content.append(image)
         title = Gtk.Label(label=label)
@@ -126,25 +128,44 @@ class EdenWindow(Gtk.ApplicationWindow):
         root.set_margin_bottom(22)
         root.set_margin_start(28)
         root.set_margin_end(28)
-        self.set_child(root)
+        # A real GTK picture layer keeps the enchanted garden visible
+        # behind compact navigation controls. High contrast stays opaque.
+        backdrop = Gtk.Overlay()
+        if not self.preferences.high_contrast:
+            gallery = Path("/usr/share/backgrounds/edenos/daily")
+            daily_images = sorted(gallery.glob("*.png")) if gallery.is_dir() else []
+            wallpaper_path = (
+                daily_images[date.today().toordinal() % len(daily_images)]
+                if daily_images
+                else Path("/usr/share/backgrounds/edenos/01-eden-sunrise.png")
+            )
+            if wallpaper_path.is_file():
+                backdrop_image = Gtk.Picture.new_for_filename(str(wallpaper_path))
+                backdrop_image.set_content_fit(Gtk.ContentFit.COVER)
+                backdrop.set_child(backdrop_image)
+        backdrop.add_overlay(root)
+        self.set_child(backdrop)
+        self._root_container = root
 
         header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         if self.state.page != "home":
             home_button = self._text_button("Home", self._go_home)
             header.append(home_button)
             self._page_focus_target = home_button
-        logo_path = Path("/usr/share/pixmaps/edenos-logo.png")
+        logo_path = Path("/usr/share/eden-os/branding/eden-logo.png")
+        if not logo_path.is_file():
+            logo_path = Path("/usr/share/pixmaps/edenos-logo.png")
         if logo_path.is_file():
             logo = Gtk.Image.new_from_file(str(logo_path))
-            logo.set_pixel_size(88)
+            logo.set_pixel_size(200)
             logo.set_tooltip_text("Eden OS")
             header.append(logo)
-        heading = Gtk.Label(label="Eden OS")
-        heading.add_css_class("eden-title")
-        heading.set_hexpand(True)
-        heading.set_xalign(0)
-        header.append(heading)
-        header.append(self._text_button("Accessibility settings", self._open_settings))
+        header_spacer = Gtk.Box()
+        header_spacer.set_hexpand(True)
+        header.append(header_spacer)
+        settings_button = self._text_button("Settings ⚙", self._open_settings)
+        settings_button.add_css_class("eden-header-control")
+        header.append(settings_button)
         root.append(header)
 
         scroll = Gtk.ScrolledWindow()
@@ -167,13 +188,17 @@ class EdenWindow(Gtk.ApplicationWindow):
             self._render_settings(content)
 
     def _render_home(self, content: Gtk.Box) -> None:
-        welcome = Gtk.Label(label="Hello, explorer!")
-        welcome.add_css_class("eden-title")
+        welcome = Gtk.Label(label=f"Hello, {getpass.getuser()}!")
+        welcome.add_css_class("eden-welcome")
+        welcome.set_halign(Gtk.Align.START)
         welcome.set_xalign(0)
+        welcome.set_hexpand(False)
         content.append(welcome)
         prompt = Gtk.Label(label="What would you like to do today?")
-        prompt.add_css_class("eden-subtitle")
+        prompt.add_css_class("eden-home-prompt")
+        prompt.set_halign(Gtk.Align.START)
         prompt.set_xalign(0)
+        prompt.set_hexpand(False)
         content.append(prompt)
         # The child session has no xfdesktop: show its daily garden here too.
         try:
@@ -191,35 +216,62 @@ class EdenWindow(Gtk.ApplicationWindow):
             content.append(garden)
             content.append(self._text_button("Find Eden in today's garden", lambda _button: self._launch_activity(Activity('find-eden', 'Find Eden!', 'Find our little explorer.', 'play', 'eden-find-eden.desktop', True))))
 
-        grid = Gtk.FlowBox()
-        grid.set_selection_mode(Gtk.SelectionMode.NONE)
-        grid.set_min_children_per_line(1)
-        grid.set_max_children_per_line(2)
-        grid.set_column_spacing(18)
-        grid.set_row_spacing(18)
-        grid.set_homogeneous(True)
-        grid.set_hexpand(True)
-        for category in CATEGORIES:
-            tile = self._tile(category.label, category.icon, self._open_category(category.slug))
-            grid.insert(tile, -1)
-            if self._page_focus_target is None:
-                self._page_focus_target = tile
+        # Keep every shortcut functional. Picture assets are decoration, never hit targets.
+        # Network features remain disabled until adult-reviewed policy is verified.
+        actions = [
+            ("Learn", "learn", self._open_category("learn"), True, "learn"),
+            ("Play Games", "play", self._open_category("play"), True, "play"),
+            ("Create", "create", self._open_category("create"), True, "create"),
+            ("Read", "read", self._open_category("read"), True, "read"),
+            ("Number Meadow", "numbers", self._open_named_activity("number-meadow"), True, "numbers"),
+            ("Word Woodland", "words", self._open_named_activity("word-woodland"), True, "words"),
+            ("Puzzle Pond", "puzzles", self._open_named_activity("puzzle-pond"), True, "puzzles"),
+            ("Art Studio", "studio", self._open_named_activity("art-studio"), True, "studio"),
+            ("Explore", "explore", self._open_category("read"), True, "explore"),
+            ("My Stuff", "stuff", self._open_progress, True, "stuff"),
+            ("Settings", "settings", self._open_settings, True, "settings"),
+            ("Help", "help", self._open_help, True, "help"),
+        ]
+        grid = Gtk.Grid(column_spacing=16, row_spacing=17)
+        grid.set_halign(Gtk.Align.CENTER)
+        grid.set_valign(Gtk.Align.CENTER)
+        grid.add_css_class("eden-dashboard-grid")
+        for index, (label, style, action, enabled, illustration) in enumerate(actions):
+            button = self._accessible_button(label, action)
+            button.add_css_class("eden-home-button")
+            button.add_css_class("eden-" + style)
+            button.set_size_request(222, 112)
+            picture_path = Path(__file__).parent / "data" / "home-icons" / (illustration + ".svg")
+            if picture_path.is_file() and not self.preferences.high_contrast:
+                body = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=9)
+                body.set_halign(Gtk.Align.CENTER)
+                body.set_valign(Gtk.Align.CENTER)
+                icon = Gtk.Image.new_from_file(str(picture_path))
+                icon.set_pixel_size(82)
+                body.append(icon)
+                name = Gtk.Label(label=label)
+                name.set_wrap(True)
+                name.set_max_width_chars(12)
+                name.set_justify(Gtk.Justification.CENTER)
+                name.add_css_class("eden-home-label")
+                body.append(name)
+                button.set_child(body)
+            else:
+                button.set_label(label)
+            button.set_sensitive(enabled)
+            grid.attach(button, index % 4, index // 4, 1, 1)
+            if self._page_focus_target is None and enabled:
+                self._page_focus_target = button
         content.append(grid)
 
-        footer = Gtk.FlowBox()
-        footer.set_selection_mode(Gtk.SelectionMode.NONE)
-        footer.set_min_children_per_line(1)
-        footer.set_max_children_per_line(2)
-        footer.set_column_spacing(16)
-        footer.set_row_spacing(16)
-        footer.insert(self._text_button("My Progress", self._open_progress), -1)
-        browser_button = self._text_button("Watch KidsTube online", self._open_kidstube)
-        browser_button.set_sensitive(browser_access_ready())
-        footer.insert(browser_button, -1)
-        footer.insert(self._text_button("Ask an adult for help", self._open_help), -1)
-        footer.insert(self._text_button("Turn off computer", self._confirm_power_off), -1)
-        content.append(footer)
-        self._append_empty(content, "Your included activities work offline. Online video needs an internet connection and adult setup.")
+    def _open_named_activity(self, activity_id: str):
+        def open_activity(_button: Gtk.Button) -> None:
+            activity = next((item for item in self.catalogue if item.id == activity_id), None)
+            if activity is None:
+                self._show_status("Ask an adult to add this game.")
+                return
+            self._launch_activity(activity)
+        return open_activity
 
     def _refresh_daily_garden(self):
         if not self.get_realized():
@@ -238,15 +290,42 @@ class EdenWindow(Gtk.ApplicationWindow):
     def _render_category(self, content: Gtk.Box) -> None:
         category = next(item for item in CATEGORIES if item.slug == self.state.category)
         title = Gtk.Label(label=category.label)
-        title.add_css_class("eden-title")
-        title.set_xalign(0)
+        title.add_css_class("eden-wooden-heading")
+        title.set_halign(Gtk.Align.CENTER)
+        title.set_xalign(0.5)
         content.append(title)
         activities = [item for item in self.catalogue if item.category == category.slug]
         if not activities:
             self._append_empty(content, "Your adult can add activities here.")
             return
-        for activity in activities:
-            self._append_activity(content, activity)
+        activity_grid = Gtk.Grid(column_spacing=16, row_spacing=16)
+        activity_grid.set_halign(Gtk.Align.CENTER)
+        for index, activity in enumerate(activities):
+            activity_grid.attach(self._activity_tile(activity), index % 3, index // 3, 1, 1)
+        content.append(activity_grid)
+
+    def _activity_tile(self, activity: Activity) -> Gtk.Button:
+        button = self._accessible_button(
+            f"Open {activity.title}", lambda _button: self._launch_activity(activity)
+        )
+        button.add_css_class("eden-activity-tile")
+        button.set_size_request(230, 210)
+        body = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        body.set_halign(Gtk.Align.CENTER)
+        body.set_valign(Gtk.Align.CENTER)
+        icon_path = Path(__file__).parent / "data" / "activity-art" / f"{activity.id}.svg"
+        if icon_path.is_file():
+            picture = Gtk.Picture.new_for_filename(str(icon_path))
+            picture.set_content_fit(Gtk.ContentFit.CONTAIN)
+            picture.set_size_request(120, 105)
+            body.append(picture)
+        title = Gtk.Label(label=activity.title)
+        title.add_css_class("eden-card-label")
+        title.set_wrap(True)
+        title.set_justify(Gtk.Justification.CENTER)
+        body.append(title)
+        button.set_child(body)
+        return button
 
     def _append_activity(self, content: Gtk.Box, activity: Activity) -> None:
         row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=18)
@@ -360,7 +439,9 @@ class EdenWindow(Gtk.ApplicationWindow):
         self._status_label.add_css_class("eden-status")
         self._status_label.set_wrap(True)
         self._status_label.set_xalign(0)
-        child = self.get_child()
+        child = getattr(self, "_root_container", None)
+        if child is None:
+            child = self.get_child()
         if isinstance(child, Gtk.Box):
             child.append(self._status_label)
 

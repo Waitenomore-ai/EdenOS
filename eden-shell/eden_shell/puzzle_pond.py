@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 try:
     import gi
 
     gi.require_version("Gtk", "4.0")
-    from gi.repository import Gio, Gtk
+    from gi.repository import Gio, GLib, Gtk
 except (ImportError, ValueError) as exc:  # pragma: no cover - Debian runtime only
     raise SystemExit("Puzzle Pond needs the Debian GTK 4 runtime.") from exc
 
@@ -21,17 +22,43 @@ class PuzzlePondWindow(Gtk.ApplicationWindow):
         self.set_title("Eden Puzzle Pond")
         self.set_default_size(820, 680)
         self.game = PuzzlePond()
+        self._mismatch_timeout_id = None
 
         root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=18)
         root.set_margin_top(30)
         root.set_margin_bottom(30)
         root.set_margin_start(36)
         root.set_margin_end(36)
-        self.set_child(root)
+        provider = Gtk.CssProvider()
+        provider.load_from_path(str(Path(__file__).parent / "data" / "eden.css"))
+        Gtk.StyleContext.add_provider_for_display(
+            self.get_display(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+        self._style_provider = provider
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroll.set_child(root)
+        self.set_child(scroll)
+        root.add_css_class("eden-game-panel")
         title = Gtk.Label(label="Puzzle Pond")
-        title.add_css_class("eden-title")
+        title.add_css_class("eden-game-heading")
         title.set_xalign(0)
         root.append(title)
+        back_home = Gtk.Button(label="← Back to Eden Home")
+        back_home.add_css_class("eden-game-back")
+        back_home.set_halign(Gtk.Align.START)
+        back_home.set_size_request(200, 62)
+        back_home.update_property(
+            [Gtk.AccessibleProperty.LABEL], ["Close game and return to Eden Home"]
+        )
+        back_home.connect("clicked", lambda _button: self.close())
+        root.append(back_home)
+        illustration = Gtk.Image.new_from_file(str(
+            Path(__file__).parent / "data" / "activity-art" / "puzzle-pond.svg"
+        ))
+        illustration.set_pixel_size(150)
+        illustration.set_halign(Gtk.Align.CENTER)
+        root.append(illustration)
         prompt = Gtk.Label(label="Find the two matching pond friends. There is no timer.")
         prompt.add_css_class("eden-subtitle")
         prompt.set_xalign(0)
@@ -45,6 +72,7 @@ class PuzzlePondWindow(Gtk.ApplicationWindow):
         self.status = Gtk.Label(label="Choose a card when you are ready.")
         self.status.add_css_class("eden-status")
         self.status.set_xalign(0)
+        self.status.add_css_class("eden-game-feedback")
         self.status.set_wrap(True)
         root.append(self.status)
         root.append(self._button("Start again", self._restart))
@@ -52,7 +80,8 @@ class PuzzlePondWindow(Gtk.ApplicationWindow):
 
     def _button(self, label: str, callback) -> Gtk.Button:
         button = Gtk.Button(label=label)
-        button.add_css_class("eden-small-button")
+        button.add_css_class("eden-game-button")
+        button.set_size_request(90, 64)
         button.update_property([Gtk.AccessibleProperty.LABEL], [label])
         button.connect("clicked", callback)
         return button
@@ -63,10 +92,16 @@ class PuzzlePondWindow(Gtk.ApplicationWindow):
         for card in self.game.cards:
             label = card.symbol if card.revealed or card.matched else "?"
             button = self._button(label, lambda _button, i=card.index: self._choose(i))
+            button.set_size_request(125, 110)
             button.set_sensitive(not card.matched and not card.revealed)
+            button.update_property([Gtk.AccessibleProperty.LABEL], [
+                f"Card {card.index + 1}: {card.symbol if card.revealed or card.matched else 'hidden'}"
+            ])
             self.cards.attach(button, card.index % 4, card.index // 4, 1, 1)
 
     def _choose(self, index: int) -> None:
+        if self._mismatch_timeout_id is not None:
+            return
         result = self.game.choose(index)
         if result == "matched":
             self.status.set_label("A match! Find another pair.")
@@ -76,14 +111,25 @@ class PuzzlePondWindow(Gtk.ApplicationWindow):
                 second = self.game.cards[self.game.second]
                 if first.symbol != second.symbol:
                     self.status.set_label("Those are different. Try another pair.")
-                    self.game.finish_mismatch()
+                    self._render()
+                    self._mismatch_timeout_id = GLib.timeout_add(1100, self._finish_mismatch)
+                    return
                 else:
                     self.status.set_label("A match! Find another pair.")
         if self.game.complete:
             self.status.set_label("The pond is complete! Start again whenever you like.")
         self._render()
 
+    def _finish_mismatch(self) -> bool:
+        self._mismatch_timeout_id = None
+        self.game.finish_mismatch()
+        self._render()
+        return GLib.SOURCE_REMOVE
+
     def _restart(self, _button: Gtk.Button) -> None:
+        if self._mismatch_timeout_id is not None:
+            GLib.source_remove(self._mismatch_timeout_id)
+            self._mismatch_timeout_id = None
         self.game.restart()
         self.status.set_label("Choose a card when you are ready.")
         self._render()

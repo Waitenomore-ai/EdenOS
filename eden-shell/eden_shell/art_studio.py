@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 try:
     import gi
@@ -28,11 +29,36 @@ class ArtStudioWindow(Gtk.ApplicationWindow):
         root.set_margin_bottom(30)
         root.set_margin_start(36)
         root.set_margin_end(36)
-        self.set_child(root)
+        provider = Gtk.CssProvider()
+        provider.load_from_path(str(Path(__file__).parent / "data" / "eden.css"))
+        Gtk.StyleContext.add_provider_for_display(
+            self.get_display(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+        self._style_provider = provider
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroll.set_child(root)
+        self.set_child(scroll)
+        root.add_css_class("eden-game-panel")
         title = Gtk.Label(label="Art Studio")
-        title.add_css_class("eden-title")
+        title.add_css_class("eden-game-heading")
         title.set_xalign(0)
         root.append(title)
+        back_home = Gtk.Button(label="← Back to Eden Home")
+        back_home.add_css_class("eden-game-back")
+        back_home.set_halign(Gtk.Align.START)
+        back_home.set_size_request(200, 62)
+        back_home.update_property(
+            [Gtk.AccessibleProperty.LABEL], ["Close game and return to Eden Home"]
+        )
+        back_home.connect("clicked", lambda _button: self.close())
+        root.append(back_home)
+        illustration = Gtk.Image.new_from_file(str(
+            Path(__file__).parent / "data" / "activity-art" / "art-studio.svg"
+        ))
+        illustration.set_pixel_size(150)
+        illustration.set_halign(Gtk.Align.CENTER)
+        root.append(illustration)
         prompt = Gtk.Label(label="Choose a sticker, then add it to your picture.")
         prompt.add_css_class("eden-subtitle")
         prompt.set_xalign(0)
@@ -60,6 +86,7 @@ class ArtStudioWindow(Gtk.ApplicationWindow):
         self.status = Gtk.Label(label="Your picture is empty. Add a sticker to begin.")
         self.status.add_css_class("eden-status")
         self.status.set_xalign(0)
+        self.status.add_css_class("eden-game-feedback")
         self.status.set_wrap(True)
         root.append(self.status)
         actions = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
@@ -69,7 +96,8 @@ class ArtStudioWindow(Gtk.ApplicationWindow):
 
     def _button(self, label: str, callback) -> Gtk.Button:
         button = Gtk.Button(label=label)
-        button.add_css_class("eden-small-button")
+        button.add_css_class("eden-game-button")
+        button.set_size_request(90, 64)
         button.update_property([Gtk.AccessibleProperty.LABEL], [label])
         button.connect("clicked", callback)
         return button
@@ -84,7 +112,10 @@ class ArtStudioWindow(Gtk.ApplicationWindow):
         while child := self.canvas.get_first_child():
             self.canvas.remove(child)
         for stamp in self.board.stamps:
-            self.canvas.insert(self._button(stamp.symbol, lambda _button: None), -1)
+            sticker = Gtk.Label(label=stamp.symbol)
+            sticker.add_css_class("eden-card-label")
+            sticker.set_size_request(65, 65)
+            self.canvas.insert(sticker, -1)
         count = len(self.board.stamps)
         self.status.set_label(f"Your picture has {count} sticker{'s' if count != 1 else ''}.")
 

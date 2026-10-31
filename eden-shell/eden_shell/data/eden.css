@@ -1,12 +1,21 @@
-window { background: #eef7f4; color: #193d38; }
+/* Use the shipped Eden garden art for the actual launcher, not only the login screen. */
+window { background-color: #e6f3ee; background-image: url("/usr/share/backgrounds/edenos/01-eden-sunrise.png"); background-position: center; background-repeat: no-repeat; background-size: cover; color: #193d38; }
+.eden-content { background: transparent; border-radius: 28px; }
+.contrast .eden-content { background: #000000; }
+.contrast scrolledwindow, .contrast viewport { background: #000000; }
+.contrast .eden-title, .contrast .eden-subtitle { text-shadow: none; }
+
 .eden-title { color: #174e46; font-size: 34px; font-weight: 800; }
 .eden-subtitle { color: #365d56; font-size: 21px; }
-.eden-card { min-height: 142px; border-radius: 24px; padding: 20px; background: #ffffff; border: 2px solid #d5e8e1; }
-.eden-card:hover { background: #f7fcfa; border-color: #5b9b89; }
+.eden-card { min-height: 72px; min-width: 190px; border-radius: 34px; padding: 12px 22px; background: rgba(255, 249, 235, 0.88); border: 2px solid rgba(174, 122, 176, 0.7); box-shadow: 0 3px 8px rgba(22, 75, 59, 0.18); }
+.eden-card:hover { background: rgba(255, 255, 247, 0.97); border-color: #5b9b89; }
 .eden-card:focus { outline: 4px solid #174e46; outline-offset: 3px; }
-.eden-card-label { color: #174e46; font-size: 25px; font-weight: 700; }
+.eden-card-label { color: #174e46; font-size: 23px; font-weight: 700; }
 .eden-small-button { min-height: 58px; border-radius: 18px; padding: 10px 18px; font-size: 20px; }
-.eden-content { padding: 28px; }
+.eden-content { padding: 16px; }
+scrolledwindow, scrolledwindow > viewport, viewport { background: transparent; }
+.eden-small-button { background: rgba(255, 249, 235, 0.9); }
+.eden-title, .eden-subtitle { text-shadow: 0px 1px 3px rgba(255,255,255,0.95); }
 .eden-empty { border-radius: 20px; padding: 30px; background: #ffffff; font-size: 21px; }
 .eden-status { color: #365d56; font-size: 18px; }
 .contrast { background: #000000; color: #ffffff; }
@@ -19,3 +28,174 @@ window { background: #eef7f4; color: #193d38; }
 .contrast .eden-small-button:focus { outline: 5px solid #ffeb3b; }
 .reduced-motion * { transition: none; animation: none; }
 
+
+/* Approved compact 12-button Eden home screen */
+.eden-home-button { min-width:220px; min-height:78px; border-radius:36px;
+ color:white; font-weight:900; font-size:22px;
+ text-shadow:0 2px 3px rgba(30,31,60,.85);
+ border:3px solid rgba(255,255,255,.78);
+ box-shadow:0 5px 0 rgba(18,58,54,.38),0 8px 16px rgba(0,0,0,.24); }
+.eden-learn,.eden-help {background:#188aee;}
+.eden-play,.eden-explore {background:#ffab16;}
+.eden-create,.eden-games,.eden-stuff {background:#aa51d8;}
+.eden-watch {background:#52bd3b;}
+.eden-kidstube {background:#e84899;}
+.eden-activities {background:#18bcd1;}
+.eden-internet {background:#ec6049;}
+.eden-settings {background:#15aaa9;}
+.eden-home-button:disabled {opacity:.62;}
+.contrast .eden-home-button {background:#000; color:#fff; text-shadow:none; border:3px solid #fff;}
+
+/* Shared garden activity language: illustrated backdrop, large cards and clear controls. */
+.eden-game-panel {
+  background: rgba(250, 255, 246, 0.94);
+  border: 4px solid #83bf6d;
+  border-radius: 28px;
+  box-shadow: 0 12px 24px rgba(19, 69, 44, 0.25);
+  padding: 28px;
+}
+.eden-game-heading {
+  color: #21466d;
+  font-size: 34px;
+  font-weight: 900;
+}
+.eden-game-picture {
+  background: rgba(214, 246, 200, 0.96);
+  border: 3px solid #77bb78;
+  border-radius: 24px;
+  padding: 20px;
+  font-size: 60px;
+  color: #254b36;
+}
+.eden-game-options button, .eden-game-button {
+  border-radius: 22px;
+  background: #f8e8ff;
+  border: 3px solid #ba8ae2;
+  color: #223e60;
+  font-size: 26px;
+  font-weight: 800;
+  min-width: 105px;
+  min-height: 72px;
+  box-shadow: 0 4px 0 rgba(59, 93, 56, .22);
+}
+.eden-game-options button:focus-visible, .eden-game-button:focus-visible {
+  outline: 5px solid #2156a6;
+  outline-offset: 2px;
+}
+.eden-game-options button:hover, .eden-game-button:hover { background: #fff4d5; }
+.eden-game-feedback {
+  background: rgba(255, 255, 255, .94);
+  border-radius: 15px;
+  color: #204d3f;
+  font-size: 22px;
+  font-weight: 750;
+  padding: 12px;
+}
+.contrast .eden-game-panel, .contrast .eden-game-picture,
+.contrast .eden-game-feedback { background: black; color: white; border: 3px solid white; }
+.contrast .eden-game-options button, .contrast .eden-game-button {
+  background: black; color: white; border: 3px solid white;
+}
+
+.eden-activity-tile {
+ background: rgba(250, 255, 245, .95);
+ border: 3px solid #86c66e;
+ border-radius: 28px;
+ box-shadow: 0 5px 0 rgba(37, 85, 59, .3);
+ padding: 16px;
+}
+.eden-activity-tile:hover { background: #fff4d4; border-color: #edb347; }
+.eden-activity-tile:focus-visible { outline: 5px solid #2159a1; }
+.contrast .eden-activity-tile { background: black; color: white; border: 3px solid white; }
+
+/* Eden illustrated woodland template — readable, accessible overlays. */
+.eden-welcome {
+ color: #173f31; font-size: 32px; font-weight: 900;
+ background: rgba(255, 250, 217, .88);
+ border: 2px solid rgba(255,255,255,.92);
+ border-radius: 20px; padding: 9px 24px;
+ text-shadow: 0 1px 2px white;
+}
+.eden-home-prompt {
+ color: #173f31; font-weight: 750; font-size: 21px;
+ background: rgba(255, 252, 229, .9); border-radius: 16px;
+ padding: 6px 18px;
+}
+.eden-header-control {
+ min-width: 124px; min-height: 52px; padding: 8px 15px;
+ border-radius: 24px; border: 3px solid white;
+ color: #fff; font-weight: 800; background: #7943bd;
+ box-shadow: 0 4px 0 rgba(28, 58, 45, .42);
+}
+.eden-wooden-heading {
+ color: #fff9e6; font-size: 36px; font-weight: 900;
+ background: #996031;
+ border: 5px solid #e3b477;
+ border-radius: 35px; padding: 13px 48px;
+ text-shadow: 0 2px 3px #3d2a22;
+ box-shadow: 0 5px 0 rgba(64, 47, 35, .42);
+}
+.eden-home-label { color: white; font-weight: 900; font-size: 20px; }
+.eden-home-button { padding: 6px 13px; }
+.eden-home-button:focus-visible { outline: 5px solid #234b78; outline-offset: 3px; }
+.contrast .eden-welcome, .contrast .eden-home-prompt,
+.contrast .eden-wooden-heading, .contrast .eden-header-control {
+ background: black; color: white; text-shadow: none; border: 3px solid white;
+}
+
+/* Illustrated home dashboard — vivid glass-like tiles from the approved reference. */
+.eden-dashboard-grid { padding: 10px 16px; }
+.eden-home-button {
+ min-width: 212px; min-height: 94px; border-radius: 25px;
+ padding: 6px 10px; border: 4px solid rgba(255,255,255,.93);
+ box-shadow: 0 5px 0 rgba(31,58,49,.46),0 9px 17px rgba(14,37,36,.30);
+}
+.eden-home-label {
+ color: white; font-size: 21px; font-weight: 900;
+ text-shadow: 0 2px 3px rgba(17,40,41,.96);
+}
+.eden-learn,.eden-numbers { background: #30ac4e; }
+.eden-play,.eden-puzzles { background: #298be1; }
+.eden-create,.eden-studio { background: #f4a421; }
+.eden-read,.eden-words { background: #bd53df; }
+.eden-explore { background: #16b7b2; }
+.eden-stuff { background: #f0b432; }
+.eden-settings { background: #349cc7; }
+.eden-help { background: #9158c9; }
+.eden-home-button:hover { border-color: #fff5b2; }
+.contrast .eden-home-label { color: white; text-shadow: none; }
+
+/* Update 40: uniform, roomy artwork-first dashboard tiles. */
+.eden-dashboard-grid { padding: 12px 12px 22px; }
+.eden-home-button {
+ min-width: 222px; min-height: 112px; border-radius: 27px;
+ border: 4px solid rgba(255,255,255,.98); padding: 8px 11px;
+ box-shadow: 0 5px 0 rgba(35,72,50,.40),0 9px 15px rgba(14,37,36,.22);
+}
+.eden-home-label { font-size: 20px; font-weight: 900; }
+.eden-welcome { font-size: 30px; }
+.eden-activity-tile { min-height: 208px; }
+.contrast .eden-home-button { background: black; border: 4px solid white; }
+
+/* Update 41: compact greeting panels and a shared game exit affordance. */
+.eden-welcome, .eden-home-prompt {
+ min-width: 0;
+ margin-right: 0;
+}
+.eden-game-back {
+ min-height: 62px;
+ padding: 10px 22px;
+ border: 3px solid #fff8d9;
+ border-radius: 22px;
+ background: #348fbc;
+ color: #ffffff;
+ font-size: 21px;
+ font-weight: 850;
+ box-shadow: 0 4px 0 rgba(29,77,85,.32);
+}
+.eden-game-back:hover { background: #29749a; }
+.eden-game-back:focus-visible { outline: 5px solid #244f9e; outline-offset: 3px; }
+.contrast .eden-game-back {
+ background: #000000; color: #ffffff;
+ border: 3px solid #ffffff;
+}
