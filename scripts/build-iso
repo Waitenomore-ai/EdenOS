@@ -30,6 +30,10 @@ bash scripts/stage-branding
 python3 scripts/write-build-info config/includes.chroot/etc/eden-os/build.json
 python3 scripts/build-update-package --output output \
     --version "${EDEN_PACKAGE_VERSION:-0.1.0~dev0}"
+# Include the exact matching, checksummed desktop update in future ISO images.
+mkdir -p config/includes.binary/eden-update
+cp output/eden-os-desktop_*.deb config/includes.binary/eden-update/
+(cd config/includes.binary/eden-update && sha256sum eden-os-desktop_*.deb > eden-os-update.sha256)
 mkdir -p output
 {
     printf 'Eden OS DEVELOPMENT TEST IMAGE\n'
