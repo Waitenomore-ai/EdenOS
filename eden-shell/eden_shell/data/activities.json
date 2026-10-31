@@ -52,6 +52,15 @@
     "desktop_id": "eden-puzzle-pond.desktop",
     "offline": true,
     "reviewed": true
+  },
+  {
+    "id": "time-routines",
+    "title": "Time and Routines",
+    "description": "Follow a calm visual routine one step at a time.",
+    "category": "play",
+    "desktop_id": "eden-time-routines.desktop",
+    "offline": true,
+    "reviewed": true
   }
 ]
 

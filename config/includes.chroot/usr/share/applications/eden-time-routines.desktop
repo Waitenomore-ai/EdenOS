@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Eden Time and Routines
+Comment=Follow a calm routine offline
+Exec=/usr/local/bin/eden-time-routines
+Icon=appointment-soon
+Terminal=false
+Categories=Education;Accessibility;
+StartupNotify=true
