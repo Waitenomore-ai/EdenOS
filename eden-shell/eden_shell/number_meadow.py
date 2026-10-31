@@ -45,6 +45,12 @@ class NumberMeadowWindow(Gtk.ApplicationWindow):
         title.add_css_class("eden-game-heading")
         title.set_xalign(0)
         root.append(title)
+        illustration = Gtk.Image.new_from_file(str(
+            Path(__file__).parent / "data" / "activity-art" / "number-meadow.svg"
+        ))
+        illustration.set_pixel_size(150)
+        illustration.set_halign(Gtk.Align.CENTER)
+        root.append(illustration)
         self.prompt = Gtk.Label()
         self.prompt.add_css_class("eden-subtitle")
         self.prompt.set_wrap(True)
