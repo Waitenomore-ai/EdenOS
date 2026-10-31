@@ -33,6 +33,9 @@ class UpdatePackageTests(unittest.TestCase):
                              (ROOT / 'eden-shell/eden_shell/app.py').read_bytes())
             self.assertTrue(os.access(extracted / 'usr/local/bin/eden-shell', os.X_OK))
             self.assertTrue((extracted / 'usr/share/applications/eden-shell.desktop').is_file())
+            self.assertTrue((extracted / 'usr/share/eden-os/eden_shell/profile_chooser_model.py').is_file())
+            self.assertTrue((extracted / 'usr/share/sounds/edenos/startup.wav').is_file())
+            self.assertTrue((extracted / 'usr/local/bin/eden-backup').is_file())
             self.assertIn('/etc/eden-os/defaults.json',
                           (extracted / 'DEBIAN/conffiles').read_text().splitlines())
             self.assertFalse((extracted / 'home').exists(), 'Update must not overwrite child files')
