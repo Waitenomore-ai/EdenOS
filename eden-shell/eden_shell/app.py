@@ -154,9 +154,8 @@ class EdenWindow(Gtk.ApplicationWindow):
         if not logo_path.is_file():
             logo_path = Path("/usr/share/pixmaps/edenos-logo.png")
         if logo_path.is_file():
-            logo = Gtk.Picture.new_for_filename(str(logo_path))
-            logo.set_content_fit(Gtk.ContentFit.CONTAIN)
-            logo.set_size_request(255, 150)
+            logo = Gtk.Image.new_from_file(str(logo_path))
+            logo.set_pixel_size(200)
             logo.set_tooltip_text("Eden OS")
             header.append(logo)
         header_spacer = Gtk.Box()
