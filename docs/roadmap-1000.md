@@ -99,7 +99,9 @@ This document expands the earlier 100-item roadmap. Its IDs E0001–E1000 are a 
 
 ## 2. Launcher and first child session
 
-- [ ] **E0021** — Confirm eden-shell launches from the adult terminal.
+Pilot evidence (2026-10-31): The Eden GTK preview launches on the iMac, the 200-pixel logo and logged-in-user greeting are committed on the development branch, eight Eden activity desktop entries exist, and 96 launcher tests pass with one skipped. An adult-authorised installation of preview3, visual activity checks, isolated child accounts, graphics cold-boot tests and release safety verification remain open. The existing graphical session, SSH, LightDM and Wi-Fi were not changed by this roadmap update.
+
+- [x] **E0021** — Confirm eden-shell launches from the adult terminal. (Verified 2026-10-31 on the pilot iMac via DISPLAY=:0 with the development PYTHONPATH; not evidence of child-session autostart.)
 - [ ] **E0022** — Capture launcher errors when using software rendering.
 - [ ] **E0023** — Test a supported GTK renderer when GPU acceleration is unavailable.
 - [ ] **E0024** — Verify the launcher fills the iMac screen.
