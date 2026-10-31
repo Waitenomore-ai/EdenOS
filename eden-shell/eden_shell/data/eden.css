@@ -1,4 +1,8 @@
-window { background: #eef7f4; color: #193d38; }
+/* Use the shipped Eden garden art for the actual launcher, not only the login screen. */
+window { background-color: #e6f3ee; background-image: url("/usr/share/backgrounds/edenos/01-eden-sunrise.png"); background-position: center; background-repeat: no-repeat; background-size: cover; color: #193d38; }
+.eden-content { background: rgba(246, 253, 249, 0.88); border-radius: 28px; }
+.contrast .eden-content { background: #000000; }
+
 .eden-title { color: #174e46; font-size: 34px; font-weight: 800; }
 .eden-subtitle { color: #365d56; font-size: 21px; }
 .eden-card { min-height: 142px; border-radius: 24px; padding: 20px; background: #ffffff; border: 2px solid #d5e8e1; }
