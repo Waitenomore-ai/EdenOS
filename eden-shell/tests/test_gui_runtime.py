@@ -42,6 +42,8 @@ class GtkRuntimeTests(unittest.TestCase):
                 self.assertEqual(window.preferences.text_scale, 1.6)
                 window._toggle_high_contrast(None)
                 self.assertTrue(window.has_css_class('contrast'))
+                window._toggle_reduced_motion(None)
+                self.assertTrue(window.has_css_class('reduced-motion'))
                 window._go_home(None)
                 self.assertEqual(window.state.page, 'home')
                 self.assertEqual(window.get_focus(), window._page_focus_target)

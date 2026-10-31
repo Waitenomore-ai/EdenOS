@@ -199,3 +199,13 @@ the known /boot/grub/efi.img to check its amd64 PE32+ EFI application header.
 This is structural inspection, not a cryptographic signature or boot proof.
 Local verification: 54 passed, one real GTK test skipped (55 total). Review
 found no important issues. Online GTK and the next ISO must verify integration.
+
+## Remote-only progress — 31 October 2026
+
+The source-only batches after the original tracker now include the approved
+magical login sound, a safe child profile chooser model, private accessibility
+preference storage, working reduced-motion styling, verified backup archives,
+and package/activity coverage checks. The current local suite reports 96 tests
+passed with one expected display-dependent skip. These changes still require
+the graphical iMac and installed-system checks listed above before they can be
+called physically verified.
