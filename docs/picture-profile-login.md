@@ -27,3 +27,8 @@ aid, not a password or authentication factor.
 Implementation is deliberately not enabled yet: the current image uses the
 standard LightDM greeter, so the greeter integration and physical login flow
 must be designed and tested before changing the installed iMac.
+
+The source now includes a validation-only profile-card model for the future
+greeter. It accepts only built-in avatar names and exposes only display name and
+avatar to the public card view; the local username remains an internal account
+mapping.
