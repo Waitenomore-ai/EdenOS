@@ -96,3 +96,14 @@ scrolledwindow, scrolledwindow > viewport, viewport { background: transparent; }
 .contrast .eden-game-options button, .contrast .eden-game-button {
   background: black; color: white; border: 3px solid white;
 }
+
+.eden-activity-tile {
+ background: rgba(250, 255, 245, .95);
+ border: 3px solid #86c66e;
+ border-radius: 28px;
+ box-shadow: 0 5px 0 rgba(37, 85, 59, .3);
+ padding: 16px;
+}
+.eden-activity-tile:hover { background: #fff4d4; border-color: #edb347; }
+.eden-activity-tile:focus-visible { outline: 5px solid #2159a1; }
+.contrast .eden-activity-tile { background: black; color: white; border: 3px solid white; }
