@@ -1264,4 +1264,9 @@ must not be confused with the current LightDM account flow.
 - [ ] **E1018** — Add an adult setting to hide or show Nature Explorer.
 - [ ] **E1019** — Verify all Nature Explorer controls work with keyboard navigation.
 - [ ] **E1020** — Verify Nature Explorer remains fully offline in a built ISO.
+- [ ] **E1021** — Pilot Feelings and Quiet Space with an adult before child exposure.
+- [ ] **E1022** — Review feeling words and symbols for inclusive, non-diagnostic language.
+- [ ] **E1023** — Add an adult setting to hide or show Feelings and Quiet Space.
+- [ ] **E1024** — Verify reset clears the session without saving a child’s mood.
+- [ ] **E1025** — Verify Feelings and Quiet Space remains fully offline in a built ISO.
 

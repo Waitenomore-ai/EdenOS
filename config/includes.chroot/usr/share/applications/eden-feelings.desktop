@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Eden Feelings and Quiet Space
+Comment=Choose a feeling and try a calm action offline
+Exec=/usr/local/bin/eden-feelings
+Icon=face-smile
+Terminal=false
+Categories=Game;Education;

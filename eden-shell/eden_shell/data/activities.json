@@ -70,6 +70,15 @@
     "desktop_id": "eden-nature-explorer.desktop",
     "offline": true,
     "reviewed": true
+  },
+  {
+    "id": "feelings-quiet-space",
+    "title": "Feelings and Quiet Space",
+    "description": "Choose a feeling and try a gentle offline calm action.",
+    "category": "play",
+    "desktop_id": "eden-feelings.desktop",
+    "offline": true,
+    "reviewed": true
   }
 ]
 
