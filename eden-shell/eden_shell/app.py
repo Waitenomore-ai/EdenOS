@@ -206,7 +206,7 @@ class EdenWindow(Gtk.ApplicationWindow):
             ("Word Woodland", "words", self._open_named_activity("word-woodland"), True, "word-woodland"),
             ("Puzzle Pond", "puzzles", self._open_named_activity("puzzle-pond"), True, "puzzle-pond"),
             ("Art Studio", "studio", self._open_named_activity("art-studio"), True, "art-studio"),
-            ("Explore", "explore", self._open_category("play"), True, "nature-explorer"),
+            ("Explore", "explore", self._open_category("read"), True, "nature-explorer"),
             ("My Stuff", "stuff", self._open_progress, True, "time-routines"),
             ("Settings", "settings", self._open_settings, True, "feelings-quiet-space"),
             ("Help", "help", self._open_help, True, "story-garden"),
