@@ -1273,3 +1273,23 @@ must not be confused with the current LightDM account flow.
 - [ ] **E1027** — Verify the editor cannot select custom avatar paths.
 - [ ] **E1028** — Verify adult reset returns the default avatar and original display name.
 
+## Roadmap extension: artwork, buttons, banners and icon polish
+
+Added 1 November 2026 at the user's request. The two new concept boards are artwork previews; their buttons, banners, twelve app/system icons, welcome screen, profile-selection screen and gentle celebration screen are now tracked for production and integration. These entries do not claim that the new visual assets have already been implemented, added to the ISO or deployed. Preserve the existing logo and Find Eden wallpaper work. Related existing work: E0221–E0260 (navigation/branding), E0261–E0280 (accessibility), and E1001–E1015 (picture-based sign-in).
+
+- [ ] **E1029** — Inventory both new artwork concept boards and map each button, banner, icon and screen preview to its intended Eden OS location.
+- [ ] **E1030** — Preserve the selected tree-and-stream logo, Eden character and established garden colours while polishing the new assets.
+- [ ] **E1031** — Create separate production assets from the previews, with transparent backgrounds where needed, consistent names and suitable resolutions; keep the original boards as references.
+- [ ] **E1032** — Build the matching button family with normal, focused, pressed, disabled and selected states that remain distinguishable without colour alone.
+- [ ] **E1033** — Prepare the twelve app and system icons shown in the concept board, with consistent proportions, clear silhouettes and readable text labels.
+- [ ] **E1034** — Apply matching navigation icons and controls consistently across the launcher and included activities.
+- [ ] **E1035** — Produce the welcome banner and screen artwork with space for large, adjustable text.
+- [ ] **E1036** — Produce the profile-selection banner and avatar-tile artwork, linking implementation to E1001–E1015 rather than creating a second sign-in flow.
+- [ ] **E1037** — Produce gentle celebration artwork and feedback that can be skipped, muted or shown without animation and without penalising mistakes.
+- [ ] **E1038** — Polish spacing, typography, icon placement and button sizes across the home screen, activity pages and system messages.
+- [ ] **E1039** — Provide high-contrast and reduced-motion treatments, retaining recognisable shapes and labels rather than relying on decorative artwork.
+- [ ] **E1040** — Check the assets and layouts with keyboard navigation, large text, touch targets, screen-reader names and basic-graphics rendering on the iMac.
+- [ ] **E1041** — Keep all shipped artwork local and optimise file sizes for the 4 GB RAM / 32 GB storage baseline.
+- [ ] **E1042** — Add final assets, credits and an asset manifest to GitHub, then connect them to the actual GTK theme and application screens.
+- [ ] **E1043** — Include the finished visual pack in ISO and installed-system update staging, with checks that required artwork is present in the built artifacts.
+- [ ] **E1044** — Review screenshots of the implemented screens against the concept boards and record native-device results before marking the visual refresh complete.
