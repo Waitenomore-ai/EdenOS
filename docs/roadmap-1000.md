@@ -1293,3 +1293,42 @@ Added 1 November 2026 at the user's request. The two new concept boards are artw
 - [ ] **E1042** — Add final assets, credits and an asset manifest to GitHub, then connect them to the actual GTK theme and application screens.
 - [ ] **E1043** — Include the finished visual pack in ISO and installed-system update staging, with checks that required artwork is present in the built artifacts.
 - [ ] **E1044** — Review screenshots of the implemented screens against the concept boards and record native-device results before marking the visual refresh complete.
+
+
+## Roadmap extension: garden learning artwork packs and official-logo screens
+
+Added 1 November 2026 at the user's request following creation of ten additional artwork packs and correction of the OS screen board to use the official Eden OS logo. **Status: artwork sheets and mockups created; production exports, application integration and ISO delivery pending.** Preserve E1029–E1044 and existing working artwork.
+
+### Approved artwork scope
+
+| Pack | Source artwork and intended use |
+| --- | --- |
+| How to play | Six cards: Tap, Drag, Match, Listen, Take turns, Choose; use in activity instructions. |
+| Communication | Twelve cards: Help, More, Finished, Stop, Yes, No, Drink, Toilet, Quiet, My turn, I need a break, I feel unwell; use as optional picture communication aids. |
+| Garden building | Twenty-four garden pieces including trees, flowers, paths, bridge, pond, stream, cottage, greenhouse, furniture and tools; use in Build Eden’s Garden. |
+| Puzzle pictures | Four garden scenes for large-piece jigsaws: sunflower garden, apple orchard, pond wildlife and Eden with a friend on a bridge. |
+| Story characters and props | Six inclusive child characters and eighteen everyday, clothing, toy and transport props for picture stories. |
+| Shapes and colours | Eight shape pictures and eight labelled colour swatches for sorting and matching. |
+| Everyday places | Six illustrated cards: Home, School, Playground, Shop, Library, Garden. |
+| Growing garden rewards | Twelve illustrations: four plant stages, four collectibles and four gentle celebrations. |
+| Day and night | Four garden scenes: sunrise, daytime, sunset and moonlit night. |
+| OS essentials | Six screen concepts: Startup, Sign in, App tiles, Updating, Something went wrong, Ready to play. Use the corrected board with the official circular tree-and-stream logo, green Eden and blue OS wordmark; the earlier butterfly-wreath startup logo is superseded. |
+
+Source boards are preserved in the Eden artwork conversation of 1 November 2026. Known source references: [play instructions](https://chatgpt.com/library?file_id=libfile_8922f5a385b8819191c3c8a81445b49f&account_id=personal), [communication cards](https://chatgpt.com/library?file_id=libfile_ba9f0b8262288191a2521a587695c04f&account_id=personal), [garden pieces](https://chatgpt.com/library?file_id=libfile_79eaa7f22cb08191a53191f472a754e0&account_id=personal), [puzzle scenes](https://chatgpt.com/library?file_id=libfile_92adde6942708191b50a3a4c78b76943&account_id=personal), [story assets](https://chatgpt.com/library?file_id=libfile_4d0c0e54fed88191bb416b7f7eb309ef&account_id=personal), [shapes and colours](https://chatgpt.com/library?file_id=libfile_3fbc645abf188191a1513bd1d3dfe8c9&account_id=personal), [places](https://chatgpt.com/library?file_id=libfile_43346013c20c81918cc4c38bea41147c&account_id=personal), [rewards](https://chatgpt.com/library?file_id=libfile_b276e8bf0410819181aaa9725580e295&account_id=personal), [day and night](https://chatgpt.com/library?file_id=libfile_06fc9026594c81919160fba6a3f9bb5a&account_id=personal). Capture the corrected screen-board source identifier during asset intake; do not reuse the superseded startup branding.
+
+- [ ] **E1045** — Gather the ten new packs and corrected screen board into a versioned artwork source collection; record stable filenames, source references, checksums, dimensions, provenance and intended consumers.
+- [ ] **E1046** — Export the six play-instruction illustrations individually and add them to relevant activity help, including alternatives to precision dragging.
+- [ ] **E1047** — Export and review the twelve communication pictures with children and supporting adults; provide optional accessible selection and spoken labels without assuming universal symbol understanding.
+- [ ] **E1048** — Export the twenty-four garden pieces with clean transparency, consistent scale and attachment points where paths or streams connect; integrate into an offline garden-building activity with undo and local save.
+- [ ] **E1049** — Export the four puzzle pictures separately and integrate configurable large-piece jigsaws with keyboard/touch/switch support, hints and no required timer.
+- [ ] **E1050** — Export the six story characters and eighteen props with clean cutouts; integrate with the existing picture-story/Maker Lab work rather than creating a duplicate story system.
+- [ ] **E1051** — Prepare the eight shapes and eight colour swatches for sorting and matching; verify geometry and labels, using precise code/vector shapes when needed and real accessible UI text.
+- [ ] **E1052** — Export the six everyday-place illustrations, review the pictured settings for clarity, and add them to routine and picture-story activities.
+- [ ] **E1053** — Export the twelve growing-garden reward illustrations and add optional gentle progress feedback without streak penalties, ranking or rewards tied to reporting particular feelings.
+- [ ] **E1054** — Export the four day/night scenes at desktop and activity sizes and connect them to time/routine and nature activities with manual selection and static reduced-motion presentation.
+- [ ] **E1055** — Implement the six OS essential screen designs using the official existing circular tree-and-stream logo asset and original green/blue wordmark; preserve proportions and never regenerate or substitute the logo in shipped screens.
+- [ ] **E1056** — Connect sign-in artwork to E1001–E1015 and visual controls to E1029–E1044; keep real account mapping, working app launches, truthful update progress and actionable error recovery.
+- [ ] **E1057** — Validate all new assets with large text, keyboard, touch, switch access, screen-reader labels, high contrast and basic graphics; keep labels separate from decorative bitmap artwork.
+- [ ] **E1058** — Optimise and package local runtime assets for the 4 GB RAM / 32 GB disk baseline while retaining full-quality sources and an asset manifest in GitHub.
+- [ ] **E1059** — Include completed packs in Eden OS update and ISO staging; verify offline operation, artwork references, saved projects, clean installation and upgrade behaviour.
+- [ ] **E1060** — Compare implemented screenshots with the corrected artwork boards and record the actual code commit, checks and ISO/update build before marking any pack delivered.
