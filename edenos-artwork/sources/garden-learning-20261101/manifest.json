@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-01",
+  "provenance": "Eden OS artwork generated and approved in the Eden artwork conversation, transferred unchanged from the iMac staging collection.",
+  "runtime_included": false,
+  "assets": [
+    {
+      "id": "play-instructions",
+      "path": "edenos-artwork/sources/garden-learning-20261101/play-instructions.png",
+      "original_filename": "Eden OS visual action cards.png",
+      "sha256": "0047f53af9ec5a18dd4f408f33667065a88335a949d8253bbd94475efeb33000",
+      "bytes": 2067635,
+      "width": 1536,
+      "height": 1024,
+      "source_library_id": "libfile_8922f5a385b8819191c3c8a81445b49f",
+      "consumer": "activity-help",
+      "status": "source-sheet-only"
+    },
+    {
+      "id": "communication",
+      "path": "edenos-artwork/sources/garden-learning-20261101/communication.png",
+      "original_filename": "Eden OS Storybook Communication Cards.png",
+      "sha256": "854608f2ead1c8f4d3c6dab201b59aeb968272f3e04a8a0448e4e698730e6582",
+      "bytes": 2273470,
+      "width": 1448,
+      "height": 1086,
+      "source_library_id": "libfile_ba9f0b8262288191a2521a587695c04f",
+      "consumer": "communication-board",
+      "status": "source-sheet-only"
+    },
+    {
+      "id": "garden-building",
+      "path": "edenos-artwork/sources/garden-learning-20261101/garden-building.png",
+      "original_filename": "Eden OS storybook garden asset pack preview.png",
+      "sha256": "38b4d685718d6b4a7413c89080d19b517f39379b7640ef00b681dbeabd4b953d",
+      "bytes": 2480930,
+      "width": 1536,
+      "height": 1024,
+      "source_library_id": "libfile_79eaa7f22cb08191a53191f472a754e0",
+      "consumer": "garden-builder",
+      "status": "source-sheet-only"
+    },
+    {
+      "id": "puzzle-scenes",
+      "path": "edenos-artwork/sources/garden-learning-20261101/puzzle-scenes.png",
+      "original_filename": "Eden's Garden Adventure Scenes.png",
+      "sha256": "db348f638300efbde1322bf309018c603d8000ead2bd3acc2c31074ef8510005",
+      "bytes": 3088180,
+      "width": 1536,
+      "height": 1024,
+      "source_library_id": "libfile_92adde6942708191b50a3a4c78b76943",
+      "consumer": "puzzle-pond",
+      "status": "source-sheet-only"
+    },
+    {
+      "id": "story-props",
+      "path": "edenos-artwork/sources/garden-learning-20261101/story-props.png",
+      "original_filename": "Eden's Storybook Garden Asset Pack.png",
+      "sha256": "baa01223228245def48ba45387c800b4a7ec3bb0d719eaa50b60735d3d2518c9",
+      "bytes": 2427504,
+      "width": 1536,
+      "height": 1024,
+      "source_library_id": "libfile_4d0c0e54fed88191bb416b7f7eb309ef",
+      "consumer": "story-garden",
+      "status": "source-sheet-only"
+    },
+    {
+      "id": "shapes-colours",
+      "path": "edenos-artwork/sources/garden-learning-20261101/shapes-colours.png",
+      "original_filename": "Shapes and colors learning chart.png",
+      "sha256": "7e0bde6d8474f6d8b0a3f6d6b49e7875121059e86918730c2a05192abeb5799b",
+      "bytes": 1559190,
+      "width": 1536,
+      "height": 1024,
+      "source_library_id": "libfile_3fbc645abf188191a1513bd1d3dfe8c9",
+      "consumer": "sorting-matching",
+      "status": "source-sheet-only"
+    },
+    {
+      "id": "everyday-places",
+      "path": "edenos-artwork/sources/garden-learning-20261101/everyday-places.png",
+      "original_filename": "Eden OS storybook community cards.png",
+      "sha256": "30b004bb1cf3de074218aaff95f19276d61f0184fb53e62b04dd4d77863ea801",
+      "bytes": 2836826,
+      "width": 1536,
+      "height": 1024,
+      "source_library_id": "libfile_43346013c20c81918cc4c38bea41147c",
+      "consumer": "routines-stories",
+      "status": "source-sheet-only"
+    },
+    {
+      "id": "garden-rewards",
+      "path": "edenos-artwork/sources/garden-learning-20261101/garden-rewards.png",
+      "original_filename": "Eden's Garden Reward Collection.png",
+      "sha256": "4a73b5589b5ffa4d74a92d6dd1ceeee1ed6521d098be5ba528ae052bc2bdf5d0",
+      "bytes": 2095226,
+      "width": 1536,
+      "height": 1024,
+      "source_library_id": "libfile_b276e8bf0410819181aaa9725580e295",
+      "consumer": "optional-feedback",
+      "status": "source-sheet-only"
+    },
+    {
+      "id": "day-night",
+      "path": "edenos-artwork/sources/garden-learning-20261101/day-night.png",
+      "original_filename": "One Garden, Four Gentle Skies.png",
+      "sha256": "4a6b70de6e6944cdf26d9f16fd3c23a973885f314591f5e9feeee56657c654ef",
+      "bytes": 3245585,
+      "width": 1536,
+      "height": 1024,
+      "source_library_id": "libfile_06fc9026594c81919160fba6a3f9bb5a",
+      "consumer": "time-nature",
+      "status": "source-sheet-only"
+    }
+  ],
+  "pending": [
+    {
+      "id": "os-essentials-corrected",
+      "reason": "The staged OS screen board is not yet verified against the corrected official-logo board; do not ship the older butterfly-wreath branding."
+    }
+  ]
+}

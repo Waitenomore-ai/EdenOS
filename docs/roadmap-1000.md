@@ -1332,3 +1332,7 @@ Source boards are preserved in the Eden artwork conversation of 1 November 2026.
 - [ ] **E1058** — Optimise and package local runtime assets for the 4 GB RAM / 32 GB disk baseline while retaining full-quality sources and an asset manifest in GitHub.
 - [ ] **E1059** — Include completed packs in Eden OS update and ISO staging; verify offline operation, artwork references, saved projects, clean installation and upgrade behaviour.
 - [ ] **E1060** — Compare implemented screenshots with the corrected artwork boards and record the actual code commit, checks and ISO/update build before marking any pack delivered.
+
+### Artwork source intake progress — 1 November 2026
+
+E1045 is in progress: nine of ten new packs are preserved unchanged in `edenos-artwork/sources/garden-learning-20261101/`, with an integrity manifest and source references. All nine PNG hashes, sizes and dimensions were verified. The corrected official-logo OS screen board still needs verified intake, so E1045 remains unchecked. E1046–E1060 remain pending; these source sheets are not included in runtime staging or the ISO by this change.
