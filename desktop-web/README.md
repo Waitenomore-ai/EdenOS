@@ -10,7 +10,7 @@ The desktop app is a lightweight Electron application for Windows, macOS and Lin
 - **macOS:** branded DMG with Eden's Garden background artwork and a drag-to-Applications layout. Both Intel (x64) and Apple silicon (arm64) builds are produced.
 - **Linux:** native Debian package (`.deb`) and portable AppImage (`.AppImage`). These use the Eden's Garden application icon and desktop launcher; the standard package manager or AppImage launch flow is used rather than pretending Linux has a Windows-style setup wizard.
 
-The Windows welcome and finish screens contain installation information only. They are **not** a fabricated licence agreement. The installer clearly explains that this is the desktop app, not the full Eden OS operating system.
+The Windows setup includes an illustrated welcome, options and completion experience; desktop and Start Menu shortcuts are enabled by default. The Windows welcome and finish screens contain installation information only. They are **not** a fabricated licence agreement. The installer clearly explains that this is the desktop app, not the full Eden OS operating system.
 
 ## Build and validation
 

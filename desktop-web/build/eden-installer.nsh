@@ -27,7 +27,7 @@ Var EdenFinishLaunch
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-welcome.bmp" $2
 
-    ${NSD_CreateLabel} 205u 119u 202u 27u "Welcome to the Eden's Garden Setup"
+    ${NSD_CreateLabel} 205u 119u 202u 27u "Welcome to Eden's Garden"
     Pop $3
     SetCtlColors $3 "10223F" "FFFFFF"
     CreateFont $4 "Segoe UI" "15" "700"
@@ -68,7 +68,7 @@ Var EdenFinishLaunch
     CreateFont $4 "Segoe UI" "15" "700"
     SendMessage $3 ${WM_SETFONT} $4 0
 
-    ${NSD_CreateLabel} 205u 149u 202u 29u "A desktop shortcut and Start Menu entry$\r$\nwill be created for easy access."
+    ${NSD_CreateLabel} 205u 149u 202u 29u "Desktop and Start Menu shortcuts are included.$\r$\nChoose whether to open Eden after setup."
     Pop $5
     SetCtlColors $5 "24344A" "FFFFFF"
 
@@ -110,7 +110,7 @@ Var EdenFinishLaunch
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-finish.bmp" $2
 
-    ${NSD_CreateLabel} 205u 119u 202u 27u "Eden's Garden is ready!"
+    ${NSD_CreateLabel} 205u 119u 202u 27u "Installation complete!"
     Pop $3
     SetCtlColors $3 "10223F" "FFFFFF"
     CreateFont $4 "Segoe UI" "16" "700"
