@@ -32,6 +32,30 @@ jobs:
         run: npm run dist:win
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Capture Windows installer welcome screen
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.Windows.Forms
+          Add-Type -AssemblyName System.Drawing
+          $installer = (Get-ChildItem desktop-web/dist -Filter '*.exe' | Select-Object -First 1).FullName
+          $proc = Start-Process -FilePath $installer -PassThru
+          Start-Sleep -Seconds 8
+          $proc.Refresh()
+          $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          $bitmap = New-Object System.Drawing.Bitmap($bounds.Width, $bounds.Height)
+          $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+          $graphics.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size)
+          New-Item -ItemType Directory -Force -Path desktop-web/screenshots | Out-Null
+          $bitmap.Save('desktop-web/screenshots/windows-welcome.png')
+          $graphics.Dispose()
+          $bitmap.Dispose()
+          if (-not $proc.HasExited) { Stop-Process -Id $proc.Id -Force }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Eden-Garden-Windows-visual-check
+          path: desktop-web/screenshots/windows-welcome.png
+          if-no-files-found: error
+          retention-days: 7
       - name: Install, launch and uninstall on clean Windows runner
         shell: pwsh
         run: |

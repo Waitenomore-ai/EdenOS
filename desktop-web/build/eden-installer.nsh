@@ -13,6 +13,10 @@ Function EdenResizeWizard
   System::Call 'user32::SetWindowPos(p r0, p 0, i 560, i 366, i 0, i 0, i 0x15) i .r9'
   GetDlgItem $0 $HWNDPARENT 3
   System::Call 'user32::SetWindowPos(p r0, p 0, i 475, i 366, i 0, i 0, i 0x15) i .r9'
+  ; NSIS page holder (1018) clips children to its original 500px width.
+  ; Resize the holder too, otherwise the artwork and text disappear at x=490.
+  GetDlgItem $0 $HWNDPARENT 1018
+  System::Call 'user32::SetWindowPos(p r0, p 0, i 0, i 0, i 734, i 326, i 0x16) i .r9'
   ; Keep the top-left position, change the outer window to 750 x 450.
   System::Call 'user32::SetWindowPos(p $HWNDPARENT, p 0, i 0, i 0, i 750, i 450, i 0x16) i .r0'
 FunctionEnd
