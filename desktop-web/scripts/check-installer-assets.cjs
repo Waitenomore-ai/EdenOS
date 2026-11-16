@@ -45,7 +45,7 @@ expectSize('dmg-background.png', pngSize(path.join(build, 'dmg-background.png'))
 expectSize('installer-header.bmp', bmpSize(path.join(build, 'installer-header.bmp')), [150, 57]);
 expectSize('installer-sidebar.bmp', bmpSize(path.join(build, 'installer-sidebar.bmp')), [164, 314]);
 for (const name of ['installer-welcome.bmp', 'installer-options.bmp', 'installer-finish.bmp']) {
-  expectSize(name, bmpSize(path.join(build, name)), [820, 300]);
+  expectSize(name, bmpSize(path.join(build, name)), [734, 300]);
 }
 
 const nsis = fs.readFileSync(path.join(build, 'eden-installer.nsh'), 'utf8');

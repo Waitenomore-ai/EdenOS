@@ -7,6 +7,12 @@
 ; Standard wizard pages share this host and its navigation buttons.
 !define MUI_CUSTOMFUNCTION_GUIINIT EdenResizeWizard
 Function EdenResizeWizard
+  GetDlgItem $0 $HWNDPARENT 1
+  System::Call 'user32::SetWindowPos(p r0, p 0, i 645, i 366, i 0, i 0, i 0x15) i .r9'
+  GetDlgItem $0 $HWNDPARENT 2
+  System::Call 'user32::SetWindowPos(p r0, p 0, i 560, i 366, i 0, i 0, i 0x15) i .r9'
+  GetDlgItem $0 $HWNDPARENT 3
+  System::Call 'user32::SetWindowPos(p r0, p 0, i 475, i 366, i 0, i 0, i 0x15) i .r9'
   ; Keep the top-left position, change the outer window to 750 x 450.
   System::Call 'user32::SetWindowPos(p $HWNDPARENT, p 0, i 0, i 0, i 750, i 450, i 0x16) i .r0'
 FunctionEnd
@@ -32,20 +38,13 @@ Var EdenFinishLaunch
     Pop $0
     ; Resize the real page dialog to occupy the enlarged host client area.
     System::Call 'user32::SetWindowPos(p r0, p 0, i 0, i 0, i 734, i 300, i 0x16) i .r9'
-    ${NSD_CreateBitmap} 0u 0u 417u 193u ""
+    ${NSD_CreateBitmap} 0u 0u 550u 215u ""
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-welcome.bmp" $2
     System::Call 'user32::SetWindowPos(p r1, p 0, i 0, i 0, i 734, i 300, i 0x16) i .r9'
 
-    ${NSD_CreateLabel} 140u 72u 260u 27u "Welcome to Eden's Garden"
-    Pop $3
-    SetCtlColors $3 "10223F" "FFFFFF"
-    CreateFont $4 "Segoe UI" "11" "700"
-    SendMessage $3 ${WM_SETFONT} $4 0
+    ; Heading and explanatory text are rendered directly into the BMP.
 
-    ${NSD_CreateLabel} 140u 107u 260u 53u "This will install Eden's Garden on your computer.$\r$\nA calm, child-friendly space to learn, play,$\r$\nwatch and grow at your own pace."
-    Pop $5
-    SetCtlColors $5 "24344A" "FFFFFF"
 
     ; HWND_BOTTOM=1, SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE=0x13
     ; Keep the illustrated background behind text and interactive controls.
@@ -70,20 +69,13 @@ Var EdenFinishLaunch
     Pop $0
     ; Resize the real page dialog to occupy the enlarged host client area.
     System::Call 'user32::SetWindowPos(p r0, p 0, i 0, i 0, i 734, i 300, i 0x16) i .r9'
-    ${NSD_CreateBitmap} 0u 0u 417u 193u ""
+    ${NSD_CreateBitmap} 0u 0u 550u 215u ""
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-options.bmp" $2
     System::Call 'user32::SetWindowPos(p r1, p 0, i 0, i 0, i 734, i 300, i 0x16) i .r9'
 
-    ${NSD_CreateLabel} 140u 72u 260u 27u "Choose Installation Options"
-    Pop $3
-    SetCtlColors $3 "10223F" "FFFFFF"
-    CreateFont $4 "Segoe UI" "11" "700"
-    SendMessage $3 ${WM_SETFONT} $4 0
+    ; Heading and explanatory text are rendered directly into the BMP.
 
-    ${NSD_CreateLabel} 140u 106u 260u 38u "Desktop and Start Menu shortcuts are included.$\r$\nChoose whether to open Eden after setup."
-    Pop $5
-    SetCtlColors $5 "24344A" "FFFFFF"
 
     ${NSD_CreateCheckBox} 140u 151u 260u 16u "Launch Eden's Garden after setup"
     Pop $EdenOptionsLaunch
@@ -121,20 +113,13 @@ Var EdenFinishLaunch
     Pop $0
     ; Resize the real page dialog to occupy the enlarged host client area.
     System::Call 'user32::SetWindowPos(p r0, p 0, i 0, i 0, i 734, i 300, i 0x16) i .r9'
-    ${NSD_CreateBitmap} 0u 0u 417u 193u ""
+    ${NSD_CreateBitmap} 0u 0u 550u 215u ""
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-finish.bmp" $2
     System::Call 'user32::SetWindowPos(p r1, p 0, i 0, i 0, i 734, i 300, i 0x16) i .r9'
 
-    ${NSD_CreateLabel} 140u 72u 260u 27u "Installation complete!"
-    Pop $3
-    SetCtlColors $3 "10223F" "FFFFFF"
-    CreateFont $4 "Segoe UI" "11" "700"
-    SendMessage $3 ${WM_SETFONT} $4 0
+    ; Heading and explanatory text are rendered directly into the BMP.
 
-    ${NSD_CreateLabel} 140u 105u 260u 42u "Eden's Garden has been installed successfully.$\r$\nYour garden of learning and discovery is ready."
-    Pop $5
-    SetCtlColors $5 "24344A" "FFFFFF"
 
     ${NSD_CreateCheckBox} 140u 153u 260u 16u "Launch Eden's Garden now"
     Pop $EdenFinishLaunch
