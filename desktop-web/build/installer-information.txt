@@ -1,0 +1,12 @@
+EDEN'S GARDEN
+
+Welcome to Eden's Garden, a calm and inclusive learning experience.
+
+The desktop application connects securely to https://www.edensgarden.uk/app/unified/ and requires an internet connection to access the learning activities.
+
+Support: hello@edensgarden.uk
+Website: https://edensgarden.uk
+
+This installer does not install the full Eden OS operating system.
+
+Please review the website's current terms and privacy information before using the service.
