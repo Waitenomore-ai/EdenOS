@@ -52,8 +52,11 @@
       "installerHeader": "build/installer-header.bmp",
       "installerSidebar": "build/installer-sidebar.bmp",
       "uninstallerSidebar": "build/installer-sidebar.bmp",
-      "license": "build/installer-information.txt",
-      "runAfterFinish": false
+      "runAfterFinish": false,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "include": "build/eden-installer.nsh"
     },
     "mac": {
       "icon": "build/icon.icns",
