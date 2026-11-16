@@ -10,6 +10,9 @@ const required = [
   'icon.icns',
   'installer-header.bmp',
   'installer-sidebar.bmp',
+  'installer-welcome.bmp',
+  'installer-options.bmp',
+  'installer-finish.bmp',
   'dmg-background.png',
   'eden-installer.nsh',
   'installer-information.txt',
@@ -41,9 +44,12 @@ expectSize('eden-original-approved.png', pngSize(path.join(build, 'eden-original
 expectSize('dmg-background.png', pngSize(path.join(build, 'dmg-background.png')), [640, 430]);
 expectSize('installer-header.bmp', bmpSize(path.join(build, 'installer-header.bmp')), [150, 57]);
 expectSize('installer-sidebar.bmp', bmpSize(path.join(build, 'installer-sidebar.bmp')), [164, 314]);
+for (const name of ['installer-welcome.bmp', 'installer-options.bmp', 'installer-finish.bmp']) {
+  expectSize(name, bmpSize(path.join(build, name)), [556, 257]);
+}
 
 const nsis = fs.readFileSync(path.join(build, 'eden-installer.nsh'), 'utf8');
-for (const marker of ['customWelcomePage', 'customFinishPage', 'MUI_WELCOMEPAGE_TITLE', 'MUI_FINISHPAGE_TITLE']) {
+for (const marker of ['customWelcomePage', 'customPageAfterChangeDir', 'customFinishPage', 'EdenWelcomePre', 'EdenOptionsPre', 'EdenFinishPre', 'Launch Eden\'s Garden now']) {
   if (!nsis.includes(marker)) throw new Error(`NSIS branding marker missing: ${marker}`);
 }
 console.log('EDEN_INSTALLER_ASSETS_CHECK_PASS');
