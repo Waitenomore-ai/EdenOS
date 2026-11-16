@@ -9,9 +9,6 @@
 Function EdenResizeWizard
   ; Keep the top-left position, change the outer window to 750 x 450.
   System::Call 'user32::SetWindowPos(p $HWNDPARENT, p 0, i 0, i 0, i 750, i 450, i 0x16) i .r0'
-  ; Expand the built-in page holder to the larger content area.
-  GetDlgItem $0 $HWNDPARENT 1018
-  System::Call 'user32::SetWindowPos(p r0, p 0, i 0, i 0, i 734, i 358, i 0x16) i .r1'
 FunctionEnd
 
 Var EdenLaunchChoice
@@ -33,9 +30,12 @@ Var EdenFinishLaunch
     File /oname=$PLUGINSDIR\eden-welcome.bmp "${BUILD_RESOURCES_DIR}\installer-welcome.bmp"
     nsDialogs::Create 1044
     Pop $0
+    ; Resize the real page dialog to occupy the enlarged host client area.
+    System::Call 'user32::SetWindowPos(p r0, p 0, i 0, i 0, i 734, i 300, i 0x16) i .r9'
     ${NSD_CreateBitmap} 0u 0u 417u 193u ""
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-welcome.bmp" $2
+    System::Call 'user32::SetWindowPos(p r1, p 0, i 0, i 0, i 734, i 300, i 0x16) i .r9'
 
     ${NSD_CreateLabel} 140u 72u 260u 27u "Welcome to Eden's Garden"
     Pop $3
@@ -68,9 +68,12 @@ Var EdenFinishLaunch
     File /oname=$PLUGINSDIR\eden-options.bmp "${BUILD_RESOURCES_DIR}\installer-options.bmp"
     nsDialogs::Create 1044
     Pop $0
+    ; Resize the real page dialog to occupy the enlarged host client area.
+    System::Call 'user32::SetWindowPos(p r0, p 0, i 0, i 0, i 734, i 300, i 0x16) i .r9'
     ${NSD_CreateBitmap} 0u 0u 417u 193u ""
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-options.bmp" $2
+    System::Call 'user32::SetWindowPos(p r1, p 0, i 0, i 0, i 734, i 300, i 0x16) i .r9'
 
     ${NSD_CreateLabel} 140u 72u 260u 27u "Choose Installation Options"
     Pop $3
@@ -116,9 +119,12 @@ Var EdenFinishLaunch
     File /oname=$PLUGINSDIR\eden-finish.bmp "${BUILD_RESOURCES_DIR}\installer-finish.bmp"
     nsDialogs::Create 1044
     Pop $0
+    ; Resize the real page dialog to occupy the enlarged host client area.
+    System::Call 'user32::SetWindowPos(p r0, p 0, i 0, i 0, i 734, i 300, i 0x16) i .r9'
     ${NSD_CreateBitmap} 0u 0u 417u 193u ""
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-finish.bmp" $2
+    System::Call 'user32::SetWindowPos(p r1, p 0, i 0, i 0, i 734, i 300, i 0x16) i .r9'
 
     ${NSD_CreateLabel} 140u 72u 260u 27u "Installation complete!"
     Pop $3
