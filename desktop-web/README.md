@@ -1,38 +1,44 @@
-# Eden's Garden desktop shell — build candidate v75
+# Eden's Garden desktop app — v0.75.0
 
-This folder stages a minimal Electron desktop wrapper for the **public unified Eden's Garden web app**.
+The desktop app is a lightweight Electron application for Windows, macOS and Linux. It opens the public unified Eden's Garden experience in a dedicated, child-friendly desktop window:
 
-**Current status:** source and packaging configuration only. The Windows and macOS installers are not signed, notarised, or user-tested. Do not distribute them as a final release until the GitHub Actions builds succeed and they have been tested on those platforms.
+`https://www.edensgarden.uk/app/unified/`
 
-## Behaviour
+## Installer experience
 
-- Loads https://www.edensgarden.uk/app/unified/ in a dedicated desktop window.
-- Browser storage is local to the desktop application, preserving child profiles and sticker rewards between launches.
-- Story Garden's explicit offline downloads can work after the content has been cached inside the desktop app.
-- No Node.js APIs are exposed to remote web content; sandbox, isolation and web security are enabled.
-- Requests for native permissions such as microphone, location and notifications are denied.
-- Links outside the approved unified app URL open in the default web browser.
-- An offline fallback page is displayed only if the web app itself cannot load.
+- **Windows:** branded NSIS setup wizard using the approved original Eden character artwork, custom Eden's Garden header/sidebar artwork, a welcome page, installation-location selection, installation progress and a branded completion page. Desktop and Start Menu shortcuts are created, and the app can launch after setup.
+- **macOS:** branded DMG with Eden's Garden background artwork and a drag-to-Applications layout. Both Intel (x64) and Apple silicon (arm64) builds are produced.
+- **Linux:** native Debian package (`.deb`) and portable AppImage (`.AppImage`). These use the Eden's Garden application icon and desktop launcher; the standard package manager or AppImage launch flow is used rather than pretending Linux has a Windows-style setup wizard.
 
-## Build instructions
+The Windows welcome and finish screens contain installation information only. They are **not** a fabricated licence agreement. The installer clearly explains that this is the desktop app, not the full Eden OS operating system.
 
-Use Node.js 22. In this folder:
+## Build and validation
+
+Use Node.js 22 in this directory:
 
 ```bash
 npm ci
 npm run check
-npm run dist:win   # Windows runner only
-npm run dist:mac   # macOS runner only
+npm run dist:win
+npm run dist:mac
+npm run dist:linux
 ```
 
-The workflow `.github/workflows/desktop-web.yml` can compile unsigned Windows x64 EXE and macOS x64/arm64 DMG files on matching GitHub Actions runners. It uploads build artifacts, **not public releases**.
+`npm run check` validates the Electron entry point and required branded installer assets, including expected image dimensions and NSIS welcome/finish page definitions.
 
-### Limitations
+GitHub Actions builds each platform on its matching hosted runner and performs clean-runner install/launch/uninstall smoke tests before uploading short-lived build artifacts. The workflow does not publish a public release automatically.
 
-- Native signing and notarisation are not yet configured. Microsoft SmartScreen and Apple Gatekeeper may warn.
-- The app loads web resources from the internet on first use. It is not a standalone full-media bundle.
-- Device profiles and rewards remain local; there is no server account sync.
-- Accessibility tests, OS packaging tests, SmartScreen and Gatekeeper validation are outstanding.
-- The official iMac Eden OS desktop remains separate and untouched.
+## Important release limitations
 
-**Security:** Never enable `nodeIntegration` or permit privileged APIs to run from remote website code.
+- Windows signing and Apple signing/notarisation are not configured. SmartScreen and Gatekeeper may show warnings.
+- The app loads the unified web experience from the internet. It is not a full offline bundle of all learning content or media.
+- Browser storage is local to this desktop app; profile and reward data are not synchronized between devices.
+- Hosted CI smoke tests are not a substitute for final hands-on testing on real Windows, macOS and Linux devices.
+- The existing Eden OS installation on the iMac is separate and is not modified by this desktop packaging project.
+
+## Security
+
+Remote web content runs with Node integration disabled, context isolation and sandboxing enabled. Native permission requests are denied, and links outside the approved unified app origin open in the system browser. Do not expose privileged Electron APIs to the remote website.
+
+Support: hello@edensgarden.uk  
+Website: https://edensgarden.uk

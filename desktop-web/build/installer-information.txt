@@ -1,12 +1,16 @@
 EDEN'S GARDEN
 
-Welcome to Eden's Garden, a calm and inclusive learning experience.
+Welcome to Eden's Garden, a calm, child-friendly space to learn, play, watch and grow.
 
-The desktop application connects securely to https://www.edensgarden.uk/app/unified/ and requires an internet connection to access the learning activities.
+The desktop application securely connects to:
+https://www.edensgarden.uk/app/unified/
+
+An internet connection is required for the online learning activities. Some Story Garden content may be available offline after it has been downloaded or cached in the app.
 
 Support: hello@edensgarden.uk
 Website: https://edensgarden.uk
 
-This installer does not install the full Eden OS operating system.
+IMPORTANT
+This installer installs the Eden's Garden desktop application. It does not install or replace the full Eden OS operating system.
 
-Please review the website's current terms and privacy information before using the service.
+Eden's Garden is provided for families to use in accordance with the current website terms and privacy information.
