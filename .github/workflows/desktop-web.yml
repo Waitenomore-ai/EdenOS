@@ -134,7 +134,8 @@ jobs:
           sudo apt-get install -y xvfb libfuse2
           DEB=$(find desktop-web/dist -maxdepth 1 -name '*.deb' -print -quit)
           test -n "$DEB"
-          sudo apt-get install -y "$DEB"
+          DEB_PATH="$GITHUB_WORKSPACE/$DEB"
+          sudo apt-get install -y "$DEB_PATH"
           DESKTOP=$(find /usr/share/applications -maxdepth 1 -iname '*eden*.desktop' -print -quit)
           test -n "$DESKTOP"
           BIN=$(python3 -c 'import configparser,shlex,sys; c=configparser.ConfigParser(interpolation=None); c.read(sys.argv[1]); a=shlex.split(c["Desktop Entry"]["Exec"]); print(a[0])' "$DESKTOP")
