@@ -3,6 +3,17 @@
 ; Native directory and installation-progress pages remain familiar and accessible.
 ; All artwork uses approved Eden's Garden assets and the original approved Eden portrait.
 
+; Resize the actual NSIS host window, not just the labels.
+; Standard wizard pages share this host and its navigation buttons.
+!define MUI_CUSTOMFUNCTION_GUIINIT EdenResizeWizard
+Function EdenResizeWizard
+  ; Keep the top-left position, change the outer window to 750 x 450.
+  System::Call 'user32::SetWindowPos(p $HWNDPARENT, p 0, i 0, i 0, i 750, i 450, i 0x16) i .r0'
+  ; Expand the built-in page holder to the larger content area.
+  GetDlgItem $0 $HWNDPARENT 1018
+  System::Call 'user32::SetWindowPos(p r0, p 0, i 0, i 0, i 734, i 358, i 0x16) i .r1'
+FunctionEnd
+
 Var EdenLaunchChoice
 Var EdenOptionsLaunch
 Var EdenFinishLaunch
@@ -26,13 +37,13 @@ Var EdenFinishLaunch
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-welcome.bmp" $2
 
-    ${NSD_CreateLabel} 140u 72u 154u 27u "Welcome to Eden's Garden"
+    ${NSD_CreateLabel} 140u 72u 260u 27u "Welcome to Eden's Garden"
     Pop $3
     SetCtlColors $3 "10223F" "FFFFFF"
     CreateFont $4 "Segoe UI" "11" "700"
     SendMessage $3 ${WM_SETFONT} $4 0
 
-    ${NSD_CreateLabel} 140u 107u 154u 53u "This will install Eden's Garden on your computer.$\r$\nA calm, child-friendly space to learn, play,$\r$\nwatch and grow at your own pace."
+    ${NSD_CreateLabel} 140u 107u 260u 53u "This will install Eden's Garden on your computer.$\r$\nA calm, child-friendly space to learn, play,$\r$\nwatch and grow at your own pace."
     Pop $5
     SetCtlColors $5 "24344A" "FFFFFF"
 
@@ -61,17 +72,17 @@ Var EdenFinishLaunch
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-options.bmp" $2
 
-    ${NSD_CreateLabel} 140u 72u 154u 27u "Choose Installation Options"
+    ${NSD_CreateLabel} 140u 72u 260u 27u "Choose Installation Options"
     Pop $3
     SetCtlColors $3 "10223F" "FFFFFF"
     CreateFont $4 "Segoe UI" "11" "700"
     SendMessage $3 ${WM_SETFONT} $4 0
 
-    ${NSD_CreateLabel} 140u 106u 154u 38u "Desktop and Start Menu shortcuts are included.$\r$\nChoose whether to open Eden after setup."
+    ${NSD_CreateLabel} 140u 106u 260u 38u "Desktop and Start Menu shortcuts are included.$\r$\nChoose whether to open Eden after setup."
     Pop $5
     SetCtlColors $5 "24344A" "FFFFFF"
 
-    ${NSD_CreateCheckBox} 140u 151u 154u 16u "Launch Eden's Garden after setup"
+    ${NSD_CreateCheckBox} 140u 151u 260u 16u "Launch Eden's Garden after setup"
     Pop $EdenOptionsLaunch
     SetCtlColors $EdenOptionsLaunch "24344A" "FFFFFF"
     ${If} $EdenLaunchChoice == "1"
@@ -109,17 +120,17 @@ Var EdenFinishLaunch
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-finish.bmp" $2
 
-    ${NSD_CreateLabel} 140u 72u 154u 27u "Installation complete!"
+    ${NSD_CreateLabel} 140u 72u 260u 27u "Installation complete!"
     Pop $3
     SetCtlColors $3 "10223F" "FFFFFF"
     CreateFont $4 "Segoe UI" "11" "700"
     SendMessage $3 ${WM_SETFONT} $4 0
 
-    ${NSD_CreateLabel} 140u 105u 154u 42u "Eden's Garden has been installed successfully.$\r$\nYour garden of learning and discovery is ready."
+    ${NSD_CreateLabel} 140u 105u 260u 42u "Eden's Garden has been installed successfully.$\r$\nYour garden of learning and discovery is ready."
     Pop $5
     SetCtlColors $5 "24344A" "FFFFFF"
 
-    ${NSD_CreateCheckBox} 140u 153u 154u 16u "Launch Eden's Garden now"
+    ${NSD_CreateCheckBox} 140u 153u 260u 16u "Launch Eden's Garden now"
     Pop $EdenFinishLaunch
     SetCtlColors $EdenFinishLaunch "24344A" "FFFFFF"
     ${If} $EdenLaunchChoice == "1"
