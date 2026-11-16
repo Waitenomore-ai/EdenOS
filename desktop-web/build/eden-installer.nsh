@@ -38,6 +38,9 @@ Var EdenFinishLaunch
     Pop $5
     SetCtlColors $5 "24344A" "FFFFFF"
 
+    ; HWND_BOTTOM=1, SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE=0x13
+    ; Keep the illustrated background behind text and interactive controls.
+    System::Call 'user32::SetWindowPos(p r1, p 1, i 0, i 0, i 0, i 0, i 0x13) i .r0'
     nsDialogs::Show
     Call muiPageUnloadFullWindow
   FunctionEnd
@@ -80,6 +83,9 @@ Var EdenFinishLaunch
       SendMessage $EdenOptionsLaunch ${BM_SETCHECK} ${BST_CHECKED} 0
     ${EndIf}
 
+    ; HWND_BOTTOM=1, SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE=0x13
+    ; Keep the illustrated background behind text and interactive controls.
+    System::Call 'user32::SetWindowPos(p r1, p 1, i 0, i 0, i 0, i 0, i 0x13) i .r0'
     nsDialogs::Show
     Call muiPageUnloadFullWindow
   FunctionEnd
@@ -128,6 +134,9 @@ Var EdenFinishLaunch
       SendMessage $EdenFinishLaunch ${BM_SETCHECK} ${BST_CHECKED} 0
     ${EndIf}
 
+    ; HWND_BOTTOM=1, SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE=0x13
+    ; Keep the illustrated background behind text and interactive controls.
+    System::Call 'user32::SetWindowPos(p r1, p 1, i 0, i 0, i 0, i 0, i 0x13) i .r0'
     nsDialogs::Show
     Call muiPageUnloadFullWindow
   FunctionEnd
