@@ -26,13 +26,13 @@ Var EdenFinishLaunch
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-welcome.bmp" $2
 
-    ${NSD_CreateLabel} 205u 72u 202u 27u "Welcome to Eden's Garden"
+    ${NSD_CreateLabel} 140u 72u 154u 27u "Welcome to Eden's Garden"
     Pop $3
     SetCtlColors $3 "10223F" "FFFFFF"
-    CreateFont $4 "Segoe UI" "15" "700"
+    CreateFont $4 "Segoe UI" "11" "700"
     SendMessage $3 ${WM_SETFONT} $4 0
 
-    ${NSD_CreateLabel} 205u 107u 202u 53u "This will install Eden's Garden on your computer.$\r$\nA calm, child-friendly space to learn, play,$\r$\nwatch and grow at your own pace."
+    ${NSD_CreateLabel} 140u 107u 154u 53u "This will install Eden's Garden on your computer.$\r$\nA calm, child-friendly space to learn, play,$\r$\nwatch and grow at your own pace."
     Pop $5
     SetCtlColors $5 "24344A" "FFFFFF"
 
@@ -61,17 +61,17 @@ Var EdenFinishLaunch
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-options.bmp" $2
 
-    ${NSD_CreateLabel} 205u 72u 202u 27u "Choose Installation Options"
+    ${NSD_CreateLabel} 140u 72u 154u 27u "Choose Installation Options"
     Pop $3
     SetCtlColors $3 "10223F" "FFFFFF"
-    CreateFont $4 "Segoe UI" "15" "700"
+    CreateFont $4 "Segoe UI" "11" "700"
     SendMessage $3 ${WM_SETFONT} $4 0
 
-    ${NSD_CreateLabel} 205u 106u 202u 38u "Desktop and Start Menu shortcuts are included.$\r$\nChoose whether to open Eden after setup."
+    ${NSD_CreateLabel} 140u 106u 154u 38u "Desktop and Start Menu shortcuts are included.$\r$\nChoose whether to open Eden after setup."
     Pop $5
     SetCtlColors $5 "24344A" "FFFFFF"
 
-    ${NSD_CreateCheckBox} 205u 151u 205u 16u "Launch Eden's Garden after setup"
+    ${NSD_CreateCheckBox} 140u 151u 154u 16u "Launch Eden's Garden after setup"
     Pop $EdenOptionsLaunch
     SetCtlColors $EdenOptionsLaunch "24344A" "FFFFFF"
     ${If} $EdenLaunchChoice == "1"
@@ -109,17 +109,17 @@ Var EdenFinishLaunch
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-finish.bmp" $2
 
-    ${NSD_CreateLabel} 205u 72u 202u 27u "Installation complete!"
+    ${NSD_CreateLabel} 140u 72u 154u 27u "Installation complete!"
     Pop $3
     SetCtlColors $3 "10223F" "FFFFFF"
-    CreateFont $4 "Segoe UI" "16" "700"
+    CreateFont $4 "Segoe UI" "11" "700"
     SendMessage $3 ${WM_SETFONT} $4 0
 
-    ${NSD_CreateLabel} 205u 105u 202u 42u "Eden's Garden has been installed successfully.$\r$\nYour garden of learning and discovery is ready."
+    ${NSD_CreateLabel} 140u 105u 154u 42u "Eden's Garden has been installed successfully.$\r$\nYour garden of learning and discovery is ready."
     Pop $5
     SetCtlColors $5 "24344A" "FFFFFF"
 
-    ${NSD_CreateCheckBox} 205u 153u 205u 16u "Launch Eden's Garden now"
+    ${NSD_CreateCheckBox} 140u 153u 154u 16u "Launch Eden's Garden now"
     Pop $EdenFinishLaunch
     SetCtlColors $EdenFinishLaunch "24344A" "FFFFFF"
     ${If} $EdenLaunchChoice == "1"
