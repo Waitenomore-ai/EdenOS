@@ -10,10 +10,11 @@
   },
   "license": "UNLICENSED",
   "scripts": {
-    "check": "node --check main.cjs",
+    "check": "node --check main.cjs && npm run check:installer",
     "dist:win": "electron-builder --win nsis --x64 --publish never",
     "dist:mac": "electron-builder --mac dmg --x64 --arm64 --publish never",
-    "dist:linux": "electron-builder --linux AppImage deb --x64 --publish never"
+    "dist:linux": "electron-builder --linux AppImage deb --x64 --publish never",
+    "check:installer": "node scripts/check-installer-assets.cjs"
   },
   "devDependencies": {
     "electron": "45.3.0",
