@@ -32,6 +32,23 @@ jobs:
         run: npm run dist:win
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Install, launch and uninstall on clean Windows runner
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem desktop-web/dist -Filter '*.exe' | Select-Object -First 1
+          if (-not $installer) { throw 'Windows installer missing' }
+          $target = 'C:\EdenGardenSmokeTest'
+          Start-Process -FilePath $installer.FullName -ArgumentList @('/S', "/D=$target") -Wait -PassThru | Out-Null
+          $app = Join-Path $target 'Edens Garden.exe'
+          if (-not (Test-Path $app)) { throw "Installed application not found: $app" }
+          $proc = Start-Process -FilePath $app -PassThru
+          Start-Sleep -Seconds 12
+          if ($proc.HasExited) { throw 'Eden Garden exited during Windows launch smoke test' }
+          Stop-Process -Id $proc.Id -Force
+          $uninstaller = Join-Path $target 'Uninstall Eden Garden.exe'
+          if (Test-Path $uninstaller) { Start-Process -FilePath $uninstaller -ArgumentList '/S' -Wait }
+          if (Test-Path $target) { Remove-Item $target -Recurse -Force -ErrorAction SilentlyContinue }
+          Write-Host 'WINDOWS_INSTALL_LAUNCH_UNINSTALL_PASS'
       - uses: actions/upload-artifact@v4
         with:
           name: Eden-Garden-Windows-unsigned
@@ -60,6 +77,29 @@ jobs:
         run: npm run dist:mac
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Mount, install and launch on clean macOS runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          DMG=$(find desktop-web/dist -maxdepth 1 -name '*.dmg' -print -quit)
+          test -n "$DMG"
+          MOUNT=$(mktemp -d)
+          hdiutil attach "$DMG" -mountpoint "$MOUNT" -nobrowse -quiet
+          APP=$(find "$MOUNT" -maxdepth 1 -name '*.app' -print -quit)
+          test -n "$APP"
+          cp -R "$APP" /Applications/
+          hdiutil detach "$MOUNT" -quiet
+          INSTALLED="/Applications/$(basename "$APP")"
+          test -d "$INSTALLED"
+          xattr -dr com.apple.quarantine "$INSTALLED" || true
+          EXECUTABLE=$(defaults read "$INSTALLED/Contents/Info" CFBundleExecutable)
+          "$INSTALLED/Contents/MacOS/$EXECUTABLE" >/tmp/eden-macos-smoke.log 2>&1 &
+          APP_PID=$!
+          sleep 12
+          kill -0 "$APP_PID"
+          kill "$APP_PID" || true
+          rm -rf "$INSTALLED"
+          echo MACOS_INSTALL_LAUNCH_REMOVE_PASS
       - uses: actions/upload-artifact@v4
         with:
           name: Eden-Garden-Mac-unsigned
@@ -86,6 +126,39 @@ jobs:
       - name: Build Linux packages
         working-directory: desktop-web
         run: npm run dist:linux
+      - name: Install, launch and remove Debian package on clean Linux runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y xvfb libfuse2
+          DEB=$(find desktop-web/dist -maxdepth 1 -name '*.deb' -print -quit)
+          test -n "$DEB"
+          DEB_PATH="$GITHUB_WORKSPACE/$DEB"
+          sudo apt-get install -y "$DEB_PATH"
+          DESKTOP=$(find /usr/share/applications -maxdepth 1 -iname '*eden*.desktop' -print -quit)
+          test -n "$DESKTOP"
+          BIN=$(python3 -c 'import configparser,shlex,sys; c=configparser.ConfigParser(interpolation=None); c.read(sys.argv[1]); a=shlex.split(c["Desktop Entry"]["Exec"]); print(a[0])' "$DESKTOP")
+          test -x "$BIN"
+          xvfb-run -a timeout 15s "$BIN" >/tmp/eden-linux-smoke.log 2>&1 &
+          PID=$!
+          sleep 5
+          if ! kill -0 "$PID" 2>/dev/null; then cat /tmp/eden-linux-smoke.log; exit 1; fi
+          wait "$PID" || STATUS=$?
+          if [ "${STATUS:-0}" -ne 124 ] && [ "${STATUS:-0}" -ne 0 ]; then cat /tmp/eden-linux-smoke.log; exit "$STATUS"; fi
+          sudo apt-get remove -y edens-garden-desktop
+          APPIMAGE=$(find desktop-web/dist -maxdepth 1 -name '*.AppImage' -print -quit)
+          test -n "$APPIMAGE"
+          chmod +x "$APPIMAGE"
+          (cd /tmp && "$GITHUB_WORKSPACE/$APPIMAGE" --appimage-extract >/dev/null)
+          test -x /tmp/squashfs-root/AppRun
+          xvfb-run -a timeout 15s /tmp/squashfs-root/AppRun >/tmp/eden-appimage-smoke.log 2>&1 &
+          APID=$!
+          sleep 5
+          if ! kill -0 "$APID" 2>/dev/null; then cat /tmp/eden-appimage-smoke.log; exit 1; fi
+          wait "$APID" || ASTATUS=$?
+          if [ "${ASTATUS:-0}" -ne 124 ] && [ "${ASTATUS:-0}" -ne 0 ]; then cat /tmp/eden-appimage-smoke.log; exit "$ASTATUS"; fi
+          echo LINUX_DEB_AND_APPIMAGE_INSTALL_LAUNCH_REMOVE_PASS
       - uses: actions/upload-artifact@v4
         with:
           name: Eden-Garden-Linux-testing
