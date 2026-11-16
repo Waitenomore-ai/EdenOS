@@ -1,5 +1,5 @@
 !ifndef BUILD_UNINSTALLER
-; Eden's Garden illustrated, full-width NSIS pages.
+; Eden's Garden illustrated NSIS pages using standard nsDialogs control ownership.
 ; Native directory and installation-progress pages remain familiar and accessible.
 ; All artwork uses approved Eden's Garden assets and the original approved Eden portrait.
 
@@ -13,7 +13,6 @@ Var EdenFinishLaunch
 
 !macro customWelcomePage
   !insertmacro MUI_PAGE_INIT
-  !insertmacro MUI_PAGE_FUNCTION_FULLWINDOW
   PageEx custom
     PageCallbacks EdenWelcomePre EdenWelcomeLeave
   PageExEnd
@@ -23,7 +22,6 @@ Var EdenFinishLaunch
     File /oname=$PLUGINSDIR\eden-welcome.bmp "${BUILD_RESOURCES_DIR}\installer-welcome.bmp"
     nsDialogs::Create 1044
     Pop $0
-    Call muiPageLoadFullWindow
     ${NSD_CreateBitmap} 0u 0u 417u 193u ""
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-welcome.bmp" $2
@@ -42,7 +40,6 @@ Var EdenFinishLaunch
     ; Keep the illustrated background behind text and interactive controls.
     System::Call 'user32::SetWindowPos(p r1, p 1, i 0, i 0, i 0, i 0, i 0x13) i .r0'
     nsDialogs::Show
-    Call muiPageUnloadFullWindow
   FunctionEnd
 
   Function EdenWelcomeLeave
@@ -51,7 +48,6 @@ Var EdenFinishLaunch
 
 !macro customPageAfterChangeDir
   !insertmacro MUI_PAGE_INIT
-  !insertmacro MUI_PAGE_FUNCTION_FULLWINDOW
   PageEx custom
     PageCallbacks EdenOptionsPre EdenOptionsLeave
   PageExEnd
@@ -61,7 +57,6 @@ Var EdenFinishLaunch
     File /oname=$PLUGINSDIR\eden-options.bmp "${BUILD_RESOURCES_DIR}\installer-options.bmp"
     nsDialogs::Create 1044
     Pop $0
-    Call muiPageLoadFullWindow
     ${NSD_CreateBitmap} 0u 0u 417u 193u ""
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-options.bmp" $2
@@ -87,7 +82,6 @@ Var EdenFinishLaunch
     ; Keep the illustrated background behind text and interactive controls.
     System::Call 'user32::SetWindowPos(p r1, p 1, i 0, i 0, i 0, i 0, i 0x13) i .r0'
     nsDialogs::Show
-    Call muiPageUnloadFullWindow
   FunctionEnd
 
   Function EdenOptionsLeave
@@ -102,7 +96,6 @@ Var EdenFinishLaunch
 
 !macro customFinishPage
   !insertmacro MUI_PAGE_INIT
-  !insertmacro MUI_PAGE_FUNCTION_FULLWINDOW
   PageEx custom
     PageCallbacks EdenFinishPre EdenFinishLeave
   PageExEnd
@@ -112,7 +105,6 @@ Var EdenFinishLaunch
     File /oname=$PLUGINSDIR\eden-finish.bmp "${BUILD_RESOURCES_DIR}\installer-finish.bmp"
     nsDialogs::Create 1044
     Pop $0
-    Call muiPageLoadFullWindow
     ${NSD_CreateBitmap} 0u 0u 417u 193u ""
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-finish.bmp" $2
@@ -138,7 +130,6 @@ Var EdenFinishLaunch
     ; Keep the illustrated background behind text and interactive controls.
     System::Call 'user32::SetWindowPos(p r1, p 1, i 0, i 0, i 0, i 0, i 0x13) i .r0'
     nsDialogs::Show
-    Call muiPageUnloadFullWindow
   FunctionEnd
 
   Function EdenStartApp
