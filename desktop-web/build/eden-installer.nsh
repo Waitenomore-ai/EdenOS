@@ -23,6 +23,7 @@ Var EdenFinishLaunch
     File /oname=$PLUGINSDIR\eden-welcome.bmp "${BUILD_RESOURCES_DIR}\installer-welcome.bmp"
     nsDialogs::Create 1044
     Pop $0
+    Call muiPageLoadFullWindow
     ${NSD_CreateBitmap} 0u 0u 417u 193u ""
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-welcome.bmp" $2
@@ -37,7 +38,6 @@ Var EdenFinishLaunch
     Pop $5
     SetCtlColors $5 "24344A" "FFFFFF"
 
-    Call muiPageLoadFullWindow
     nsDialogs::Show
     Call muiPageUnloadFullWindow
   FunctionEnd
@@ -58,6 +58,7 @@ Var EdenFinishLaunch
     File /oname=$PLUGINSDIR\eden-options.bmp "${BUILD_RESOURCES_DIR}\installer-options.bmp"
     nsDialogs::Create 1044
     Pop $0
+    Call muiPageLoadFullWindow
     ${NSD_CreateBitmap} 0u 0u 417u 193u ""
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-options.bmp" $2
@@ -79,7 +80,6 @@ Var EdenFinishLaunch
       SendMessage $EdenOptionsLaunch ${BM_SETCHECK} ${BST_CHECKED} 0
     ${EndIf}
 
-    Call muiPageLoadFullWindow
     nsDialogs::Show
     Call muiPageUnloadFullWindow
   FunctionEnd
@@ -106,6 +106,7 @@ Var EdenFinishLaunch
     File /oname=$PLUGINSDIR\eden-finish.bmp "${BUILD_RESOURCES_DIR}\installer-finish.bmp"
     nsDialogs::Create 1044
     Pop $0
+    Call muiPageLoadFullWindow
     ${NSD_CreateBitmap} 0u 0u 417u 193u ""
     Pop $1
     ${NSD_SetImage} $1 "$PLUGINSDIR\eden-finish.bmp" $2
@@ -127,7 +128,6 @@ Var EdenFinishLaunch
       SendMessage $EdenFinishLaunch ${BM_SETCHECK} ${BST_CHECKED} 0
     ${EndIf}
 
-    Call muiPageLoadFullWindow
     nsDialogs::Show
     Call muiPageUnloadFullWindow
   FunctionEnd
