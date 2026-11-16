@@ -20,20 +20,20 @@ Var EdenFinishLaunch
 
   Function EdenWelcomePre
     InitPluginsDir
-    File /oname=$PLUGINSDIR\eden-welcome.bmp "build/installer-welcome.bmp"
+    File /oname=$PLUGINSDIR\eden-welcome.bmp "${BUILD_RESOURCES_DIR}\installer-welcome.bmp"
     nsDialogs::Create 1044
     Pop $0
-    \${NSD_CreateBitmap} 0u 0u 417u 193u ""
+    ${NSD_CreateBitmap} 0u 0u 417u 193u ""
     Pop $1
-    \${NSD_SetImage} $1 "$PLUGINSDIR\eden-welcome.bmp" $2
+    ${NSD_SetImage} $1 "$PLUGINSDIR\eden-welcome.bmp" $2
 
-    \${NSD_CreateLabel} 205u 119u 202u 27u "Welcome to the Eden's Garden Setup"
+    ${NSD_CreateLabel} 205u 119u 202u 27u "Welcome to the Eden's Garden Setup"
     Pop $3
     SetCtlColors $3 "10223F" "FFFFFF"
     CreateFont $4 "Segoe UI" "15" "700"
-    SendMessage $3 \${WM_SETFONT} $4 0
+    SendMessage $3 ${WM_SETFONT} $4 0
 
-    \${NSD_CreateLabel} 205u 151u 202u 34u "This will install Eden's Garden on your computer.$\r$\nA calm, child-friendly space to learn, play,$\r$\nwatch and grow at your own pace."
+    ${NSD_CreateLabel} 205u 151u 202u 34u "This will install Eden's Garden on your computer.$\r$\nA calm, child-friendly space to learn, play,$\r$\nwatch and grow at your own pace."
     Pop $5
     SetCtlColors $5 "24344A" "FFFFFF"
 
@@ -55,29 +55,29 @@ Var EdenFinishLaunch
 
   Function EdenOptionsPre
     InitPluginsDir
-    File /oname=$PLUGINSDIR\eden-options.bmp "build/installer-options.bmp"
+    File /oname=$PLUGINSDIR\eden-options.bmp "${BUILD_RESOURCES_DIR}\installer-options.bmp"
     nsDialogs::Create 1044
     Pop $0
-    \${NSD_CreateBitmap} 0u 0u 417u 193u ""
+    ${NSD_CreateBitmap} 0u 0u 417u 193u ""
     Pop $1
-    \${NSD_SetImage} $1 "$PLUGINSDIR\eden-options.bmp" $2
+    ${NSD_SetImage} $1 "$PLUGINSDIR\eden-options.bmp" $2
 
-    \${NSD_CreateLabel} 205u 119u 202u 27u "Choose Installation Options"
+    ${NSD_CreateLabel} 205u 119u 202u 27u "Choose Installation Options"
     Pop $3
     SetCtlColors $3 "10223F" "FFFFFF"
     CreateFont $4 "Segoe UI" "15" "700"
-    SendMessage $3 \${WM_SETFONT} $4 0
+    SendMessage $3 ${WM_SETFONT} $4 0
 
-    \${NSD_CreateLabel} 205u 149u 202u 29u "A desktop shortcut and Start Menu entry$\r$\nwill be created for easy access."
+    ${NSD_CreateLabel} 205u 149u 202u 29u "A desktop shortcut and Start Menu entry$\r$\nwill be created for easy access."
     Pop $5
     SetCtlColors $5 "24344A" "FFFFFF"
 
-    \${NSD_CreateCheckBox} 205u 177u 205u 16u "Launch Eden's Garden after setup"
+    ${NSD_CreateCheckBox} 205u 177u 205u 16u "Launch Eden's Garden after setup"
     Pop $EdenOptionsLaunch
     SetCtlColors $EdenOptionsLaunch "24344A" "FFFFFF"
-    \${If} $EdenLaunchChoice == "1"
-      SendMessage $EdenOptionsLaunch \${BM_SETCHECK} \${BST_CHECKED} 0
-    \${EndIf}
+    ${If} $EdenLaunchChoice == "1"
+      SendMessage $EdenOptionsLaunch ${BM_SETCHECK} ${BST_CHECKED} 0
+    ${EndIf}
 
     Call muiPageLoadFullWindow
     nsDialogs::Show
@@ -85,12 +85,12 @@ Var EdenFinishLaunch
   FunctionEnd
 
   Function EdenOptionsLeave
-    SendMessage $EdenOptionsLaunch \${BM_GETCHECK} 0 0 $0
-    \${If} $0 == \${BST_CHECKED}
+    SendMessage $EdenOptionsLaunch ${BM_GETCHECK} 0 0 $0
+    ${If} $0 == ${BST_CHECKED}
       StrCpy $EdenLaunchChoice "1"
-    \${Else}
+    ${Else}
       StrCpy $EdenLaunchChoice "0"
-    \${EndIf}
+    ${EndIf}
   FunctionEnd
 !macroend
 
@@ -103,29 +103,29 @@ Var EdenFinishLaunch
 
   Function EdenFinishPre
     InitPluginsDir
-    File /oname=$PLUGINSDIR\eden-finish.bmp "build/installer-finish.bmp"
+    File /oname=$PLUGINSDIR\eden-finish.bmp "${BUILD_RESOURCES_DIR}\installer-finish.bmp"
     nsDialogs::Create 1044
     Pop $0
-    \${NSD_CreateBitmap} 0u 0u 417u 193u ""
+    ${NSD_CreateBitmap} 0u 0u 417u 193u ""
     Pop $1
-    \${NSD_SetImage} $1 "$PLUGINSDIR\eden-finish.bmp" $2
+    ${NSD_SetImage} $1 "$PLUGINSDIR\eden-finish.bmp" $2
 
-    \${NSD_CreateLabel} 205u 119u 202u 27u "Eden's Garden is ready!"
+    ${NSD_CreateLabel} 205u 119u 202u 27u "Eden's Garden is ready!"
     Pop $3
     SetCtlColors $3 "10223F" "FFFFFF"
     CreateFont $4 "Segoe UI" "16" "700"
-    SendMessage $3 \${WM_SETFONT} $4 0
+    SendMessage $3 ${WM_SETFONT} $4 0
 
-    \${NSD_CreateLabel} 205u 151u 202u 28u "Eden's Garden has been installed successfully.$\r$\nYour garden of learning, play and discovery$\r$\nis ready whenever you are."
+    ${NSD_CreateLabel} 205u 151u 202u 28u "Eden's Garden has been installed successfully.$\r$\nYour garden of learning and discovery is ready."
     Pop $5
     SetCtlColors $5 "24344A" "FFFFFF"
 
-    \${NSD_CreateCheckBox} 205u 179u 205u 15u "Launch Eden's Garden now"
+    ${NSD_CreateCheckBox} 205u 179u 205u 15u "Launch Eden's Garden now"
     Pop $EdenFinishLaunch
     SetCtlColors $EdenFinishLaunch "24344A" "FFFFFF"
-    \${If} $EdenLaunchChoice == "1"
-      SendMessage $EdenFinishLaunch \${BM_SETCHECK} \${BST_CHECKED} 0
-    \${EndIf}
+    ${If} $EdenLaunchChoice == "1"
+      SendMessage $EdenFinishLaunch ${BM_SETCHECK} ${BST_CHECKED} 0
+    ${EndIf}
 
     Call muiPageLoadFullWindow
     nsDialogs::Show
@@ -133,19 +133,19 @@ Var EdenFinishLaunch
   FunctionEnd
 
   Function EdenStartApp
-    \${if} \${isUpdated}
+    ${if} ${isUpdated}
       StrCpy $1 "--updated"
-    \${else}
+    ${else}
       StrCpy $1 ""
-    \${endif}
-    \${StdUtils.ExecShellAsUser} $0 "$launchLink" "open" "$1"
+    ${endif}
+    ${StdUtils.ExecShellAsUser} $0 "$launchLink" "open" "$1"
   FunctionEnd
 
   Function EdenFinishLeave
-    SendMessage $EdenFinishLaunch \${BM_GETCHECK} 0 0 $0
-    \${If} $0 == \${BST_CHECKED}
+    SendMessage $EdenFinishLaunch ${BM_GETCHECK} 0 0 $0
+    ${If} $0 == ${BST_CHECKED}
       Call EdenStartApp
-    \${EndIf}
+    ${EndIf}
   FunctionEnd
 !macroend
 
