@@ -1,0 +1,115 @@
+{
+  "name": "edens-garden-desktop",
+  "version": "0.75.0",
+  "private": true,
+  "description": "Eden's Garden unified learning web app desktop shell",
+  "main": "main.cjs",
+  "author": {
+    "name": "Eden's Garden",
+    "email": "hello@edensgarden.uk"
+  },
+  "license": "UNLICENSED",
+  "scripts": {
+    "check": "node --check main.cjs",
+    "dist:win": "electron-builder --win nsis --x64 --publish never",
+    "dist:mac": "electron-builder --mac dmg --x64 --arm64 --publish never",
+    "dist:linux": "electron-builder --linux AppImage deb --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "45.3.0",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "uk.edensgarden.desktop",
+    "productName": "Edens Garden",
+    "artifactName": "EdensGarden-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "files": [
+      "main.cjs",
+      "offline.html",
+      "build/icon.png"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Eden's Garden",
+      "installerHeader": "build/installer-header.bmp",
+      "installerSidebar": "build/installer-sidebar.bmp",
+      "uninstallerSidebar": "build/installer-sidebar.bmp",
+      "license": "build/installer-information.txt",
+      "runAfterFinish": false
+    },
+    "mac": {
+      "icon": "build/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.education"
+    },
+    "linux": {
+      "icon": "build/icon.png",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Education",
+      "synopsis": "Eden\u2019s Garden learning app",
+      "syncDesktopName": true
+    },
+    "publish": null,
+    "dmg": {
+      "background": "build/dmg-background.png",
+      "window": {
+        "width": 640,
+        "height": 430
+      },
+      "contents": [
+        {
+          "x": 165,
+          "y": 195,
+          "type": "file"
+        },
+        {
+          "x": 470,
+          "y": 195,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
+  },
+  "homepage": "https://edensgarden.uk",
+  "desktopName": "EdensGarden"
+}
