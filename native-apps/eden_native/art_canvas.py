@@ -2,6 +2,7 @@
 from pathlib import Path
 from collections import Counter
 import json
+import math
 import os
 import tempfile
 from PySide6.QtCore import Qt, QPointF, Signal
@@ -446,7 +447,9 @@ class ArtCanvas(QWidget):
         source = directory / "current-art-project.json"
         if source.is_symlink() or source.stat().st_size > 2_000_000:
             raise ValueError("Invalid art project file")
-        payload = json.loads(source.read_text(encoding="utf-8"))
+        def reject_nonfinite(value):
+            raise ValueError("Non-finite art project number")
+        payload = json.loads(source.read_text(encoding="utf-8"), parse_constant=reject_nonfinite)
         if not isinstance(payload, dict) or payload.get("version") != 1:
             raise ValueError("Unsupported art project")
         background = payload.get("background", "White")
@@ -457,22 +460,22 @@ class ArtCanvas(QWidget):
         if not isinstance(strokes, list) or len(strokes) > 500 or not isinstance(stickers, list) or len(stickers) > 24:
             raise ValueError("Invalid art project contents")
         for stroke in strokes:
-            if not isinstance(stroke, dict) or stroke.get("colour") not in PALETTE or not isinstance(stroke.get("width"), (int, float)) or not 1 <= stroke["width"] <= 28:
+            if not isinstance(stroke, dict) or stroke.get("colour") not in PALETTE or isinstance(stroke.get("width"), bool) or not isinstance(stroke.get("width"), (int, float)) or not math.isfinite(stroke["width"]) or not 1 <= stroke["width"] <= 28:
                 raise ValueError("Invalid stroke")
             if stroke.get("mode", "paint") not in ("paint", "erase"):
                 raise ValueError("Invalid brush mode")
             points = stroke.get("points")
-            if not isinstance(points, list) or len(points) > 2000:
+            if not isinstance(points, list) or not 1 <= len(points) <= 2000:
                 raise ValueError("Invalid points")
             for point in points:
-                if not isinstance(point, list) or len(point) != 2 or not all(isinstance(v, (int, float)) and 0 <= v <= 1 for v in point):
+                if not isinstance(point, list) or len(point) != 2 or not all(isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) and 0 <= v <= 1 for v in point):
                     raise ValueError("Invalid coordinates")
         if not all(isinstance(sku, str) and len(sku) <= 80 and sku.startswith("sticker_") for sku in stickers):
             raise ValueError("Invalid sticker reference")
         positions = payload.get("sticker_positions", [])
         if not isinstance(positions, list) or len(positions) not in (0, len(stickers)):
             raise ValueError("Invalid sticker positions")
-        if not all(isinstance(pos, list) and len(pos) == 2 and all(isinstance(v, (float, int)) and not isinstance(v, bool) and 0 <= v <= 1 for v in pos) for pos in positions):
+        if not all(isinstance(pos, list) and len(pos) == 2 and all(isinstance(v, (float, int)) and not isinstance(v, bool) and math.isfinite(v) and 0 <= v <= 1 for v in pos) for pos in positions):
             raise ValueError("Invalid sticker coordinates")
         if allowed_stickers is not None and any(sku not in allowed_stickers for sku in stickers):
             raise ValueError("Sticker not permitted for this child")

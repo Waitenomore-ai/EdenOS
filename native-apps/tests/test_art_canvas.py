@@ -93,6 +93,25 @@ class ArtCanvasTests(unittest.TestCase):
         self.canvas.set_colour("Blue")
         self.assertEqual(self.canvas.brush_mode, "paint")
 
+    def test_rejects_nonfinite_and_boolean_project_coordinates_without_mutation(self):
+        import json
+        with tempfile.TemporaryDirectory() as tmp:
+            directory=Path(tmp)
+            project=self.canvas.save_project(directory)
+            original_strokes=self.canvas.strokes[:]
+            cases=[
+                {'version':1,'strokes':[{'colour':'Blue','width':True,'points':[[.1,.2]]}],'stickers':[]},
+                {'version':1,'strokes':[{'colour':'Blue','width':6,'points':[]}],'stickers':[]},
+                {'version':1,'strokes':[{'colour':'Blue','width':6,'points':[[True,.2]]}],'stickers':[]},
+                {'version':1,'strokes':[{'colour':'Blue','width':6,'points':[[float('nan'),.2]]}],'stickers':[]},
+                {'version':1,'strokes':[],'stickers':['sticker_apple'],'sticker_positions':[[float('inf'),.2]]},
+            ]
+            for payload in cases:
+                project.write_text(json.dumps(payload))
+                with self.subTest(payload=payload),self.assertRaises(ValueError):
+                    self.canvas.load_project(directory)
+                self.assertEqual(self.canvas.strokes,original_strokes)
+
     def test_background_saved_and_validated(self):
         self.canvas.set_background("Sky")
         with tempfile.TemporaryDirectory() as tmp:
