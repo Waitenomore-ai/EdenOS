@@ -76,6 +76,7 @@ class EdenNativeWindow(QMainWindow):
         self._pin.setEchoMode(QLineEdit.EchoMode.Password)
         self._pin.setPlaceholderText("Parent PIN")
         self._pin.setMaxLength(8)
+        self._pin.returnPressed.connect(self._unlock_from_entry)
         parent_layout.addWidget(self._pin)
         unlock = QPushButton("Unlock Parent Corner")
         unlock.setAccessibleName("Unlock Parent Corner with PIN")
