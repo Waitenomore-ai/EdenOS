@@ -48,12 +48,31 @@ def create_window(*, pin_adapter=None, profiles=None):
             self.session = ParentSession(self.state, pin_adapter.verify_pin) if pin_adapter else None
             self.setWindowTitle("Eden OS — native desktop preview")
             self.resize(1024, 768)
+            self.setStyleSheet("""
+                QWidget { background: #e9f5e8; color: #214b39; font-size: 20px; }
+                QPushButton { background: #fff9e6; border: 2px solid #83b397;
+                    border-radius: 18px; padding: 12px; }
+                QPushButton:focus { border: 3px solid #3a7452; }
+                QLineEdit, QComboBox { background: white; color: #214b39;
+                    border: 2px solid #83b397; border-radius: 12px; padding: 9px; }
+                QScrollArea { border: none; }
+            """)
             self.layout = QVBoxLayout(self)
             self.title = QLabel("Eden OS")
             self.title.setObjectName("edenTitle")
             self.title.setStyleSheet("font-size: 26px; font-weight: bold;")
             self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.layout.addWidget(self.title)
+            self.login_banner = QLabel()
+            self.login_banner.setObjectName("edenApprovedLoginBanner")
+            self.login_banner.setAccessibleName("Choose your character banner")
+            self.login_banner.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            banner_path = Path(__file__).resolve().parent.parent / "assets" / "login" / "eden_choose_your_character_banner.png"
+            if banner_path.is_file() and not banner_path.is_symlink():
+                banner = QPixmap(str(banner_path))
+                if not banner.isNull():
+                    self.login_banner.setPixmap(banner.scaled(650, 154, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            self.layout.addWidget(self.login_banner)
             self.activity_toolbar = QWidget()
             self.activity_toolbar.setObjectName("edenSharedActivityToolbar")
             toolbar_layout = QGridLayout(self.activity_toolbar)
@@ -537,13 +556,17 @@ def create_window(*, pin_adapter=None, profiles=None):
             is_activity = self.state.page in activity_titles
             self.activity_toolbar.setVisible(is_activity)
             self.title.setVisible(not is_activity)
+            self.login_banner.setVisible(self.state.page == "login")
             if is_activity:
                 self.toolbar_heading.setText(activity_titles[self.state.page])
                 self.toolbar_heading.setAccessibleName(activity_titles[self.state.page])
             self.info.setText("Native preview · " + self.state.page + " · " + detect_platform().name)
-            def action(label, callback, grid=None, index=None):
+            def action(label, callback, grid=None, index=None, portrait=None):
                 button = QPushButton(label)
-                button.setMinimumHeight(56)
+                button.setMinimumHeight(112 if portrait else 56)
+                if portrait:
+                    button.setIcon(QIcon(str(portrait)))
+                    button.setIconSize(QSize(80, 98))
                 button.setAccessibleName(label)
                 button.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
                 button.clicked.connect(lambda _checked=False: callback())
@@ -558,8 +581,13 @@ def create_window(*, pin_adapter=None, profiles=None):
                         self.info.setText("Welcome to Eden — ask a parent to set up the first child")
                         if self.pin_adapter:
                             action("Parent setup", lambda: self.transition(self.state.open_parent()))
-                    for card in cards:
-                        action(card.display_name, lambda username=card.username: self.transition(self.state.select_child(username)))
+                    profile_grid_widget = QWidget()
+                    profile_grid = QGridLayout(profile_grid_widget)
+                    for index, card in enumerate(cards):
+                        portrait = resolve_avatar(card.avatar)
+                        action(card.display_name, lambda username=card.username: self.transition(self.state.select_child(username)),
+                               profile_grid, index, portrait=portrait)
+                    self.buttons.addWidget(profile_grid_widget)
                 else:
                     action("Preview child session", lambda: self.transition(self.state.select_child("demo-only")))
             elif self.state.page in ("my-day", "story-garden"):
