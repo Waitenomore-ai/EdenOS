@@ -323,7 +323,10 @@ def create_window(*, pin_adapter=None, profiles=None):
             if any(sku not in allowed for sku in skus):
                 return
             from .approved_models.art_studio_model import Stamp
-            self.art_game.stamps[:] = [Stamp(sku, "approved") for sku in skus]
+            # Free emoji stamps are a separate layer; approved-sticker undo
+            # must never silently erase them from the canonical ArtBoard.
+            free_stamps = [stamp for stamp in self.art_game.stamps if stamp.symbol not in allowed]
+            self.art_game.stamps[:] = free_stamps + [Stamp(sku, "approved") for sku in skus]
             self.render()
 
         def move_art_sticker_layer(self, direction):

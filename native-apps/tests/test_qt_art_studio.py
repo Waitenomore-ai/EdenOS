@@ -56,6 +56,17 @@ class ArtStudioTests(unittest.TestCase):
   self.window.answer_word(game.round.answer)
   self.assertEqual(service.balance('eden_demo'),20)
 
+ def test_free_emoji_stamps_survive_approved_sticker_undo(self):
+  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Add 🌼')
+  self.assertEqual([x.symbol for x in self.window.art_game.stamps],['🌼'])
+  self.click('Sticker: Apple')
+  self.assertEqual([x.symbol for x in self.window.art_game.stamps],['🌼','sticker_apple'])
+  self.assertTrue(self.window.art_canvas.undo_action())
+  self.assertEqual([x.symbol for x in self.window.art_game.stamps],['🌼'])
+  self.assertTrue(self.window.art_canvas.redo_action())
+  self.assertEqual([x.symbol for x in self.window.art_game.stamps],['🌼','sticker_apple'])
+
  def test_garden_stars_shop_requires_balance_and_unlocks_only_for_child(self):
   from eden_native.garden_stars import GardenStars
   self.click('Eden Demo');self.click('My Garden Stars')
