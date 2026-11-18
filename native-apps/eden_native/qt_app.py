@@ -1189,6 +1189,9 @@ def create_window(*, pin_adapter=None, profiles=None):
                 middle_layout = QVBoxLayout(middle_panel)
                 board = QWidget()
                 board.setObjectName("stickerGardenBoard")
+                # Original iMac artwork board is 810px wide: avoid stretching
+                # the 1672x941 approved image across a 1452px-wide desktop.
+                board.setMaximumWidth(810)
                 board.setMinimumSize(480 if compact_garden else 0, 310 if compact_garden else min(550, max(350, self.height() - 350)))
                 # Use the exact approved 1672x941 original iMac background.
                 # Never substitute unapproved artwork if it is missing.

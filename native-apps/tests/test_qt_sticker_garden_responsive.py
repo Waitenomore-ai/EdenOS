@@ -27,6 +27,7 @@ class StickerGardenResponsiveTests(unittest.TestCase):
      self.assertLessEqual(panel.width(),window.scroll_area.viewport().width(),(width,height,panel.width()))
      self.assertFalse(window.scroll_area.horizontalScrollBar().isVisible())
      self.assertGreaterEqual(board.height(),500 if width==1920 else 310)
+     self.assertLessEqual(board.width(),810)
      if width==800:self.assertTrue(window.scroll_area.verticalScrollBar().isVisible())
     finally:
      window.close();self.app.processEvents()
