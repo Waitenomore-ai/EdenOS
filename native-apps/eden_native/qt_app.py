@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import json
 import os
+import uuid
 from .core import NavigationState, detect_platform
 from .parent_session import ParentSession
 from .avatars import resolve_avatar
@@ -152,7 +153,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                 return
             try:
                 ParentProfileService(self.session, self.profiles).create(
-                    self.profile_username.text().strip().lower(), self.profile_name.text(), self.profile_avatar.currentText())
+                    self.profile_username.text(), self.profile_name.text(), self.profile_avatar.currentText())
             except (ValueError, PermissionError, OSError) as exc:
                 self.info.setText("Profile not created: " + str(exc))
                 return
@@ -216,6 +217,47 @@ def create_window(*, pin_adapter=None, profiles=None):
                 self.transition(NavigationState(page=activity, child_id=self.state.child_id))
             else:
                 self.info.setText("Activity integration pending")
+
+        def garden_stars_service(self):
+            if not self.profiles or not self.session or not self.state.child_id:
+                return None
+            if self.profiles.get(self.state.child_id) is None:
+                return None
+            service = GardenStars(self.profiles.path.parent / "garden-stars.sqlite3")
+            service.create_profile(self.state.child_id)
+            return service
+
+        def award_garden_stars(self, activity):
+            service = self.garden_stars_service()
+            if service is None:
+                return 0
+            try:
+                result = service.earn(self.state.child_id, activity, str(uuid.uuid4()))
+                return result.get("awarded", 0)
+            except (OSError, ValueError):
+                return 0
+
+        def open_garden_stars(self):
+            if self.state.page != "home" or self.garden_stars_service() is None:
+                return False
+            self.transition(NavigationState(page="garden-stars", child_id=self.state.child_id))
+            return True
+
+        def purchase_garden_sticker(self, sku):
+            if self.state.page != "garden-stars":
+                return False
+            service = self.garden_stars_service()
+            if service is None:
+                return False
+            try:
+                # Parent-free unlocks must be handled separately after PIN verification.
+                result = service.unlock(self.state.child_id, sku, parent_authorized=False)
+            except (ValueError, OSError) as exc:
+                self.info.setText("Sticker not unlocked: " + str(exc))
+                return False
+            self.render()
+            self.info.setText("Sticker unlocked for Art Studio!" if result["spent"] else "Sticker already collected")
+            return True
 
         def art_allowed_stickers(self):
             """Free stickers plus this child's earned/parent-unlocked rewards in isolated data."""
@@ -384,6 +426,7 @@ def create_window(*, pin_adapter=None, profiles=None):
         def answer_word(self, value):
             if self.state.page != "word-woodland" or self.word_game is None: return
             if self.word_game.answer(value):
+                self.award_garden_stars("word_woodland")
                 self.word_game.new_round()
                 self.render()
                 self.info.setText("Well done! Let's try another word.")
@@ -416,6 +459,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             if self.state.page != "number-meadow" or self.number_game is None:
                 return
             if self.number_game.answer(value):
+                self.award_garden_stars("number_meadow")
                 self.number_game.new_round()
                 self.render()
                 self.info.setText("Well done! Here's another number.")
@@ -844,6 +888,26 @@ def create_window(*, pin_adapter=None, profiles=None):
                 self.buttons.addWidget(choices_widget)
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
                 action("Log out", lambda: self.transition(self.state.logout()))
+            elif self.state.page == "garden-stars":
+                service = self.garden_stars_service()
+                if service is None:
+                    self.transition(self.state.logout())
+                    return
+                balance = service.balance(self.state.child_id)
+                owned = {item["sku"] for item in service.collection(self.state.child_id)}
+                self.info.setText("My Garden Stars — " + str(balance) + " stars")
+                self.buttons.addWidget(QLabel("Choose a sticker to unlock with your earned stars. Collected stickers appear in Art Studio."))
+                root = Path(__file__).resolve().parent.parent / "assets" / "stickers"
+                catalogue = json.loads((root / "manifest.json").read_text(encoding="utf-8"))["items"]
+                sticker_grid_widget = QWidget()
+                sticker_grid = QGridLayout(sticker_grid_widget)
+                for index, entry in enumerate(catalogue):
+                    sku, name, price = entry["sku"], entry["name"], entry["price"]
+                    label = name + (" — Collected ✓" if sku in owned or price == 0 else " — " + str(price) + " stars")
+                    action(label, lambda item=sku: self.purchase_garden_sticker(item), sticker_grid, index)
+                self.buttons.addWidget(sticker_grid_widget)
+                action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
+                action("Log out", lambda: self.transition(self.state.logout()))
             elif self.state.page == "home":
                 if self.profiles is not None:
                     card = self.profiles.get(self.state.child_id)
@@ -868,6 +932,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                             action(activity.replace("-", " ").title(), lambda name=activity: self.open_activity(name), self.activity_grid, position)
                             position += 1
                     self.buttons.addWidget(grid_widget)
+                action("My Garden Stars", self.open_garden_stars)
                 action("Parent Corner", lambda: self.transition(self.state.open_parent()))
                 action("Log out", lambda: self.transition(self.state.logout()))
             else:

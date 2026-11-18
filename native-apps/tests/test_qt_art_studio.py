@@ -20,6 +20,45 @@ class ArtStudioTests(unittest.TestCase):
  def click(self,label):
   found=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible() and b.text()==label]
   self.assertEqual(len(found),1,label);found[0].click();self.app.processEvents()
+ def test_garden_stars_awards_on_correct_answers_only(self):
+  from eden_native.garden_stars import GardenStars
+  self.click('Eden Demo');self.click('Number Meadow')
+  service=GardenStars(self.window.profiles.path.parent/'garden-stars.sqlite3')
+  self.assertEqual(service.balance('eden_demo'),0)
+  game=self.window.number_game
+  wrong=next(v for v in game.round.choices if v!=game.round.count)
+  self.window.answer_number(wrong)
+  self.assertEqual(service.balance('eden_demo'),0)
+  self.window.answer_number(game.round.count)
+  self.assertEqual(service.balance('eden_demo'),10)
+  self.window.toolbar_home.click();self.app.processEvents();self.click('Word Woodland')
+  game=self.window.word_game
+  self.window.answer_word(game.round.answer)
+  self.assertEqual(service.balance('eden_demo'),20)
+
+ def test_garden_stars_shop_requires_balance_and_unlocks_only_for_child(self):
+  from eden_native.garden_stars import GardenStars
+  self.click('Eden Demo');self.click('My Garden Stars')
+  self.assertEqual(self.window.state.page,'garden-stars')
+  self.assertFalse(self.window.purchase_garden_sticker('sticker_acorn'))
+  self.assertFalse(self.window.purchase_garden_sticker('sticker_unknown'))
+  self.assertFalse(self.window.purchase_garden_sticker('sticker_acorn'))
+  service=GardenStars(self.window.profiles.path.parent/'garden-stars.sqlite3')
+  self.assertEqual(service.balance('eden_demo'),0)
+  service.earn('eden_demo','number_meadow','test-event-garden-01')
+  self.click('Back to home');self.click('My Garden Stars')
+  self.click('Acorn — 5 stars')
+  self.assertEqual(service.balance('eden_demo'),5)
+  self.assertIn('sticker_acorn',{item['sku'] for item in service.collection('eden_demo')})
+  self.click('Back to home');self.click('Art Studio')
+  self.click('Sticker: Acorn')
+  self.assertEqual(self.window.art_canvas.sticker_skus,['sticker_acorn'])
+
+ def test_garden_stars_purchase_rejects_non_shop_context(self):
+  self.click('Eden Demo')
+  self.assertFalse(self.window.purchase_garden_sticker('sticker_acorn'))
+  self.assertFalse(self.window.open_garden_stars() if self.window.state.page!='home' else self.window.purchase_garden_sticker('sticker_acorn'))
+
  def test_stamps_undo_redo_clear(self):
   self.click('Eden Demo');self.click('Art Studio')
   self.assertIsInstance(self.window.art_game,ArtBoard)
