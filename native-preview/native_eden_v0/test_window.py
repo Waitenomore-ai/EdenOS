@@ -165,5 +165,25 @@ class NativeWindowTests(unittest.TestCase):
         self.app.processEvents()
         self.assertTrue(self.window._pin.hasFocus())
 
+    def test_native_window_can_use_existing_child_card_format(self):
+        import json
+        path = Path(self.tmp.name) / "profiles.json"
+        path.write_text(json.dumps({"profiles": [
+            {"username": "sample_one", "display_name": "Sample One", "avatar": "approved-eden"},
+            {"username": "sample_two", "display_name": "Sample Two", "avatar": "approved-mila"}
+        ]}), encoding="utf-8")
+        other = EdenNativeWindow(profile_source=path)
+        try:
+            other.show()
+            self.app.processEvents()
+            self.assertEqual(other.character_count(), 2)
+            self.assertEqual(other.character_names(), ["Sample One", "Sample Two"])
+            self.assertEqual(other.choose_character(1), "sample_two")
+            self.assertEqual(other.selected_profile_id(), "sample_two")
+        finally:
+            other.close()
+            other.deleteLater()
+            self.app.processEvents()
+
 if __name__ == "__main__":
     unittest.main()
