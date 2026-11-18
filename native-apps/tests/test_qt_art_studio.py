@@ -56,6 +56,21 @@ class ArtStudioTests(unittest.TestCase):
   self.window.answer_word(game.round.answer)
   self.assertEqual(service.balance('eden_demo'),20)
 
+ def test_saved_picture_gallery_is_child_scoped_and_ignores_symlinks(self):
+  self.click('Eden Demo');self.click('Art Studio');self.click('Save picture')
+  directory=self.window.profiles.path.parent/'art-studio'/'eden_demo'
+  self.assertTrue((directory/'eden-art-0001.png').is_file())
+  (directory/'eden-art-0002.png').symlink_to(directory/'eden-art-0001.png')
+  self.window.toolbar_home.click();self.app.processEvents()
+  self.click('My saved pictures')
+  self.assertEqual(self.window.state.page,'my-artwork')
+  self.assertFalse(self.window.select_artwork('eden-art-0002.png'))
+  self.assertFalse(self.window.select_artwork('../eden-art-0001.png'))
+  self.click('eden-art-0001.png')
+  self.assertEqual(self.window.artwork_preview,'eden-art-0001.png')
+  self.click('Back to home')
+  self.assertFalse(self.window.select_artwork('eden-art-0001.png'))
+
  def test_puzzle_completion_and_saved_art_award_stars(self):
   from eden_native.garden_stars import GardenStars
   self.click('Eden Demo');self.click('Puzzle Pond')

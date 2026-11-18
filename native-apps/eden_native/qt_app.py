@@ -98,6 +98,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             self.profile_avatar = None
             self.activity_checks = {}
             self.parent_reward_combo = None
+            self.artwork_preview = None
             self.activity_grid = None
             self.number_game = None
             self.word_game = None
@@ -218,6 +219,28 @@ def create_window(*, pin_adapter=None, profiles=None):
                 self.transition(NavigationState(page=activity, child_id=self.state.child_id))
             else:
                 self.info.setText("Activity integration pending")
+
+        def open_my_artwork(self):
+            if self.state.page != "home" or self.garden_stars_service() is None:
+                return False
+            self.artwork_preview = None
+            self.transition(NavigationState(page="my-artwork", child_id=self.state.child_id))
+            return True
+
+        def select_artwork(self, filename):
+            if self.state.page != "my-artwork" or not isinstance(filename, str):
+                return False
+            if not filename.startswith("eden-art-") or not filename.endswith(".png") or not filename[9:-4].isdigit():
+                return False
+            if self.garden_stars_service() is None:
+                return False
+            directory = self.profiles.path.parent / "art-studio" / self.state.child_id
+            path = directory / filename
+            if not path.is_file() or path.is_symlink():
+                return False
+            self.artwork_preview = filename
+            self.render()
+            return True
 
         def garden_stars_service(self):
             if not self.profiles or not self.session or not self.state.child_id:
@@ -914,6 +937,31 @@ def create_window(*, pin_adapter=None, profiles=None):
                 self.buttons.addWidget(choices_widget)
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
                 action("Log out", lambda: self.transition(self.state.logout()))
+            elif self.state.page == "my-artwork":
+                if self.garden_stars_service() is None:
+                    self.transition(self.state.logout())
+                    return
+                self.info.setText("My saved pictures")
+                directory = self.profiles.path.parent / "art-studio" / self.state.child_id
+                pictures = sorted((path for path in directory.glob("eden-art-*.png")
+                                   if path.is_file() and not path.is_symlink()
+                                   and path.stem[9:].isdigit()), key=lambda path: path.name, reverse=True) if directory.is_dir() else []
+                if self.artwork_preview is not None:
+                    selected = next((path for path in pictures if path.name == self.artwork_preview), None)
+                    if selected is not None:
+                        pixmap = QPixmap(str(selected))
+                        if not pixmap.isNull():
+                            preview = QLabel()
+                            preview.setAccessibleName("Saved picture " + selected.name)
+                            preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                            preview.setPixmap(pixmap.scaled(700, 450, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+                            self.buttons.addWidget(preview)
+                if not pictures:
+                    self.buttons.addWidget(QLabel("No pictures saved yet. Visit Art Studio to make one!"))
+                for path in pictures[:100]:
+                    action(path.name, lambda name=path.name: self.select_artwork(name))
+                action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
+                action("Log out", lambda: self.transition(self.state.logout()))
             elif self.state.page == "garden-stars":
                 service = self.garden_stars_service()
                 if service is None:
@@ -958,7 +1006,11 @@ def create_window(*, pin_adapter=None, profiles=None):
                             action(activity.replace("-", " ").title(), lambda name=activity: self.open_activity(name), self.activity_grid, position)
                             position += 1
                     self.buttons.addWidget(grid_widget)
-                action("My Garden Stars", self.open_garden_stars)
+                extras_widget = QWidget()
+                extras_grid = QGridLayout(extras_widget)
+                action("My Garden Stars", self.open_garden_stars, extras_grid, 0)
+                action("My saved pictures", self.open_my_artwork, extras_grid, 1)
+                self.buttons.addWidget(extras_widget)
                 action("Parent Corner", lambda: self.transition(self.state.open_parent()))
                 action("Log out", lambda: self.transition(self.state.logout()))
             else:
