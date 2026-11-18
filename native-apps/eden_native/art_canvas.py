@@ -24,7 +24,7 @@ class ArtCanvas(QWidget):
         super().__init__(parent)
         self.setObjectName("artStudioDrawingCanvas")
         self.setAccessibleName("Art Studio drawing canvas")
-        self.setAccessibleDescription("Use Tab to focus; numbers 1 to 9 select a sticker; arrows move it; Page Up or Page Down changes its layer; Control Z undoes and Control Shift Z redoes the last action")
+        self.setAccessibleDescription("Use Tab to focus; numbers 1 to 9 select a sticker; arrows move it; Page Up or Page Down changes its layer; Delete removes the selected sticker; Control Z undoes and Control Shift Z redoes the last action")
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setMinimumSize(440, 220)
         self.setMouseTracking(True)
@@ -174,18 +174,24 @@ class ArtCanvas(QWidget):
         self.update()
         return True
 
-    def remove_last_sticker(self):
-        if not self.sticker_paths:
+    def remove_selected_sticker(self):
+        index = self.selected_sticker
+        if index is None or not 0 <= index < len(self.sticker_paths):
             return False
-        index = len(self.sticker_paths) - 1
-        path = self.sticker_paths.pop()
-        sku = self.sticker_skus.pop() if self.sticker_skus else None
-        position = self.sticker_positions.pop()
+        path = self.sticker_paths.pop(index)
+        sku = self.sticker_skus.pop(index) if self.sticker_skus else None
+        position = self.sticker_positions.pop(index)
         self.selected_sticker = None
         self._record_action("sticker_remove", (index, path, sku, position[:]))
         self.sticker_collection_changed.emit()
         self.update()
         return True
+
+    def remove_last_sticker(self):
+        if not self.sticker_paths:
+            return False
+        self.selected_sticker = len(self.sticker_paths) - 1
+        return self.remove_selected_sticker()
 
     def _sticker_at(self, point):
         for index in range(len(self.sticker_paths) - 1, -1, -1):
@@ -358,6 +364,10 @@ class ArtCanvas(QWidget):
                 self.redo_action()
                 event.accept()
                 return
+        if key in (Qt.Key.Key_Delete, Qt.Key.Key_Backspace) and modifiers == Qt.KeyboardModifier.NoModifier:
+            self.remove_selected_sticker()
+            event.accept()
+            return
         if Qt.Key.Key_1 <= key <= Qt.Key.Key_9:
             index = key - Qt.Key.Key_1
             if index < len(self.sticker_positions):

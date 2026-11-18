@@ -30,6 +30,32 @@ class ArtStudioTests(unittest.TestCase):
   self.click('Redo');self.assertEqual(len(self.window.art_game.stamps),1)
   self.click('Clear');self.assertEqual(len(self.window.art_game.stamps),0)
   self.click('Back to home');self.assertEqual(self.window.state.page,'home')
+ def test_remove_selected_sticker_accessible_button(self):
+  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Sticker: Apple');self.click('Sticker: Butterfly')
+  self.window.art_canvas.selected_sticker=0
+  self.click('Remove selected sticker')
+  self.assertEqual(self.window.art_canvas.sticker_skus,['sticker_butterfly'])
+  self.assertTrue(self.window.art_canvas.undo_action())
+  self.assertEqual(self.window.art_canvas.sticker_skus,['sticker_apple','sticker_butterfly'])
+
+ def test_remove_selected_sticker_from_middle_and_restore_order(self):
+  from PySide6.QtCore import Qt
+  from PySide6.QtTest import QTest
+  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Sticker: Apple');self.click('Sticker: Butterfly');self.click('Sticker: Apple')
+  canvas=self.window.art_canvas
+  canvas.selected_sticker=1
+  canvas.setFocus()
+  QTest.keyClick(canvas,Qt.Key.Key_Delete)
+  self.assertEqual(canvas.sticker_skus,['sticker_apple','sticker_apple'])
+  self.assertEqual([x.symbol for x in self.window.art_game.stamps],canvas.sticker_skus)
+  self.assertTrue(canvas.undo_action())
+  self.assertEqual(canvas.sticker_skus,['sticker_apple','sticker_butterfly','sticker_apple'])
+  self.assertEqual([x.symbol for x in self.window.art_game.stamps],canvas.sticker_skus)
+  self.assertTrue(canvas.redo_action())
+  self.assertEqual(canvas.sticker_skus,['sticker_apple','sticker_apple'])
+
  def test_remove_sticker_can_be_undone_and_redone_in_shared_history(self):
   self.click('Eden Demo');self.click('Art Studio')
   self.click('Sticker: Apple');self.click('Sticker: Butterfly')
