@@ -179,3 +179,16 @@ class ArtCanvasTests(unittest.TestCase):
         self.assertTrue(self.canvas.move_selected_sticker_layer(-1))
         self.assertEqual(self.canvas.sticker_paths[0],by_sku['sticker_apple'])
         with self.assertRaises(ValueError):self.canvas.move_selected_sticker_layer(4)
+
+    def test_sticker_layer_order_roundtrips_with_skus(self):
+        import json
+        root=Path(__file__).resolve().parents[1]/'assets'/'stickers'
+        manifest=json.loads((root/'manifest.json').read_text())
+        by_sku={item['sku']:root/item['filename'] for item in manifest['items']}
+        self.canvas.set_stickers([by_sku['sticker_apple'],by_sku['sticker_butterfly']],['sticker_apple','sticker_butterfly'])
+        self.canvas.selected_sticker=0
+        self.assertTrue(self.canvas.move_selected_sticker_layer(1))
+        with tempfile.TemporaryDirectory() as tmp:
+            directory=Path(tmp)
+            self.canvas.save_project(directory,['sticker_apple','sticker_butterfly'])
+            self.assertEqual(self.canvas.load_project(directory,allowed_stickers={'sticker_apple','sticker_butterfly'}),['sticker_butterfly','sticker_apple'])

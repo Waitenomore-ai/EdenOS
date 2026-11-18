@@ -18,6 +18,7 @@ from .approved_models.art_studio_model import ArtBoard
 from .approved_models.time_routines_model import Routine, ROUTINES
 from .approved_models.story_garden_model import StoryGarden, SCENES
 from .art_canvas import ArtCanvas, PALETTE, BACKGROUNDS
+from .garden_stars import GardenStars
 
 def create_window(*, pin_adapter=None, profiles=None):
     from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QLineEdit, QComboBox, QCheckBox, QScrollArea, QSizePolicy, QGridLayout, QHBoxLayout
@@ -214,6 +215,19 @@ def create_window(*, pin_adapter=None, profiles=None):
             else:
                 self.info.setText("Activity integration pending")
 
+        def art_allowed_stickers(self):
+            """Free stickers plus this child's earned/parent-unlocked rewards in isolated data."""
+            if self.art_project_directory() is None:
+                return set()
+            root = Path(__file__).resolve().parent.parent / "assets" / "stickers"
+            manifest = json.loads((root / "manifest.json").read_text())
+            valid = {entry["sku"] for entry in manifest["items"] if isinstance(entry.get("sku"), str)}
+            free = {entry["sku"] for entry in manifest["items"] if entry.get("price") == 0}
+            stars = GardenStars(self.profiles.path.parent / "garden-stars.sqlite3")
+            stars.create_profile(self.state.child_id)
+            owned = {entry["sku"] for entry in stars.collection(self.state.child_id)}
+            return free | (owned & valid)
+
         def art_project_directory(self):
             if self.state.page != "art-studio" or self.art_canvas is None or self.art_game is None:
                 return None
@@ -237,7 +251,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             root = Path(__file__).resolve().parent.parent / "assets" / "stickers"
             try:
                 manifest = json.loads((root / "manifest.json").read_text())
-                free = {entry["sku"] for entry in manifest["items"] if entry.get("price") == 0}
+                free = self.art_allowed_stickers()
             except (OSError, ValueError, KeyError, TypeError):
                 return
             old = [stamp for stamp in self.art_game.stamps if stamp.symbol in free]
@@ -259,8 +273,8 @@ def create_window(*, pin_adapter=None, profiles=None):
                 # Only allow SKUs that are free in the approved manifest.
                 root = Path(__file__).resolve().parent.parent / "assets" / "stickers"
                 manifest = json.loads((root / "manifest.json").read_text())
-                free = {entry["sku"] for entry in manifest["items"] if entry.get("price") == 0}
-                skus = [stamp.symbol for stamp in self.art_game.stamps if stamp.symbol in free]
+                allowed = self.art_allowed_stickers()
+                skus = [stamp.symbol for stamp in self.art_game.stamps if stamp.symbol in allowed]
                 self.art_canvas.save_project(directory, skus)
                 self.info.setText("Editable drawing saved")
             except (OSError, ValueError, TypeError, KeyError):
@@ -272,11 +286,11 @@ def create_window(*, pin_adapter=None, profiles=None):
             try:
                 root = Path(__file__).resolve().parent.parent / "assets" / "stickers"
                 manifest = json.loads((root / "manifest.json").read_text())
-                free = {entry["sku"] for entry in manifest["items"] if entry.get("price") == 0}
-                skus = self.art_canvas.load_project(directory, allowed_stickers=free)
+                allowed = self.art_allowed_stickers()
+                skus = self.art_canvas.load_project(directory, allowed_stickers=allowed)
                 self.art_game.clear()
                 for sku in skus:
-                    if sku in free:
+                    if sku in allowed:
                         self.art_game.add(sku, "approved")
                 self.render()
                 self.info.setText("Editable drawing restored")
@@ -546,8 +560,9 @@ def create_window(*, pin_adapter=None, profiles=None):
                 sticker_map = {}
                 try:
                     sticker_manifest = json.loads((sticker_root / "manifest.json").read_text())
+                    allowed_stickers = self.art_allowed_stickers()
                     for entry in sticker_manifest.get("items", []):
-                        if entry.get("price") == 0 and isinstance(entry.get("sku"), str) and isinstance(entry.get("filename"), str):
+                        if entry.get("sku") in allowed_stickers and isinstance(entry.get("sku"), str) and isinstance(entry.get("filename"), str):
                             candidate = sticker_root / entry["filename"]
                             if candidate.is_file() and not candidate.is_symlink() and candidate.parent == sticker_root:
                                 sticker_map[entry["sku"]] = (entry["name"], candidate)
