@@ -3,7 +3,7 @@ from pathlib import Path
 import json
 import os
 import tempfile
-from PySide6.QtCore import Qt, QPointF
+from PySide6.QtCore import Qt, QPointF, Signal
 from PySide6.QtGui import QColor, QPainter, QPen, QPixmap, QImage
 from PySide6.QtWidgets import QWidget
 
@@ -16,6 +16,7 @@ PALETTE = {
 }
 
 class ArtCanvas(QWidget):
+    sticker_layer_changed = Signal()
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("artStudioDrawingCanvas")
@@ -73,6 +74,7 @@ class ArtCanvas(QWidget):
         self.sticker_positions[index], self.sticker_positions[target] = self.sticker_positions[target], self.sticker_positions[index]
         self.selected_sticker = target
         self.update()
+        self.sticker_layer_changed.emit()
         return True
 
     def set_background(self, name):

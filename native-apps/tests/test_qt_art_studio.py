@@ -30,6 +30,26 @@ class ArtStudioTests(unittest.TestCase):
   self.click('Redo');self.assertEqual(len(self.window.art_game.stamps),1)
   self.click('Clear');self.assertEqual(len(self.window.art_game.stamps),0)
   self.click('Back to home');self.assertEqual(self.window.state.page,'home')
+ def test_keyboard_layer_change_syncs_canonical_model_and_saved_project(self):
+  import json
+  from PySide6.QtCore import Qt
+  from PySide6.QtTest import QTest
+  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Sticker: Apple');self.click('Sticker: Butterfly')
+  canvas=self.window.art_canvas
+  self.assertEqual(canvas.sticker_skus,['sticker_apple','sticker_butterfly'])
+  canvas.setFocus()
+  QTest.keyClick(canvas,Qt.Key.Key_1)
+  QTest.keyClick(canvas,Qt.Key.Key_PageUp)
+  self.app.processEvents()
+  self.assertEqual(canvas.sticker_skus,['sticker_butterfly','sticker_apple'])
+  self.assertEqual([stamp.symbol for stamp in self.window.art_game.stamps],['sticker_butterfly','sticker_apple'])
+  self.click('Save editable drawing')
+  project=self.window.art_project_directory()/'current-art-project.json'
+  self.assertEqual(json.loads(project.read_text())['stickers'],['sticker_butterfly','sticker_apple'])
+  self.click('Open saved drawing')
+  self.assertEqual([stamp.symbol for stamp in self.window.art_game.stamps],['sticker_butterfly','sticker_apple'])
+
  def test_editable_project_is_child_scoped(self):
   from PySide6.QtCore import Qt, QPoint
   from PySide6.QtTest import QTest

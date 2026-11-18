@@ -197,6 +197,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             elif activity == "art-studio":
                 self.art_game = ArtBoard()
                 self.art_canvas = ArtCanvas()
+                self.art_canvas.sticker_layer_changed.connect(self.sync_art_sticker_layers)
                 self.transition(NavigationState(page=activity, child_id=self.state.child_id))
             elif activity == "my-day":
                 self.day_game = Routine(ROUTINES["full_day"])
@@ -245,32 +246,32 @@ def create_window(*, pin_adapter=None, profiles=None):
         def move_art_sticker_layer(self, direction):
             if self.art_project_directory() is None or self.art_canvas is None or self.art_game is None:
                 return
-            if not self.art_canvas.move_selected_sticker_layer(direction):
+            # Both toolbar and keyboard use the same signal-backed model sync.
+            self.art_canvas.move_selected_sticker_layer(direction)
+
+        def sync_art_sticker_layers(self):
+            if self.art_project_directory() is None or self.art_canvas is None or self.art_game is None:
                 return
-            # Keep the canonical sticker model's ordering in sync with canvas layers.
-            root = Path(__file__).resolve().parent.parent / "assets" / "stickers"
-            try:
-                manifest = json.loads((root / "manifest.json").read_text())
-                free = self.art_allowed_stickers()
-            except (OSError, ValueError, KeyError, TypeError):
-                return
-            old = [stamp for stamp in self.art_game.stamps if stamp.symbol in free]
+            allowed = self.art_allowed_stickers()
+            old = [stamp for stamp in self.art_game.stamps if stamp.symbol in allowed]
             new_order = self.art_canvas.sticker_skus
             if len(old) != len(new_order):
                 return
             buckets = {}
             for stamp in old:
                 buckets.setdefault(stamp.symbol, []).append(stamp)
+            if any(sku not in buckets or not buckets[sku] for sku in new_order):
+                return
             reordered = [buckets[sku].pop(0) for sku in new_order]
             iterator = iter(reordered)
-            self.art_game.stamps[:] = [next(iterator) if stamp.symbol in free else stamp for stamp in self.art_game.stamps]
+            self.art_game.stamps[:] = [next(iterator) if stamp.symbol in allowed else stamp for stamp in self.art_game.stamps]
             self.render()
 
         def save_art_project(self):
             directory = self.art_project_directory()
             if directory is None: return
             try:
-                # Only allow SKUs that are free in the approved manifest.
+                # Persist only stickers permitted for the current child.
                 root = Path(__file__).resolve().parent.parent / "assets" / "stickers"
                 manifest = json.loads((root / "manifest.json").read_text())
                 allowed = self.art_allowed_stickers()
