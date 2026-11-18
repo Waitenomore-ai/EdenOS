@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
 )
 from .eden_core.profile_cards import APPROVED_AVATARS, make_profile_card
 from .eden_core.profile_source import read_profile_cards
+from .eden_core.activity_choices import read_choices
 from .eden_core.profile_chooser_model import ProfileChooser
 from .eden_core.parent_pin import has_pin, verify_pin
 from .eden_core.activity_visibility import REVIEWED_RATINGS
@@ -21,6 +22,7 @@ class EdenNativeWindow(QMainWindow):
         self.setWindowTitle("Eden's Garden — Native Desktop Preview")
         self.resize(1000, 690)
         self._is_demo = profile_source is None
+        self._profile_source = Path(profile_source) if profile_source is not None else None
         if self._is_demo:
             cards = [
                 make_profile_card("demo_" + avatar.removeprefix("approved-"),
@@ -30,6 +32,7 @@ class EdenNativeWindow(QMainWindow):
         else:
             cards = read_profile_cards(Path(profile_source))
         self._chooser = ProfileChooser(cards)
+        self._known_usernames = tuple(card.username for card in cards)
         self._unlocked = False
         self._stack = QStackedWidget()
         self.setCentralWidget(self._stack)
@@ -261,10 +264,22 @@ class EdenNativeWindow(QMainWindow):
             )
         elif name == "Activity Controls":
             catalogue = ", ".join(sorted(REVIEWED_RATINGS))
-            self._section_description.setText(
-                f"{len(REVIEWED_RATINGS)} reviewed activities: {catalogue}. "
-                "Read-only catalogue; no child-specific choices loaded."
-            )
+            child = self._chooser.selected_username()
+            if child and self._profile_source is not None:
+                known = self._known_usernames
+                choices = read_choices(self._profile_source.parent, child, known)
+                summary = ", ".join(
+                    f"{key}: {'on' if value else 'off'}" for key, value in sorted(choices.items())
+                ) or "No individual overrides"
+                self._section_description.setText(
+                    f"{len(REVIEWED_RATINGS)} reviewed activities. "
+                    f"Selected child settings: {summary}. Read-only preview."
+                )
+            else:
+                self._section_description.setText(
+                    f"{len(REVIEWED_RATINGS)} reviewed activities: {catalogue}. "
+                    "Read-only catalogue; no child-specific choices loaded."
+                )
         elif name == "Learning Progress":
             self._section_description.setText(
                 "Learning Progress — no learning records loaded. "

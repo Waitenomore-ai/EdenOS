@@ -113,6 +113,31 @@ class NativeWindowTests(unittest.TestCase):
         self.assertEqual(len(matches), 1)
         self.assertEqual(matches[0].text(), "PIN && Security")
 
+    def test_parent_activity_controls_show_existing_child_restrictions_read_only(self):
+        import json
+        from native_eden_v0.eden_core.parent_pin import set_pin
+        config = Path(self.tmp.name)
+        profiles = config / "profiles.json"
+        profiles.write_text(json.dumps({"profiles": [
+            {"username": "sample_one", "display_name": "Sample One", "avatar": "approved-eden"}
+        ]}))
+        choices = config / "activity-choices"
+        choices.mkdir()
+        path = choices / "sample_one.json"
+        path.write_text(json.dumps({"version": 1, "enabled": {"art-studio": False}}))
+        before = path.read_bytes()
+        other = EdenNativeWindow(profile_source=profiles)
+        try:
+            other.choose_character(0)
+            set_pin("482761")
+            self.assertTrue(other.unlock_parent("482761"))
+            self.assertTrue(other._switch_parent_section("Activity Controls"))
+            self.assertIn("art-studio: off", other.parent_section_description())
+            self.assertEqual(path.read_bytes(), before)
+        finally:
+            other.close()
+            other.deleteLater()
+
     def test_activity_controls_shows_reviewed_catalogue_not_fake_preferences(self):
         from native_eden_v0.eden_core.parent_pin import set_pin
         from native_eden_v0.eden_core.activity_visibility import REVIEWED_RATINGS
