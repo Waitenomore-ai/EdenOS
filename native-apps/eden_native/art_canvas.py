@@ -58,6 +58,8 @@ class ArtCanvas(QWidget):
             if not self.strokes:
                 return False
             self.strokes.pop()
+        elif kind == "background":
+            self.background = QColor(BACKGROUNDS[payload[0]])
         elif kind == "sticker_move":
             index, before, after = payload
             if index >= len(self.sticker_positions):
@@ -75,6 +77,8 @@ class ArtCanvas(QWidget):
         kind, payload = self.action_redo.pop()
         if kind == "stroke":
             self.strokes.append(payload)
+        elif kind == "background":
+            self.background = QColor(BACKGROUNDS[payload[1]])
         elif kind == "sticker_move":
             index, before, after = payload
             if index >= len(self.sticker_positions):
@@ -136,7 +140,11 @@ class ArtCanvas(QWidget):
     def set_background(self, name):
         if name not in BACKGROUNDS:
             raise ValueError("Unknown background")
+        previous = next((key for key, colour in BACKGROUNDS.items() if self.background.name() == colour), "White")
+        if previous == name:
+            return
         self.background = QColor(BACKGROUNDS[name])
+        self._record_action("background", (previous, name))
         self.update()
 
     def set_brush_width(self, width):

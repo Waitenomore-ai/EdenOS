@@ -245,6 +245,21 @@ class ArtCanvasTests(unittest.TestCase):
         self.assertFalse(self.canvas.undo_sticker_move())
         self.canvas.hide()
 
+    def test_unified_history_tracks_background_changes_and_redo_invalidation(self):
+        self.assertEqual(self.canvas.background.name(),'#ffffff')
+        self.canvas.set_background('Sky')
+        self.canvas.set_background('Grass')
+        self.assertEqual(self.canvas.background.name(),'#e8f7e7')
+        self.assertTrue(self.canvas.undo_action())
+        self.assertEqual(self.canvas.background.name(),'#e4f2ff')
+        self.assertTrue(self.canvas.undo_action())
+        self.assertEqual(self.canvas.background.name(),'#ffffff')
+        self.assertTrue(self.canvas.redo_action())
+        self.assertEqual(self.canvas.background.name(),'#e4f2ff')
+        self.canvas.set_background('Peach')
+        self.assertFalse(self.canvas.redo_action())
+        self.assertEqual(self.canvas.background.name(),'#fff0dc')
+
     def test_unified_history_reverses_interleaved_stroke_and_sticker_move(self):
         from PySide6.QtCore import Qt
         from PySide6.QtTest import QTest
