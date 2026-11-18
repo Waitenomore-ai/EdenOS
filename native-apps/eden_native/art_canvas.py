@@ -1,5 +1,6 @@
 """Native Qt drawing surface; preserved iMac ArtBoard remains the sticker model."""
 from pathlib import Path
+from collections import Counter
 import json
 import os
 import tempfile
@@ -212,7 +213,7 @@ class ArtCanvas(QWidget):
         """Save editable strokes and sticker references, never absolute asset paths."""
         directory.mkdir(parents=True, exist_ok=True, mode=0o700)
         ordered_skus = self.sticker_skus if self.sticker_skus else list(sticker_skus[:24])
-        if self.sticker_skus and sticker_skus and set(ordered_skus) != set(sticker_skus):
+        if self.sticker_skus and sticker_skus and Counter(ordered_skus) != Counter(sticker_skus):
             raise ValueError("Sticker entitlement mismatch")
         payload = {"version": 1, "strokes": self.strokes,
                    "stickers": ordered_skus,

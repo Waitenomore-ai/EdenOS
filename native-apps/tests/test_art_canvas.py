@@ -112,6 +112,14 @@ class ArtCanvasTests(unittest.TestCase):
             self.assertEqual(self.canvas.load_project(directory), ['sticker_apple'])
             self.assertEqual(self.canvas.sticker_positions[0], moved)
 
+    def test_duplicate_sticker_entitlement_counts_must_match(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.canvas.sticker_skus = ['sticker_apple', 'sticker_apple']
+            self.canvas.sticker_positions = [[.1,.1],[.3,.3]]
+            with self.assertRaisesRegex(ValueError, 'entitlement mismatch'):
+                self.canvas.save_project(Path(tmp), ['sticker_apple', 'sticker_butterfly'])
+            self.assertFalse((Path(tmp)/'current-art-project.json').exists())
+
     def test_rejects_corrupt_sticker_coordinates_without_mutation(self):
         import json
         with tempfile.TemporaryDirectory() as tmp:
