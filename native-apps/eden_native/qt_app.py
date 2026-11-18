@@ -47,7 +47,7 @@ def create_window(*, pin_adapter=None, profiles=None):
         def paintEvent(self, event):
             super().paintEvent(event)
             painter = QPainter(self)
-            wallpaper = self.home_wallpaper if self.state.page == "home" else None
+            wallpaper = self.home_wallpaper if self.state.page in ("home", "play", "learn", "create") else None
             if wallpaper is not None and not wallpaper.isNull():
                 image = wallpaper.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation)
                 painter.drawPixmap((self.width() - image.width()) // 2, (self.height() - image.height()) // 2, image)
@@ -798,6 +798,8 @@ def create_window(*, pin_adapter=None, profiles=None):
                 self.header_profile.setIcon(QIcon(str(profile_nav)))
             self.activity_toolbar.setVisible(is_activity)
             self.title.setVisible(not is_activity)
+            self.title.setText("Eden OS")
+            self.info.show()
             self.login_banner.setVisible(self.state.page == "login")
             if is_activity:
                 self.toolbar_heading.setText(activity_titles[self.state.page])
@@ -860,16 +862,48 @@ def create_window(*, pin_adapter=None, profiles=None):
                 else:
                     self.info.setText("Story Garden — choose a book")
                     if self.story_books and self.story_selected is None:
+                        imac_reader = Path(__file__).resolve().parent.parent / "assets" / "stories" / "imac-reader"
+                        banner_file = imac_reader / "choose-story-banner-v27.png"
+                        if banner_file.is_file() and not banner_file.is_symlink():
+                            banner = QLabel()
+                            banner.setObjectName("edenStoryShelfApprovedBanner")
+                            banner.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                            banner.setAccessibleName("Choose a story")
+                            banner.setPixmap(QPixmap(str(banner_file)).scaled(1150, 165, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+                            self.buttons.addWidget(banner)
                         grid_widget = QWidget()
+                        grid_widget.setObjectName("edenStoryShelf")
+                        grid_widget.setStyleSheet("background: transparent;")
                         grid = QGridLayout(grid_widget)
+                        grid.setSpacing(15)
+                        wood_file = imac_reader / "choose-story-wood-v26.png"
                         for index, book in enumerate(self.story_books):
-                            action(book["title"] + (" (draft)" if book.get("status") == "text-draft" else ""), lambda i=index: self.select_story(i), grid, index)
+                            title = book["title"]
+                            button = QPushButton(title)
+                            button.setObjectName("edenStoryBookCard")
+                            button.setAccessibleName("Read " + title)
+                            button.setMinimumHeight(112)
+                            button.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+                            button.setStyleSheet('QPushButton#edenStoryBookCard { color: #4a301f; font-weight: 800; font-size: 19px; border: 3px solid #9b7542; border-radius: 17px; background: #f5e0a8; padding: 9px; } QPushButton#edenStoryBookCard:focus { border: 4px solid #397956; }')
+                            if wood_file.is_file() and not wood_file.is_symlink():
+                                button.setStyleSheet('QPushButton#edenStoryBookCard { color: #4a301f; font-weight: 800; font-size: 19px; border: 3px solid #9b7542; border-radius: 17px; border-image: url("' + str(wood_file) + '") 0 0 0 0 stretch stretch; padding: 9px; } QPushButton#edenStoryBookCard:focus { border: 4px solid #397956; }')
+                            button.clicked.connect(lambda _checked=False, i=index: self.select_story(i))
+                            grid.addWidget(button, index // 4, index % 4)
                         self.buttons.addWidget(grid_widget)
                     elif self.story_books and self.story_selected is not None:
                         book = self.story_books[self.story_selected]
                         page = book["pages"][self.story_page]
                         self.info.setText(book["title"] + (" — draft, not approved" if book.get("status") == "text-draft" else ""))
-                        picture_file = (Path(__file__).resolve().parent.parent / "assets" / "stories" / "artwork-staging" / book["id"] / ("page-" + str(self.story_page + 1).zfill(2) + ".png"))
+                        story_art_root = Path(__file__).resolve().parent.parent / "assets" / "stories"
+                        page_stem = "page-" + str(self.story_page + 1).zfill(2)
+                        picture_file = story_art_root / "artwork-staging" / book["id"] / (page_stem + ".png")
+                        if not picture_file.is_file():
+                            imac_folder = story_art_root / "imac-page-art" / book["id"]
+                            for suffix in (".png", ".jpg"):
+                                candidate = imac_folder / (page_stem + suffix)
+                                if candidate.is_file() and not candidate.is_symlink():
+                                    picture_file = candidate
+                                    break
                         if picture_file.is_file() and not picture_file.is_symlink():
                             pixmap = QPixmap(str(picture_file))
                             if not pixmap.isNull():
@@ -974,7 +1008,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                     sidebar_scroll.setObjectName("edenArtStudioSidebar")
                     sidebar_scroll.setWidgetResizable(True)
                     sidebar_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-                    sidebar_scroll.setFixedWidth(220)
+                    sidebar_scroll.setFixedWidth(260)
                     sidebar = QWidget()
                     sidebar.setObjectName("edenArtStudioSidebarContent")
                     sidebar_layout = QVBoxLayout(sidebar)
@@ -1004,7 +1038,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                         button.setAccessibleName(colour + " paint")
                         button.setMinimumHeight(48)
                         button.clicked.connect(lambda _checked=False, c=colour: self.art_canvas.set_colour(c))
-                        colour_grid.addWidget(button, index // 3, index % 3)
+                        colour_grid.addWidget(button, index // 2, index % 2)
                     sidebar_layout.addWidget(colour_grid_widget)
                     wallpaper_label = QLabel("🌄 Wallpapers")
                     wallpaper_label.setObjectName("edenArtStudioWallpaperHeading")
@@ -1435,17 +1469,38 @@ def create_window(*, pin_adapter=None, profiles=None):
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
             elif self.state.page in HOME_CATEGORIES:
                 category = self.state.page
-                self.info.setText(category.title())
+                self.title.setText(category.title())
+                self.info.setText("")
+                self.info.hide()
                 enabled = (ActivityPreferences(self.session, self.profiles).load(self.state.child_id)
                            if self.session and self.profiles and self.profiles.get(self.state.child_id) else {})
                 activity_grid_widget = QWidget()
+                activity_grid_widget.setObjectName("edenImacActivityCards")
+                activity_grid_widget.setStyleSheet("background: transparent;")
                 activity_grid = QGridLayout(activity_grid_widget)
+                activity_grid.setSpacing(18)
+                activity_grid.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
+                card_root = Path(__file__).resolve().parent.parent / "assets" / "imac-activity-cards"
                 for index, activity in enumerate(name for name in activities_in_category(category)
                                                   if enabled.get(name, True)):
-                    action(activity.replace("-", " ").title(), lambda name=activity: self.open_activity(name),
-                           activity_grid, index)
+                    title = activity.replace("-", " ").title()
+                    card = QPushButton(title)
+                    card.setObjectName("edenImacActivityCard")
+                    card.setAccessibleName("Open " + title)
+                    card.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+                    card.setMinimumSize(260, 290)
+                    card.setMaximumSize(360, 360)
+                    card.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+                    card_file = card_root / (activity + ".png")
+                    if card_file.is_file() and not card_file.is_symlink():
+                        # Keep the logical label for keyboard/navigation tests and accessibility.
+                        # The illustration contains the visible title, so suppress duplicate text.
+                        card.setIcon(QIcon(str(card_file)))
+                        card.setIconSize(QSize(294, 276))
+                        card.setStyleSheet("QPushButton#edenImacActivityCard { background: transparent; border: 0; padding: 4px; color: transparent; font-size: 1px; } QPushButton#edenImacActivityCard:focus { border: 3px solid #397956; }")
+                    card.clicked.connect(lambda _checked=False, name=activity: self.open_activity(name))
+                    activity_grid.addWidget(card, index // 4, index % 4)
                 self.buttons.addWidget(activity_grid_widget)
-                action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
             elif self.state.page == "wallpapers":
                 if not self.profiles or self.profiles.get(self.state.child_id) is None:
                     self.transition(self.state.logout())

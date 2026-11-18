@@ -36,7 +36,7 @@ class ArtLayoutParityTests(unittest.TestCase):
                 self.assertIsNotNone(scene)
                 sidebar=scene.findChild(QScrollArea,'edenArtStudioSidebar')
                 self.assertIsNotNone(sidebar)
-                self.assertEqual(sidebar.width(),220)
+                self.assertEqual(sidebar.width(),260)
                 self.assertIsNotNone(scene.findChild(QWidget,'edenArtStudioWorkspace'))
                 self.assertIsNotNone(scene.findChild(QWidget,'edenArtStudioActions'))
                 self.assertIsNotNone(scene.findChild(QWidget,'edenArtStudioDock'))
