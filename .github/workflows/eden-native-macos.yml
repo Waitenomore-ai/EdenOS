@@ -1,6 +1,9 @@
 name: Eden Native macOS Preview (manual)
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - build/eden-native-macos-rc1-20261118
 permissions:
   contents: read
 jobs:
