@@ -18,8 +18,8 @@ class QtPinTests(unittest.TestCase):
  def tearDown(self):
   self.window.close();self.app.processEvents();self.temp.cleanup()
  def click(self,label):
-  matches=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible()]
-  matches=[b for b in matches if isinstance(b,QPushButton) and b.text()==label]
+  matches=[b for b in self.window.findChildren(QPushButton) if b.isVisible()]
+  matches=[b for b in matches if isinstance(b,QPushButton) and (b.text()==label or b.accessibleName()==label)]
   self.assertEqual(len(matches),1,label)
   matches[0].click();self.app.processEvents()
  def input(self,value):
@@ -27,14 +27,14 @@ class QtPinTests(unittest.TestCase):
   self.assertIsNotNone(entry)
   entry.setText(value)
  def parent(self):
-  self.click("Preview child session");self.click("Parent Corner")
+  self.click("Preview child session");self.click("Parent")
   self.assertFalse(self.window.state.parent_unlocked)
  def test_setup_unlock_logout_and_relock(self):
   self.parent()
   self.input("1234");self.window.pin_confirm.setText("1234");self.click("Set first Parent PIN (demo only)")
   self.assertTrue(self.window.state.parent_unlocked)
   self.click("Log out");self.assertFalse(self.window.state.parent_unlocked)
-  self.click("Preview child session");self.click("Parent Corner")
+  self.click("Preview child session");self.click("Parent")
   self.input("0000");self.click("Unlock Parent Corner")
   self.assertFalse(self.window.state.parent_unlocked)
   self.input("1234");self.click("Unlock Parent Corner")

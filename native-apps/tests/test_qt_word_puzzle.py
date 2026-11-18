@@ -22,10 +22,10 @@ class GamesIntegrationTests(unittest.TestCase):
   self.window.resize(800,600);self.window.show();self.app.processEvents()
  def tearDown(self):self.window.close();self.app.processEvents();self.tmp.cleanup()
  def click(self,label):
-  found=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible() and b.text()==label]
+  found=[b for b in self.window.findChildren(QPushButton) if b.isVisible() and (b.text()==label or b.accessibleName()==label)]
   self.assertEqual(len(found),1,label);found[0].click();self.app.processEvents()
  def test_word_woodland_correct_and_wrong(self):
-  self.click("Eden Demo");self.click("Word Woodland")
+  self.click("Eden Demo");self.click("Learn");self.click("Word Woodland")
   self.assertIsInstance(self.window.word_game,WordWoodland)
   rnd=self.window.word_game.round
   self.click(next(x for x in rnd.choices if x!=rnd.answer))
@@ -35,7 +35,7 @@ class GamesIntegrationTests(unittest.TestCase):
   self.click("Back to home")
   self.assertEqual(self.window.state.page,"home")
  def test_puzzle_matching_and_mismatch(self):
-  self.click("Eden Demo");self.click("Puzzle Pond")
+  self.click("Eden Demo");self.click("Play");self.click("Puzzle Pond")
   self.assertIsInstance(self.window.puzzle_game,PuzzlePond)
   cards=self.window.puzzle_game.cards
   first=cards[0];match=next(c for c in cards[1:] if c.symbol==first.symbol)
@@ -48,7 +48,7 @@ class GamesIntegrationTests(unittest.TestCase):
   self.window.finish_puzzle_mismatch(self.window.puzzle_game,"eden_demo")
   self.assertIsNone(self.window.puzzle_game.second)
  def test_disabled_word_cannot_open(self):
-  self.click("Eden Demo");self.click("Parent Corner")
+  self.click("Eden Demo");self.click("Parent")
   self.window.pin_input.setText("1234");self.click("Unlock Parent Corner")
   ActivityPreferences(self.window.session,self.repo).save("eden_demo",{"word-woodland":False})
   self.click("Back to child home")

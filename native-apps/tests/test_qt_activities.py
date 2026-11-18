@@ -21,29 +21,29 @@ class QtActivitiesTests(unittest.TestCase):
  def tearDown(self):
   self.window.close();self.app.processEvents();self.temp.cleanup()
  def buttons(self):
-  return [b.text() for b in [b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible()]]
+  return [b.text() or b.accessibleName() for b in [b for b in self.window.findChildren(QPushButton) if b.isVisible()]]
  def click(self,label):
-  widgets=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible()]
-  found=[w for w in widgets if isinstance(w,QPushButton) and w.text()==label]
+  widgets=[b for b in self.window.findChildren(QPushButton) if b.isVisible()]
+  found=[w for w in widgets if isinstance(w,QPushButton) and (w.text()==label or w.accessibleName()==label)]
   self.assertEqual(len(found),1,label);found[0].click();self.app.processEvents()
  def unlock(self):
-  self.click("Eden Demo");self.click("Parent Corner")
+  self.click("Eden Demo");self.click("Parent")
   self.window.pin_input.setText("1234");self.click("Unlock Parent Corner")
  def test_disable_and_reenable_child_activity(self):
   self.click("Eden Demo")
-  self.assertIn("Art Studio",self.buttons())
-  self.click("Parent Corner")
+  self.click("Create");self.assertIn("Art Studio",self.buttons())
+  self.click("Back to home");self.click("Parent")
   self.assertEqual(len(self.window.activity_checks),0)
   self.window.pin_input.setText("1234");self.click("Unlock Parent Corner")
   self.window.activity_checks["art-studio"].setChecked(False)
   self.click("Save activity choices")
   self.click("Back to child home")
-  self.assertNotIn("Art Studio",self.buttons())
-  self.click("Parent Corner");self.window.pin_input.setText("1234");self.click("Unlock Parent Corner")
+  self.click("Create");self.assertNotIn("Art Studio",self.buttons())
+  self.click("Back to home");self.click("Parent");self.window.pin_input.setText("1234");self.click("Unlock Parent Corner")
   self.assertFalse(self.window.activity_checks["art-studio"].isChecked())
   self.window.activity_checks["art-studio"].setChecked(True)
   self.click("Save activity choices");self.click("Back to child home")
-  self.assertIn("Art Studio",self.buttons())
+  self.click("Create");self.assertIn("Art Studio",self.buttons())
  def test_logout_relocks_activity_controls(self):
   self.unlock();self.click("Log out")
   self.assertEqual(self.window.activity_checks,{})

@@ -22,12 +22,12 @@ class QtProfileCreationTests(unittest.TestCase):
  def tearDown(self):
   self.window.close();self.app.processEvents();self.temp.cleanup()
  def click(self,label):
-  items=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible()]
-  matches=[b for b in items if isinstance(b,QPushButton) and b.text()==label]
+  items=[b for b in self.window.findChildren(QPushButton) if b.isVisible()]
+  matches=[b for b in items if isinstance(b,QPushButton) and (b.text()==label or b.accessibleName()==label)]
   self.assertEqual(len(matches),1,label)
   matches[0].click();self.app.processEvents()
  def unlock(self):
-  self.click("Starter");self.click("Parent Corner")
+  self.click("Starter");self.click("Parent")
   self.assertIsNone(self.window.profile_name)
   self.window.pin_input.setText("1234");self.click("Unlock Parent Corner")
  def test_parent_creates_profile(self):

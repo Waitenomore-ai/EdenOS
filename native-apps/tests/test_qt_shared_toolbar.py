@@ -25,8 +25,8 @@ class SharedToolbarTests(unittest.TestCase):
             window.show();self.app.processEvents()
             try:
                 self.assertFalse(window.activity_toolbar.isVisible())
-                for label in ('Toolbar Child','Art Studio'):
-                    buttons=[b for b in window.controls_widget.findChildren(QPushButton) if b.text()==label]
+                for label in ('Toolbar Child','Create','Art Studio'):
+                    buttons=[b for b in window.controls_widget.findChildren(QPushButton) if (b.text()==label or b.accessibleName()==label)]
                     self.assertEqual(len(buttons),1)
                     buttons[0].click();self.app.processEvents()
                 self.assertTrue(window.activity_toolbar.isVisible())

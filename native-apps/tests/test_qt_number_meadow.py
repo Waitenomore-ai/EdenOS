@@ -20,10 +20,10 @@ class NumberMeadowIntegrationTests(unittest.TestCase):
   self.window.resize(800,600);self.window.show();self.app.processEvents()
  def tearDown(self):self.window.close();self.app.processEvents();self.tmp.cleanup()
  def click(self,label):
-  found=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible() and b.text()==label]
+  found=[b for b in self.window.findChildren(QPushButton) if b.isVisible() and (b.text()==label or b.accessibleName()==label)]
   self.assertEqual(len(found),1,label);found[0].click();self.app.processEvents()
  def test_round_correct_wrong_and_home(self):
-  self.click("Eden Demo");self.click("Number Meadow")
+  self.click("Eden Demo");self.click("Learn");self.click("Number Meadow")
   self.assertEqual(self.window.state.page,"number-meadow")
   correct=self.window.number_game.round.count
   wrong=next(v for v in self.window.number_game.round.choices if v!=correct)
@@ -34,13 +34,13 @@ class NumberMeadowIntegrationTests(unittest.TestCase):
   self.click("Back to home")
   self.assertEqual(self.window.state.page,"home")
  def test_disabled_cannot_launch_via_callback(self):
-  self.click("Eden Demo");self.click("Parent Corner")
+  self.click("Eden Demo");self.click("Parent")
   self.window.pin_input.setText("1234");self.click("Unlock Parent Corner")
   ActivityPreferences(self.window.session,self.repo).save("eden_demo",{"number-meadow":False})
   self.click("Back to child home")
   self.window.open_activity("number-meadow")
   self.assertEqual(self.window.state.page,"home")
  def test_logout_while_playing(self):
-  self.click("Eden Demo");self.click("Number Meadow");self.click("Log out")
+  self.click("Eden Demo");self.click("Learn");self.click("Number Meadow");self.click("Log out")
   self.assertEqual(self.window.state.page,"login")
 if __name__=="__main__":unittest.main()

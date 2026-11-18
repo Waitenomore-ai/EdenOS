@@ -1,6 +1,7 @@
 """Native Qt Widgets preview. No browser wrapper or production profile access."""
 from __future__ import annotations
 from pathlib import Path
+from datetime import date
 import json
 import os
 import uuid
@@ -10,6 +11,7 @@ from .avatars import resolve_avatar
 from .parent_profiles import ParentProfileService
 from .approved_models.profile_cards import SELECTABLE_AVATARS
 from .activity_preferences import ActivityPreferences, ACTIVITIES
+from .home_categories import HOME_CATEGORIES, activities_in_category
 from .approved_models.number_meadow_model import NumberMeadow
 from .approved_models.word_woodland_model import WordWoodland
 from .approved_models.puzzle_pond_model import PuzzlePond
@@ -21,6 +23,7 @@ from .approved_models.story_garden_model import StoryGarden, SCENES
 from .art_canvas import ArtCanvas, PALETTE, BACKGROUNDS
 from .garden_stars import GardenStars
 from .sticker_garden import load_garden, save_garden, SLOTS
+from .wallpaper_choices import WallpaperChoices
 
 def create_window(*, pin_adapter=None, profiles=None):
     from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QLineEdit, QComboBox, QCheckBox, QScrollArea, QSizePolicy, QGridLayout, QHBoxLayout
@@ -29,7 +32,7 @@ def create_window(*, pin_adapter=None, profiles=None):
         from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
     except ImportError:
         QMediaPlayer = QAudioOutput = None
-    from PySide6.QtGui import QPixmap, QIcon
+    from PySide6.QtGui import QPixmap, QIcon, QPainter, QColor
 
     art_root = Path(__file__).resolve().parent.parent / "assets" / "activities"
 
@@ -41,20 +44,85 @@ def create_window(*, pin_adapter=None, profiles=None):
         return path if path.is_file() and not path.is_symlink() else None
 
     class EdenNativeWindow(QWidget):
+        def paintEvent(self, event):
+            super().paintEvent(event)
+            painter = QPainter(self)
+            wallpaper = self.home_wallpaper if self.state.page == "home" else None
+            if wallpaper is not None and not wallpaper.isNull():
+                image = wallpaper.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation)
+                painter.drawPixmap((self.width() - image.width()) // 2, (self.height() - image.height()) // 2, image)
+            else:
+                painter.fillRect(self.rect(), QColor("#e9f5e8"))
+            painter.end()
+
         def __init__(self):
             super().__init__()
             self.state = NavigationState()
+            self.approved_backgrounds = sorted(path for path in (Path(__file__).resolve().parent.parent / "assets" / "backgrounds").glob("*.png") if path.is_file() and not path.is_symlink())
+            wallpaper_file = self.approved_backgrounds[date.today().toordinal() % len(self.approved_backgrounds)] if self.approved_backgrounds else None
+            self.home_wallpaper = QPixmap(str(wallpaper_file)) if wallpaper_file is not None else None
             self.pin_adapter = pin_adapter
             self.profiles = profiles
             self.session = ParentSession(self.state, pin_adapter.verify_pin) if pin_adapter else None
             self.setWindowTitle("Eden OS — native desktop preview")
             self.resize(1024, 768)
+            self.setStyleSheet("""
+                QWidget { background: #e9f5e8; color: #214b39; font-size: 20px; }
+                QPushButton { background: #fff9e6; border: 2px solid #83b397;
+                    border-radius: 18px; padding: 12px; }
+                QPushButton:focus { border: 3px solid #3a7452; }
+                QLineEdit, QComboBox { background: white; color: #214b39;
+                    border: 2px solid #83b397; border-radius: 12px; padding: 9px; }
+                QLabel { background: transparent; }
+                QScrollArea { border: none; background: transparent; }
+                QWidget#edenControls { background: transparent; }
+            """)
             self.layout = QVBoxLayout(self)
+            self.header = QWidget()
+            self.header.setObjectName("edenImacHeader")
+            self.header.setStyleSheet("background:transparent;")
+            header_layout = QHBoxLayout(self.header)
+            header_layout.setSpacing(12)
+            header_layout.addStretch(1)
+            self.header_home = QPushButton("Home")
+            self.header_home.setAccessibleName("Home")
+            self.header_home.clicked.connect(lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
+            self.header_profile = QPushButton("My Profile")
+            self.header_profile.setAccessibleName("My Profile")
+            self.header_profile.clicked.connect(lambda: self.transition(NavigationState(page="profile", child_id=self.state.child_id)))
+            self.header_parent = QPushButton("Parent")
+            self.header_parent.setAccessibleName("Parent")
+            self.header_parent.clicked.connect(lambda: self.transition(self.state.open_parent()))
+            self.header_logout = QPushButton("Log out")
+            self.header_logout.setAccessibleName("Log out")
+            self.header_logout.clicked.connect(lambda: (self.stop_story_audio(), self.transition(self.state.logout())))
+            nav_folder = Path(__file__).resolve().parent.parent / "assets" / "navigation"
+            for control, filename in ((self.header_home, "home.png"), (self.header_profile, "my-profile-template.png"),
+                                      (self.header_parent, "parent.png"), (self.header_logout, "logout.png")):
+                nav_file = nav_folder / filename
+                if nav_file.is_file() and not nav_file.is_symlink():
+                    control.setText("")
+                    control.setIcon(QIcon(str(nav_file)))
+                    control.setIconSize(QSize(92, 92))
+                    control.setStyleSheet("background:transparent; border:0; padding:0;")
+                control.setFixedSize(96, 96)
+                header_layout.addWidget(control)
+            self.layout.addWidget(self.header)
             self.title = QLabel("Eden OS")
             self.title.setObjectName("edenTitle")
             self.title.setStyleSheet("font-size: 26px; font-weight: bold;")
             self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.layout.addWidget(self.title)
+            self.login_banner = QLabel()
+            self.login_banner.setObjectName("edenApprovedLoginBanner")
+            self.login_banner.setAccessibleName("Choose your character banner")
+            self.login_banner.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            banner_path = Path(__file__).resolve().parent.parent / "assets" / "login" / "eden_choose_your_character_banner.png"
+            if banner_path.is_file() and not banner_path.is_symlink():
+                banner = QPixmap(str(banner_path))
+                if not banner.isNull():
+                    self.login_banner.setPixmap(banner.scaled(650, 154, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            self.layout.addWidget(self.login_banner)
             self.activity_toolbar = QWidget()
             self.activity_toolbar.setObjectName("edenSharedActivityToolbar")
             toolbar_layout = QGridLayout(self.activity_toolbar)
@@ -88,6 +156,9 @@ def create_window(*, pin_adapter=None, profiles=None):
             self.scroll_area.setMinimumHeight(100)
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
             self.controls_widget = QWidget()
+            self.controls_widget.setObjectName("edenControls")
+            self.controls_widget.setStyleSheet("background:transparent;")
+            self.scroll_area.viewport().setStyleSheet("background:transparent;")
             self.controls_widget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
             self.buttons = QVBoxLayout(self.controls_widget)
             self.scroll_area.setWidget(self.controls_widget)
@@ -125,7 +196,26 @@ def create_window(*, pin_adapter=None, profiles=None):
         def transition(self, state):
             self.state = state
             if self.session: self.session.state = state
+            self.refresh_home_wallpaper()
             self.render()
+
+        def refresh_home_wallpaper(self):
+            approved = {path.name: path for path in self.approved_backgrounds}
+            selected = None
+            if self.profiles is not None and self.state.child_id:
+                selected = WallpaperChoices(self.profiles.path.parent / "wallpaper-selection.json").selected(self.state.child_id, approved)
+            wallpaper_file = approved.get(selected) if selected else (self.approved_backgrounds[date.today().toordinal() % len(self.approved_backgrounds)] if self.approved_backgrounds else None)
+            self.home_wallpaper = QPixmap(str(wallpaper_file)) if wallpaper_file is not None else None
+            self.update()
+
+        def choose_wallpaper(self, filename):
+            if self.state.page != "wallpapers" or not self.profiles or not self.state.child_id:
+                return False
+            approved = {path.name for path in self.approved_backgrounds}
+            if not WallpaperChoices(self.profiles.path.parent / "wallpaper-selection.json").choose(self.state.child_id, filename, approved):
+                return False
+            self.transition(NavigationState(page="home", child_id=self.state.child_id))
+            return True
 
         def submit_pin(self):
             if not self.session or not self.pin_input: return
@@ -178,7 +268,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             self.info.setText("Activity choices saved for this child.")
 
         def open_activity(self, activity):
-            if self.state.page != "home" or not self.profiles or not self.session:
+            if self.state.page not in HOME_CATEGORIES or activity not in activities_in_category(self.state.page) or not self.profiles or not self.session:
                 return
             if self.profiles.get(self.state.child_id) is None:
                 return
@@ -226,7 +316,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                 self.info.setText("Activity integration pending")
 
         def open_my_artwork(self):
-            if self.state.page != "home" or self.garden_stars_service() is None:
+            if self.state.page not in ("home", "profile") or self.garden_stars_service() is None:
                 return False
             self.artwork_preview = None
             self.transition(NavigationState(page="my-artwork", child_id=self.state.child_id))
@@ -433,7 +523,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                 return 0
 
         def open_garden_stars(self):
-            if self.state.page != "home" or self.garden_stars_service() is None:
+            if self.state.page not in ("home", "profile") or self.garden_stars_service() is None:
                 return False
             self.transition(NavigationState(page="garden-stars", child_id=self.state.child_id))
             return True
@@ -693,15 +783,37 @@ def create_window(*, pin_adapter=None, profiles=None):
                                "nature-explorer": "Nature Explorer", "my-day": "My Day",
                                "feelings": "Feelings", "story-garden": "Story Garden"}
             is_activity = self.state.page in activity_titles
+            self.header.setVisible(self.state.page != "login")
+            self.header_home.setVisible(self.state.page not in ("login", "home"))
+            nav_folder = Path(__file__).resolve().parent.parent / "assets" / "navigation"
+            profile_nav = nav_folder / "my-profile-template.png"
+            if self.state.child_id and self.profiles is not None:
+                current_child = self.profiles.get(self.state.child_id)
+                if current_child is not None:
+                    avatar_name = current_child.avatar
+                    candidate = nav_folder / ("profile-" + avatar_name + ".png")
+                    if candidate.is_file() and not candidate.is_symlink():
+                        profile_nav = candidate
+            if profile_nav.is_file() and not profile_nav.is_symlink():
+                self.header_profile.setIcon(QIcon(str(profile_nav)))
             self.activity_toolbar.setVisible(is_activity)
             self.title.setVisible(not is_activity)
+            self.login_banner.setVisible(self.state.page == "login")
             if is_activity:
                 self.toolbar_heading.setText(activity_titles[self.state.page])
                 self.toolbar_heading.setAccessibleName(activity_titles[self.state.page])
             self.info.setText("Native preview · " + self.state.page + " · " + detect_platform().name)
-            def action(label, callback, grid=None, index=None):
-                button = QPushButton(label)
-                button.setMinimumHeight(56)
+            def action(label, callback, grid=None, index=None, portrait=None, artwork=None):
+                button = QPushButton("" if artwork else label)
+                art_width = max(150, min(344, (self.width() - 120) // 3)) if artwork else 0
+                art_height = round(art_width * 196 / 344) if artwork else 0
+                button.setMinimumHeight(art_height + 12 if artwork else (112 if portrait else 56))
+                if portrait or artwork:
+                    button.setIcon(QIcon(str(artwork or portrait)))
+                    button.setIconSize(QSize(art_width, art_height) if artwork else QSize(80, 98))
+                if artwork:
+                    button.setStyleSheet("background:transparent; border:0; padding:4px;")
+                    button.setObjectName("edenHome" + label + "Artwork")
                 button.setAccessibleName(label)
                 button.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
                 button.clicked.connect(lambda _checked=False: callback())
@@ -716,8 +828,13 @@ def create_window(*, pin_adapter=None, profiles=None):
                         self.info.setText("Welcome to Eden — ask a parent to set up the first child")
                         if self.pin_adapter:
                             action("Parent setup", lambda: self.transition(self.state.open_parent()))
-                    for card in cards:
-                        action(card.display_name, lambda username=card.username: self.transition(self.state.select_child(username)))
+                    profile_grid_widget = QWidget()
+                    profile_grid = QGridLayout(profile_grid_widget)
+                    for index, card in enumerate(cards):
+                        portrait = resolve_avatar(card.avatar)
+                        action(card.display_name, lambda username=card.username: self.transition(self.state.select_child(username)),
+                               profile_grid, index, portrait=portrait)
+                    self.buttons.addWidget(profile_grid_widget)
                 else:
                     action("Preview child session", lambda: self.transition(self.state.select_child("demo-only")))
             elif self.state.page in ("my-day", "story-garden"):
@@ -791,7 +908,6 @@ def create_window(*, pin_adapter=None, profiles=None):
                         else:
                             action("Next page", lambda: (game.next_scene(), self.render()))
                 action("Back to home", lambda: (self.stop_story_audio(), self.transition(NavigationState(page="home", child_id=self.state.child_id))))
-                action("Log out", lambda: (self.stop_story_audio(), self.transition(self.state.logout())))
             elif self.state.page == "art-studio":
                 game = self.art_game
                 if not self.profiles or not self.session or self.profiles.get(self.state.child_id) is None or game is None:
@@ -964,7 +1080,6 @@ def create_window(*, pin_adapter=None, profiles=None):
                 action("Redo", self.art_canvas.redo_action)
                 action("Clear", lambda: (game.clear(), self.art_canvas.set_stickers([], []), self.render()))
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
-                action("Log out", lambda: self.transition(self.state.logout()))
             elif self.state.page in ("nature-explorer", "feelings"):
                 activity = self.state.page
                 game = self.nature_game if activity == "nature-explorer" else self.feelings_game
@@ -1008,7 +1123,6 @@ def create_window(*, pin_adapter=None, profiles=None):
                     for index, (symbol, instruction) in enumerate(CALM_ACTIONS):
                         action(("✓ " if game.completed[index] else "○ ") + symbol + " " + instruction, lambda i=index: (game.toggle_action(i), self.render()))
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
-                action("Log out", lambda: self.transition(self.state.logout()))
             elif self.state.page in ("word-woodland", "puzzle-pond"):
                 activity = self.state.page
                 game = self.word_game if activity == "word-woodland" else self.puzzle_game
@@ -1057,7 +1171,6 @@ def create_window(*, pin_adapter=None, profiles=None):
                     if game.complete:
                         action("Play again", lambda: (game.restart(), self.render()))
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
-                action("Log out", lambda: self.transition(self.state.logout()))
             elif self.state.page == "number-meadow":
                 if not self.profiles or not self.session or self.profiles.get(self.state.child_id) is None or self.number_game is None:
                     self.transition(self.state.logout())
@@ -1094,7 +1207,6 @@ def create_window(*, pin_adapter=None, profiles=None):
                     action(str(number), lambda value=number: self.answer_number(value), choices_grid, index)
                 self.buttons.addWidget(choices_widget)
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
-                action("Log out", lambda: self.transition(self.state.logout()))
             elif self.state.page == "my-artwork":
                 if self.garden_stars_service() is None:
                     self.transition(self.state.logout())
@@ -1321,7 +1433,75 @@ def create_window(*, pin_adapter=None, profiles=None):
                     sticker_grid.addWidget(tile, index // 4, index % 4)
                 self.buttons.addWidget(sticker_grid_widget)
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
-                action("Log out", lambda: self.transition(self.state.logout()))
+            elif self.state.page in HOME_CATEGORIES:
+                category = self.state.page
+                self.info.setText(category.title())
+                enabled = (ActivityPreferences(self.session, self.profiles).load(self.state.child_id)
+                           if self.session and self.profiles and self.profiles.get(self.state.child_id) else {})
+                activity_grid_widget = QWidget()
+                activity_grid = QGridLayout(activity_grid_widget)
+                for index, activity in enumerate(name for name in activities_in_category(category)
+                                                  if enabled.get(name, True)):
+                    action(activity.replace("-", " ").title(), lambda name=activity: self.open_activity(name),
+                           activity_grid, index)
+                self.buttons.addWidget(activity_grid_widget)
+                action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
+            elif self.state.page == "wallpapers":
+                if not self.profiles or self.profiles.get(self.state.child_id) is None:
+                    self.transition(self.state.logout())
+                    return
+                self.info.setText("Choose My Wallpaper")
+                picker_widget = QWidget()
+                picker_grid = QGridLayout(picker_widget)
+                picker_grid.setSpacing(8)
+                approved = {path.name for path in self.approved_backgrounds}
+                selected = WallpaperChoices(self.profiles.path.parent / "wallpaper-selection.json").selected(self.state.child_id, approved)
+                for index, picture_file in enumerate(self.approved_backgrounds):
+                    button = QPushButton("✓" if selected == picture_file.name else "")
+                    button.setAccessibleName("Choose wallpaper " + picture_file.stem.replace("-", " "))
+                    button.setToolTip(picture_file.stem.replace("-", " "))
+                    button.setIcon(QIcon(str(picture_file)))
+                    button.setIconSize(QSize(192, 108))
+                    button.setMinimumHeight(126)
+                    button.clicked.connect(lambda _checked=False, name=picture_file.name: self.choose_wallpaper(name))
+                    picker_grid.addWidget(button, index // 3, index % 3)
+                self.buttons.addWidget(picker_widget)
+                action("Back to My Profile", lambda: self.transition(NavigationState(page="profile", child_id=self.state.child_id)))
+            elif self.state.page == "profile":
+                if self.profiles is None or self.profiles.get(self.state.child_id) is None:
+                    self.transition(self.state.logout())
+                    return
+                child = self.profiles.get(self.state.child_id)
+                self.info.setText(child.display_name)
+                portrait = resolve_avatar(child.avatar)
+                if portrait:
+                    pixmap = QPixmap(str(portrait))
+                    if not pixmap.isNull():
+                        self.avatar_image.setPixmap(pixmap.scaled(110, 115, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+                        self.avatar_image.show()
+                profile_buttons = QWidget()
+                profile_buttons.setStyleSheet("background:transparent;")
+                profile_grid = QGridLayout(profile_buttons)
+                picture_buttons = (
+                    ("Choose My Wallpaper", "eden_s_garden_wallpaper_button.png", lambda: self.transition(NavigationState(page="wallpapers", child_id=self.state.child_id))),
+                    ("My Garden Stars", "eden_s_garden_stars_button.png", self.open_garden_stars),
+                )
+                for index, (label, filename, callback) in enumerate(picture_buttons):
+                    button = QPushButton("")
+                    button.setAccessibleName(label)
+                    button.setToolTip(label)
+                    image_file = Path(__file__).resolve().parent.parent / "assets" / "profile-buttons" / filename
+                    if image_file.is_file() and not image_file.is_symlink():
+                        button.setIcon(QIcon(str(image_file)))
+                        button.setIconSize(QSize(256, 86))
+                        button.setStyleSheet("background:transparent; border:0; padding:0;")
+                    else:
+                        button.setText(label)
+                    button.setMinimumHeight(96)
+                    button.clicked.connect(lambda _checked=False, run=callback: run())
+                    profile_grid.addWidget(button, 0, index)
+                self.buttons.addWidget(profile_buttons)
+                action("My saved pictures", self.open_my_artwork)
             elif self.state.page == "home":
                 if self.profiles is not None:
                     card = self.profiles.get(self.state.child_id)
@@ -1335,25 +1515,22 @@ def create_window(*, pin_adapter=None, profiles=None):
                         if not pixmap.isNull():
                             self.avatar_image.setPixmap(pixmap.scaled(110, 115, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
                             self.avatar_image.show()
-                if self.profiles is not None and self.session is not None:
-                    enabled = ActivityPreferences(self.session, self.profiles).load(self.state.child_id)
-                    grid_widget = QWidget()
-                    self.activity_grid = QGridLayout(grid_widget)
-                    self.activity_grid.setSpacing(8)
-                    position = 0
-                    for activity in ACTIVITIES:
-                        if enabled.get(activity, True):
-                            action(activity.replace("-", " ").title(), lambda name=activity: self.open_activity(name), self.activity_grid, position)
-                            position += 1
-                    self.buttons.addWidget(grid_widget)
+                home_grid_widget = QWidget()
+                home_grid_widget.setStyleSheet("background:transparent;")
+                self.activity_grid = QGridLayout(home_grid_widget)
+                self.activity_grid.setHorizontalSpacing(20)
+                for index, category in enumerate(HOME_CATEGORIES):
+                    art_path = Path(__file__).resolve().parent.parent / "assets" / "home" / (category + ".png")
+                    action(category.title(), lambda name=category: self.transition(NavigationState(page=name, child_id=self.state.child_id)),
+                           self.activity_grid, index, artwork=art_path if art_path.is_file() and not art_path.is_symlink() else None)
+                self.buttons.addWidget(home_grid_widget)
                 extras_widget = QWidget()
+                extras_widget.setStyleSheet("background:transparent;")
                 extras_grid = QGridLayout(extras_widget)
                 action("My Garden Stars", self.open_garden_stars, extras_grid, 0)
                 action("My saved pictures", self.open_my_artwork, extras_grid, 1)
                 action("My Sticker Garden", self.open_sticker_garden, extras_grid, 2)
                 self.buttons.addWidget(extras_widget)
-                action("Parent Corner", lambda: self.transition(self.state.open_parent()))
-                action("Log out", lambda: self.transition(self.state.logout()))
             else:
                 if self.state.parent_unlocked:
                     self.info.setText("Parent Corner unlocked — child profiles")
@@ -1421,7 +1598,6 @@ def create_window(*, pin_adapter=None, profiles=None):
                     action("Back to profiles", lambda: self.transition(self.state.logout()))
                 else:
                     action("Back to child home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
-                action("Log out", lambda: self.transition(self.state.logout()))
             self.buttons.activate()
             required_height = self.buttons.contentsMargins().top() + self.buttons.contentsMargins().bottom()
             for index in range(self.buttons.count()):
