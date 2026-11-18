@@ -27,8 +27,8 @@ class LayoutTests(unittest.TestCase):
             self.app.processEvents()
             try:
                 self.assertLessEqual(window.width(), 800)
-                for label in ('Layout Child', 'Art Studio'):
-                    buttons = [b for b in window.controls_widget.findChildren(QPushButton) if b.text() == label]
+                for label in ('Layout Child', 'Create', 'Art Studio'):
+                    buttons = [b for b in window.controls_widget.findChildren(QPushButton) if (b.text() == label or b.accessibleName() == label)]
                     self.assertEqual(len(buttons), 1)
                     buttons[0].click()
                     self.app.processEvents()

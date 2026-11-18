@@ -37,12 +37,12 @@ class ArtStudioTests(unittest.TestCase):
   self.assertEqual(service.balance('eden_demo'),0)
   self.click('Back to child home')
   self.assertFalse(self.window.parent_unlock_sticker())
-  self.click('Art Studio');self.click('Sticker: Acorn')
+  self.click('Create');self.click('Art Studio');self.click('Sticker: Acorn')
   self.assertEqual(self.window.art_canvas.sticker_skus,['sticker_acorn'])
 
  def test_garden_stars_awards_on_correct_answers_only(self):
   from eden_native.garden_stars import GardenStars
-  self.click('Eden Demo');self.click('Number Meadow')
+  self.click('Eden Demo');self.click('Learn');self.click('Number Meadow')
   service=GardenStars(self.window.profiles.path.parent/'garden-stars.sqlite3')
   self.assertEqual(service.balance('eden_demo'),0)
   game=self.window.number_game
@@ -51,13 +51,13 @@ class ArtStudioTests(unittest.TestCase):
   self.assertEqual(service.balance('eden_demo'),0)
   self.window.answer_number(game.round.count)
   self.assertEqual(service.balance('eden_demo'),10)
-  self.window.toolbar_home.click();self.app.processEvents();self.click('Word Woodland')
+  self.window.toolbar_home.click();self.app.processEvents();self.click('Learn');self.click('Word Woodland')
   game=self.window.word_game
   self.window.answer_word(game.round.answer)
   self.assertEqual(service.balance('eden_demo'),20)
 
  def test_saved_picture_gallery_is_child_scoped_and_ignores_symlinks(self):
-  self.click('Eden Demo');self.click('Art Studio');self.click('Save picture')
+  self.click('Eden Demo');self.click('Create');self.click('Art Studio');self.click('Save picture')
   directory=self.window.profiles.path.parent/'art-studio'/'eden_demo'
   self.assertTrue((directory/'eden-art-0001.png').is_file())
   (directory/'eden-art-0002.png').symlink_to(directory/'eden-art-0001.png')
@@ -73,7 +73,7 @@ class ArtStudioTests(unittest.TestCase):
 
  def test_puzzle_completion_and_saved_art_award_stars(self):
   from eden_native.garden_stars import GardenStars
-  self.click('Eden Demo');self.click('Puzzle Pond')
+  self.click('Eden Demo');self.click('Play');self.click('Puzzle Pond')
   service=GardenStars(self.window.profiles.path.parent/'garden-stars.sqlite3')
   game=self.window.puzzle_game
   pairs={}
@@ -85,11 +85,11 @@ class ArtStudioTests(unittest.TestCase):
   self.assertTrue(game.complete)
   self.assertEqual(service.balance('eden_demo'),10)
   self.window.toolbar_home.click();self.app.processEvents()
-  self.click('Art Studio');self.click('Save picture')
+  self.click('Create');self.click('Art Studio');self.click('Save picture')
   self.assertEqual(service.balance('eden_demo'),20)
 
  def test_free_emoji_stamps_survive_approved_sticker_undo(self):
-  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Eden Demo');self.click('Create');self.click('Art Studio')
   self.click('Add 🌼')
   self.assertEqual([x.symbol for x in self.window.art_game.stamps],['🌼'])
   self.click('Sticker: Apple')
@@ -113,7 +113,7 @@ class ArtStudioTests(unittest.TestCase):
   self.click('Acorn — 5 stars')
   self.assertEqual(service.balance('eden_demo'),5)
   self.assertIn('sticker_acorn',{item['sku'] for item in service.collection('eden_demo')})
-  self.click('Back to home');self.click('Art Studio')
+  self.click('Back to home');self.click('Create');self.click('Art Studio')
   self.click('Sticker: Acorn')
   self.assertEqual(self.window.art_canvas.sticker_skus,['sticker_acorn'])
 
@@ -123,7 +123,7 @@ class ArtStudioTests(unittest.TestCase):
   self.assertFalse(self.window.open_garden_stars() if self.window.state.page!='home' else self.window.purchase_garden_sticker('sticker_acorn'))
 
  def test_stamps_undo_redo_clear(self):
-  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Eden Demo');self.click('Create');self.click('Art Studio')
   self.assertIsInstance(self.window.art_game,ArtBoard)
   self.click('Sticker: Apple');self.assertEqual(len(self.window.art_game.stamps),1)
   self.assertEqual(len(self.window.art_canvas.sticker_paths),1)
@@ -133,7 +133,7 @@ class ArtStudioTests(unittest.TestCase):
   self.click('Clear');self.assertEqual(len(self.window.art_game.stamps),0)
   self.click('Back to home');self.assertEqual(self.window.state.page,'home')
  def test_render_keeps_combined_history_after_sticker_and_background(self):
-  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Eden Demo');self.click('Create');self.click('Art Studio')
   self.click('Sticker: Apple')
   canvas=self.window.art_canvas
   canvas.set_background('Sky')
@@ -149,7 +149,7 @@ class ArtStudioTests(unittest.TestCase):
   self.assertEqual(canvas.background.name(),'#e4f2ff')
 
  def test_remove_selected_sticker_accessible_button(self):
-  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Eden Demo');self.click('Create');self.click('Art Studio')
   self.click('Sticker: Apple');self.click('Sticker: Butterfly')
   self.window.art_canvas.selected_sticker=0
   self.click('Remove selected sticker')
@@ -160,7 +160,7 @@ class ArtStudioTests(unittest.TestCase):
  def test_remove_selected_sticker_from_middle_and_restore_order(self):
   from PySide6.QtCore import Qt
   from PySide6.QtTest import QTest
-  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Eden Demo');self.click('Create');self.click('Art Studio')
   self.click('Sticker: Apple');self.click('Sticker: Butterfly');self.click('Sticker: Apple')
   canvas=self.window.art_canvas
   canvas.selected_sticker=1
@@ -175,7 +175,7 @@ class ArtStudioTests(unittest.TestCase):
   self.assertEqual(canvas.sticker_skus,['sticker_apple','sticker_apple'])
 
  def test_remove_sticker_can_be_undone_and_redone_in_shared_history(self):
-  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Eden Demo');self.click('Create');self.click('Art Studio')
   self.click('Sticker: Apple');self.click('Sticker: Butterfly')
   canvas=self.window.art_canvas
   self.assertTrue(canvas.remove_last_sticker())
@@ -192,7 +192,7 @@ class ArtStudioTests(unittest.TestCase):
 
  def test_unified_sticker_add_undo_redo_preserves_model_and_save(self):
   import json
-  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Eden Demo');self.click('Create');self.click('Art Studio')
   self.click('Sticker: Apple')
   canvas=self.window.art_canvas
   self.assertEqual(canvas.sticker_skus,['sticker_apple'])
@@ -208,7 +208,7 @@ class ArtStudioTests(unittest.TestCase):
   self.assertEqual(json.loads(project.read_text())['stickers'],['sticker_apple'])
 
  def test_layer_reorder_is_reversible_in_combined_history(self):
-  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Eden Demo');self.click('Create');self.click('Art Studio')
   self.click('Sticker: Apple');self.click('Sticker: Butterfly')
   canvas=self.window.art_canvas
   canvas.selected_sticker=0
@@ -225,7 +225,7 @@ class ArtStudioTests(unittest.TestCase):
   import json
   from PySide6.QtCore import Qt
   from PySide6.QtTest import QTest
-  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Eden Demo');self.click('Create');self.click('Art Studio')
   self.click('Sticker: Apple');self.click('Sticker: Butterfly')
   canvas=self.window.art_canvas
   self.assertEqual(canvas.sticker_skus,['sticker_apple','sticker_butterfly'])
@@ -244,7 +244,7 @@ class ArtStudioTests(unittest.TestCase):
  def test_editable_project_is_child_scoped(self):
   from PySide6.QtCore import Qt, QPoint
   from PySide6.QtTest import QTest
-  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Eden Demo');self.click('Create');self.click('Art Studio')
   canvas=self.window.art_canvas
   QTest.mousePress(canvas,Qt.MouseButton.LeftButton,pos=QPoint(40,40))
   QTest.mouseRelease(canvas,Qt.MouseButton.LeftButton,pos=QPoint(90,80))

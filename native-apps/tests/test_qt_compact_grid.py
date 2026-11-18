@@ -21,13 +21,17 @@ class CompactGridTests(unittest.TestCase):
  def click(self,label):
   buttons=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible() and (b.text()==label or b.accessibleName()==label)]
   self.assertEqual(len(buttons),1);buttons[0].click();self.app.processEvents()
- def test_eight_activities_four_by_two_no_scroll(self):
+ def test_imac_home_three_categories_and_activity_routes(self):
   self.click("Eden Demo")
   grid=self.window.activity_grid
-  self.assertEqual(grid.count(),8)
-  self.assertEqual(grid.rowCount(),2)
-  self.assertEqual(grid.columnCount(),4)
+  self.assertEqual(grid.count(),3)
+  self.assertEqual(grid.rowCount(),1)
+  self.assertEqual(grid.columnCount(),3)
   self.assertEqual(self.window.scroll_area.verticalScrollBar().maximum(),0)
+  self.click("Create")
+  self.assertEqual(self.window.activity_grid.count(),1)
+  self.click("Art Studio")
+  self.assertEqual(self.window.state.page,"art-studio")
  def test_parent_checkboxes_four_by_two(self):
   self.click("Eden Demo");self.click("Parent Corner")
   self.window.pin_input.setText("1234");self.click("Unlock Parent Corner")

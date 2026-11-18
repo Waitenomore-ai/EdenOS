@@ -40,6 +40,7 @@ class QtAccessibilityTests(unittest.TestCase):
   self.click("Eden Demo")
   for widget in [b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible()]:
    if isinstance(widget,QPushButton):
-    self.assertEqual(widget.accessibleName(),widget.text())
+    self.assertTrue(widget.accessibleName())
+    if widget.text(): self.assertEqual(widget.accessibleName(),widget.text())
     self.assertEqual(widget.focusPolicy(),Qt.FocusPolicy.StrongFocus)
 if __name__=="__main__":unittest.main()

@@ -175,7 +175,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                 return
             try:
                 ParentProfileService(self.session, self.profiles).create(
-                    self.profile_username.text(), self.profile_name.text(), self.profile_avatar.currentText())
+                    self.profile_username.text().strip().lower(), self.profile_name.text(), self.profile_avatar.currentText())
             except (ValueError, PermissionError, OSError) as exc:
                 self.info.setText("Profile not created: " + str(exc))
                 return
@@ -193,7 +193,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             self.info.setText("Activity choices saved for this child.")
 
         def open_activity(self, activity):
-            if self.state.page != "home" or not self.profiles or not self.session:
+            if self.state.page not in HOME_CATEGORIES or activity not in activities_in_category(self.state.page) or not self.profiles or not self.session:
                 return
             if self.profiles.get(self.state.child_id) is None:
                 return
@@ -564,10 +564,12 @@ def create_window(*, pin_adapter=None, profiles=None):
             self.info.setText("Native preview · " + self.state.page + " · " + detect_platform().name)
             def action(label, callback, grid=None, index=None, portrait=None, artwork=None):
                 button = QPushButton("" if artwork else label)
-                button.setMinimumHeight(214 if artwork else (112 if portrait else 56))
+                art_width = max(150, min(344, (self.width() - 120) // 3)) if artwork else 0
+                art_height = round(art_width * 196 / 344) if artwork else 0
+                button.setMinimumHeight(art_height + 12 if artwork else (112 if portrait else 56))
                 if portrait or artwork:
                     button.setIcon(QIcon(str(artwork or portrait)))
-                    button.setIconSize(QSize(344, 196) if artwork else QSize(80, 98))
+                    button.setIconSize(QSize(art_width, art_height) if artwork else QSize(80, 98))
                 if artwork:
                     button.setStyleSheet("background:transparent; border:0; padding:4px;")
                     button.setObjectName("edenHome" + label + "Artwork")

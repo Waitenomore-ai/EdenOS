@@ -32,7 +32,7 @@ class DayStoryTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def click(self, label):
-        matches = [b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible() and b.text() == label]
+        matches = [b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible() and (b.text() == label or b.accessibleName() == label)]
         self.assertEqual(len(matches), 1, label)
         matches[0].click()
         self.app.processEvents()
