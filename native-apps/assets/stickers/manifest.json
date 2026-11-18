@@ -1,0 +1,680 @@
+{
+  "version": "eden-stickers-v70",
+  "items": [
+    {
+      "sku": "sticker_apple",
+      "name": "Apple",
+      "category": "Food",
+      "filename": "sticker_apple.png",
+      "source": "01_apple.png",
+      "sha256": "85e173774982c69b7757591ed9c22e802650d523c67bcb2269b5f36f175d37bb",
+      "price": 0
+    },
+    {
+      "sku": "sticker_acorn",
+      "name": "Acorn",
+      "category": "Nature",
+      "filename": "sticker_acorn.png",
+      "source": "02_acorn.png",
+      "sha256": "cd15f49fda28bf0ad34af7fb87959f525803b5f413a7bc73490031678b6fd66e",
+      "price": 5
+    },
+    {
+      "sku": "sticker_ant",
+      "name": "Ant",
+      "category": "Animals",
+      "filename": "sticker_ant.png",
+      "source": "03_ant.png",
+      "sha256": "97cbecae61b4cc68aa5333033833e486af07350fab3f7e319d50b9d49814a9d5",
+      "price": 15
+    },
+    {
+      "sku": "sticker_bee",
+      "name": "Bee",
+      "category": "Animals",
+      "filename": "sticker_bee.png",
+      "source": "04_bee.png",
+      "sha256": "65e8cbed01a266e9eb9844a54c3b12a3f455da843f92a4d33ccf4a556794b24e",
+      "price": 15
+    },
+    {
+      "sku": "sticker_bird_robin",
+      "name": "Little Bird",
+      "category": "Animals",
+      "filename": "sticker_bird_robin.png",
+      "source": "05_bird(1).png",
+      "sha256": "1934dca19ea05c791d83472a7c40ae5637b1e2d5bbdd369cb67f4cc5f4fd915c",
+      "price": 15
+    },
+    {
+      "sku": "sticker_bird_blue",
+      "name": "Blue Bird",
+      "category": "Animals",
+      "filename": "sticker_bird_blue.png",
+      "source": "05_bird.png",
+      "sha256": "f4f84a31270be5d5f5537ffd083523fda763f89bdd6d7fc19a02476bdede5ef7",
+      "price": 15
+    },
+    {
+      "sku": "sticker_butterfly",
+      "name": "Butterfly",
+      "category": "Animals",
+      "filename": "sticker_butterfly.png",
+      "source": "06_butterfly.png",
+      "sha256": "22468ddff95a9108e63972bde924a5cc162d232aef205d65aaa0962e71d35bfe",
+      "price": 0
+    },
+    {
+      "sku": "sticker_cat",
+      "name": "Cat",
+      "category": "Animals",
+      "filename": "sticker_cat.png",
+      "source": "07_cat.png",
+      "sha256": "4a3286db74a8253aedb28ef0b1892471bdbb91e29482146de41ef539994abb08",
+      "price": 15
+    },
+    {
+      "sku": "sticker_car",
+      "name": "Car",
+      "category": "Things",
+      "filename": "sticker_car.png",
+      "source": "08_car.png",
+      "sha256": "021c27fae17371cb97151b784128638d08e5f31de52e50b4a5d49028bd6ad366",
+      "price": 20
+    },
+    {
+      "sku": "sticker_cloud_smile",
+      "name": "Smiley Cloud",
+      "category": "Nature",
+      "filename": "sticker_cloud_smile.png",
+      "source": "09_cloud(1).png",
+      "sha256": "b3e7b4bdf14293a5ff4f53e3e67f48a0858b4bf676a6bdc4271c15d67c02dfaa",
+      "price": 5
+    },
+    {
+      "sku": "sticker_cloud_white",
+      "name": "White Cloud",
+      "category": "Nature",
+      "filename": "sticker_cloud_white.png",
+      "source": "09_cloud.png",
+      "sha256": "fded56ea364ae4a2ccdb5d7eec4cc0b1d6590324fbd4c9635d7f43bb023e61d7",
+      "price": 0
+    },
+    {
+      "sku": "sticker_cookie",
+      "name": "Cookie",
+      "category": "Food",
+      "filename": "sticker_cookie.png",
+      "source": "10_cookie.png",
+      "sha256": "d72d9424c1737c89f61446ccbe7387b2e31d6021f8cd4143cd665403598eb22c",
+      "price": 10
+    },
+    {
+      "sku": "sticker_dog",
+      "name": "Dog",
+      "category": "Animals",
+      "filename": "sticker_dog.png",
+      "source": "11_dog.png",
+      "sha256": "571bce2b3d50174a9f9185e0d8c5d138d87749a84aec33ccf0f76401410e7560",
+      "price": 15
+    },
+    {
+      "sku": "sticker_dolphin",
+      "name": "Dolphin",
+      "category": "Animals",
+      "filename": "sticker_dolphin.png",
+      "source": "13_dolphin.png",
+      "sha256": "56f44a6f4dbf4a7dc586d999033a9c958fffa0715da428291b6a1b9f0ada6ade",
+      "price": 15
+    },
+    {
+      "sku": "sticker_elephant",
+      "name": "Elephant",
+      "category": "Animals",
+      "filename": "sticker_elephant.png",
+      "source": "14_elephant.png",
+      "sha256": "09388d3386e22fafaa513a45f9edc73cf0a16cfbe7f13bbb215722f5217712a5",
+      "price": 15
+    },
+    {
+      "sku": "sticker_giraffe",
+      "name": "Giraffe",
+      "category": "Animals",
+      "filename": "sticker_giraffe.png",
+      "source": "21_giraffe.png",
+      "sha256": "3276aee7d8125f52b2f09815b2b0f8cf51443ffb5dc010df1373b9e54ec61421",
+      "price": 15
+    },
+    {
+      "sku": "sticker_grapes",
+      "name": "Grapes",
+      "category": "Food",
+      "filename": "sticker_grapes.png",
+      "source": "22_grapes.png",
+      "sha256": "3a325cc412fcffb02aa3d2491d0d309b9a9b11f32fcab6b59f584a90fc491d5c",
+      "price": 10
+    },
+    {
+      "sku": "sticker_guitar",
+      "name": "Guitar",
+      "category": "Things",
+      "filename": "sticker_guitar.png",
+      "source": "23_guitar.png",
+      "sha256": "67e1a75f50518b514e0a20bd97f5ee56d30289a3e43a83c2fcb7b88c75a1c0a5",
+      "price": 20
+    },
+    {
+      "sku": "sticker_heart",
+      "name": "Heart",
+      "category": "Things",
+      "filename": "sticker_heart.png",
+      "source": "24_heart.png",
+      "sha256": "8c8746bafa61487fc4f4e9c1e24591d4357c6858ded413b962e56403522ab66c",
+      "price": 0
+    },
+    {
+      "sku": "sticker_house",
+      "name": "House",
+      "category": "Places",
+      "filename": "sticker_house.png",
+      "source": "25_house.png",
+      "sha256": "d8fa6ebf00e935b36c6e0181ff52efdf8ca17e09e373c42634d28f15226b56b2",
+      "price": 20
+    },
+    {
+      "sku": "sticker_hedgehog",
+      "name": "Hedgehog",
+      "category": "Animals",
+      "filename": "sticker_hedgehog.png",
+      "source": "26_hedgehog.png",
+      "sha256": "bf11a2a674400e0c259dfe95c3c859ef3f5d52910392373fcd1cf51a05345f0f",
+      "price": 15
+    },
+    {
+      "sku": "sticker_hat",
+      "name": "Hat",
+      "category": "Things",
+      "filename": "sticker_hat.png",
+      "source": "27_hat.png",
+      "sha256": "6e81b6a9e92827c436480b8e7adfda43eaf1e60a2e43967e03389abfa7c1d2ef",
+      "price": 20
+    },
+    {
+      "sku": "sticker_ice_cream",
+      "name": "Ice Cream",
+      "category": "Food",
+      "filename": "sticker_ice_cream.png",
+      "source": "28_ice_cream.png",
+      "sha256": "56c15de728df6aa0543f0721823563b0017057475baf629c6dd164af2ab34e99",
+      "price": 10
+    },
+    {
+      "sku": "sticker_insect",
+      "name": "Grasshopper",
+      "category": "Animals",
+      "filename": "sticker_insect.png",
+      "source": "29_insect.png",
+      "sha256": "807ba6677bd170a9ecce9a431819bc1d18ba63081cc4bde6de55542c03c4a237",
+      "price": 15
+    },
+    {
+      "sku": "sticker_island",
+      "name": "Island",
+      "category": "Nature",
+      "filename": "sticker_island.png",
+      "source": "30_island.png",
+      "sha256": "d367a50dcb0a18af26a1e772251ac9d8c60e33e174a0761fdb1c680da5fc0136",
+      "price": 5
+    },
+    {
+      "sku": "sticker_jellyfish",
+      "name": "Jellyfish",
+      "category": "Animals",
+      "filename": "sticker_jellyfish.png",
+      "source": "31_jellyfish.png",
+      "sha256": "0e456d930c05f01ab41b27b3beca9323f1d4db714ed3da6885faed4ce10a9124",
+      "price": 15
+    },
+    {
+      "sku": "sticker_jam_jar",
+      "name": "Jam Jar",
+      "category": "Food",
+      "filename": "sticker_jam_jar.png",
+      "source": "32_jam_jar.png",
+      "sha256": "0b9e8034a7296767984b70abc3c911e8fe5c44782bcead2575aad12aa297cbc8",
+      "price": 10
+    },
+    {
+      "sku": "sticker_jet",
+      "name": "Jet",
+      "category": "Things",
+      "filename": "sticker_jet.png",
+      "source": "33_jet.png",
+      "sha256": "0b59e5e989ec4b831e9c20127220324b8062cc1b0051a9f0a991f2b3ba99dd9f",
+      "price": 20
+    },
+    {
+      "sku": "sticker_kite",
+      "name": "Kite",
+      "category": "Things",
+      "filename": "sticker_kite.png",
+      "source": "34_kite.png",
+      "sha256": "22d35270acb0a8ecfe8c3d94fa72fa12a5b7327d260da31b4936bfb9368df3e9",
+      "price": 20
+    },
+    {
+      "sku": "sticker_key",
+      "name": "Key",
+      "category": "Learning",
+      "filename": "sticker_key.png",
+      "source": "35_key.png",
+      "sha256": "5688b3fba90a92ee2cd2f3e5109ed1bbfc1f3a3821ec2c54c0365d3e50260a4e",
+      "price": 20
+    },
+    {
+      "sku": "sticker_koala",
+      "name": "Koala",
+      "category": "Animals",
+      "filename": "sticker_koala.png",
+      "source": "36_koala.png",
+      "sha256": "766a2a5680df3d108a54e169caca2778dd76bedb39a63770408b4aef583a337a",
+      "price": 15
+    },
+    {
+      "sku": "sticker_kangaroo",
+      "name": "Kangaroo",
+      "category": "Animals",
+      "filename": "sticker_kangaroo.png",
+      "source": "37_kangaroo.png",
+      "sha256": "076de95250f8de94e76787c407fa53e06a69915e293b4b12f1651685ff24fd89",
+      "price": 15
+    },
+    {
+      "sku": "sticker_lion",
+      "name": "Lion",
+      "category": "Animals",
+      "filename": "sticker_lion.png",
+      "source": "38_lion.png",
+      "sha256": "896f101d522d7c9ab1e95ab50a4a3cef7ce0860da251244e4234edb5054003de",
+      "price": 15
+    },
+    {
+      "sku": "sticker_leaf",
+      "name": "Leaf",
+      "category": "Nature",
+      "filename": "sticker_leaf.png",
+      "source": "39_leaf.png",
+      "sha256": "29079cb16b3d292da7edccd03eeb94deecad07488fb7a6d284ed65702816f4a9",
+      "price": 5
+    },
+    {
+      "sku": "sticker_ladybird",
+      "name": "Ladybird",
+      "category": "Animals",
+      "filename": "sticker_ladybird.png",
+      "source": "40_ladybird.png",
+      "sha256": "eecb303f900bd6419fcff4e468412b4ab42653b53c0a8114e94db2582a4b98b2",
+      "price": 15
+    },
+    {
+      "sku": "sticker_moon",
+      "name": "Moon",
+      "category": "Nature",
+      "filename": "sticker_moon.png",
+      "source": "41_moon.png",
+      "sha256": "d676f3487447db1f02ae77a7520f89f12db9302c37295833af22ea3244cc8bfe",
+      "price": 5
+    },
+    {
+      "sku": "sticker_mushroom",
+      "name": "Mushroom",
+      "category": "Nature",
+      "filename": "sticker_mushroom.png",
+      "source": "42_mushroom.png",
+      "sha256": "d6604fd10437292880bb4e0e0df6553e306a3cfd11dff5dd1034fca7d04ba85c",
+      "price": 5
+    },
+    {
+      "sku": "sticker_mouse",
+      "name": "Mouse",
+      "category": "Animals",
+      "filename": "sticker_mouse.png",
+      "source": "43_mouse.png",
+      "sha256": "713dc1f4a5a8c0dec9d1de79e3e44815a7b566e5ccebace95c0966ef10545ac8",
+      "price": 15
+    },
+    {
+      "sku": "sticker_monkey",
+      "name": "Monkey",
+      "category": "Animals",
+      "filename": "sticker_monkey.png",
+      "source": "44_monkey.png",
+      "sha256": "74af061d19a74294ddda46ec25968c7f6a7b3f1d4a5b621d3b5a73dc80f8c057",
+      "price": 15
+    },
+    {
+      "sku": "sticker_nest",
+      "name": "Nest",
+      "category": "Nature",
+      "filename": "sticker_nest.png",
+      "source": "45_nest.png",
+      "sha256": "c94344efe39e21f99c060bed80e9091c16419b522537cdd334dcfd2dc8ba43d0",
+      "price": 5
+    },
+    {
+      "sku": "sticker_notebook",
+      "name": "Notebook",
+      "category": "Learning",
+      "filename": "sticker_notebook.png",
+      "source": "46_notebook.png",
+      "sha256": "7ad9aa6e5d8249059017a7a10220ce1b8fddc0f5fbab80df574449f5bf21b220",
+      "price": 20
+    },
+    {
+      "sku": "sticker_numbers",
+      "name": "Numbers",
+      "category": "Learning",
+      "filename": "sticker_numbers.png",
+      "source": "47_numbers.png",
+      "sha256": "9bc422994d37c8cbf1358765dbdf54bee61eec75588b0e09da70c99af61bc105",
+      "price": 20
+    },
+    {
+      "sku": "sticker_owl",
+      "name": "Owl",
+      "category": "Animals",
+      "filename": "sticker_owl.png",
+      "source": "48_owl.png",
+      "sha256": "ee2d690a47ad2d49a45fab6d019f0465c0a1e1b2476a7a5e407a64bd08856ec3",
+      "price": 15
+    },
+    {
+      "sku": "sticker_orange",
+      "name": "Orange",
+      "category": "Food",
+      "filename": "sticker_orange.png",
+      "source": "49_orange.png",
+      "sha256": "ae9ad855991eccd202aea453fab81f58f6c88440452ad7b1183eddf4dc5d6c98",
+      "price": 10
+    },
+    {
+      "sku": "sticker_octopus",
+      "name": "Octopus",
+      "category": "Animals",
+      "filename": "sticker_octopus.png",
+      "source": "50_octopus.png",
+      "sha256": "bced8ef935ce863512c44c960d70a4cec332c74bfa56e55eace383a847758f07",
+      "price": 15
+    },
+    {
+      "sku": "sticker_penguin",
+      "name": "Penguin",
+      "category": "Animals",
+      "filename": "sticker_penguin.png",
+      "source": "51_penguin.png",
+      "sha256": "60d95c4e700ee0054f8781d4cecc41624e9ab9b0a1463c1ce342329c1386a9eb",
+      "price": 15
+    },
+    {
+      "sku": "sticker_pear",
+      "name": "Pear",
+      "category": "Food",
+      "filename": "sticker_pear.png",
+      "source": "52_pear.png",
+      "sha256": "bc02991a5a96f18220383d96e8b5e2fd22a8a4a3c823bfc182c5c5b777a7ed66",
+      "price": 10
+    },
+    {
+      "sku": "sticker_queen",
+      "name": "Queen",
+      "category": "Things",
+      "filename": "sticker_queen.png",
+      "source": "55_queen.png",
+      "sha256": "7aaeefbf04d26358d4f25d085c9ec4ac42d1b00be45bf37636c82a4cc2191adf",
+      "price": 20
+    },
+    {
+      "sku": "sticker_quail",
+      "name": "Quail",
+      "category": "Animals",
+      "filename": "sticker_quail.png",
+      "source": "56_quail.png",
+      "sha256": "c9448684a49e86762c7d45f7ce0ac3ae2818211b41b5510f968519a0b9adad61",
+      "price": 15
+    },
+    {
+      "sku": "sticker_question_mark",
+      "name": "Question Mark",
+      "category": "Learning",
+      "filename": "sticker_question_mark.png",
+      "source": "57_question_mark.png",
+      "sha256": "13e7b4bb992fcaac900b64a8141fc2dd22dac2dd883a8e5e37d72fd8355f1d6d",
+      "price": 20
+    },
+    {
+      "sku": "sticker_rabbit",
+      "name": "Rabbit",
+      "category": "Animals",
+      "filename": "sticker_rabbit.png",
+      "source": "58_rabbit.png",
+      "sha256": "e7b4f0939734e2a285576f31308d011f354eaab5c5f03c317405a4edad5bba1a",
+      "price": 15
+    },
+    {
+      "sku": "sticker_rocket",
+      "name": "Rocket",
+      "category": "Things",
+      "filename": "sticker_rocket.png",
+      "source": "60_rocket.png",
+      "sha256": "c654e552220399004e1b6a6c92e6c8d48f5f72bfa733d1d4652c2a13371ffb81",
+      "price": 20
+    },
+    {
+      "sku": "sticker_sun",
+      "name": "Sun",
+      "category": "Nature",
+      "filename": "sticker_sun.png",
+      "source": "61_sun.png",
+      "sha256": "f8d7a01223dbecb98175c74f918868ad9d73c7909bab603d6a34eb18033e7193",
+      "price": 5
+    },
+    {
+      "sku": "sticker_star",
+      "name": "Star",
+      "category": "Nature",
+      "filename": "sticker_star.png",
+      "source": "62_star.png",
+      "sha256": "2294f4bc464c62277eaefa19c75597c2c771a9342e6bff1379aca1d1bb679003",
+      "price": 5
+    },
+    {
+      "sku": "sticker_snail",
+      "name": "Snail",
+      "category": "Animals",
+      "filename": "sticker_snail.png",
+      "source": "63_snail.png",
+      "sha256": "37f24f96e70de19dcf7a1c4a949ec5d05837001c18706d01805772c83473f675",
+      "price": 15
+    },
+    {
+      "sku": "sticker_sheep",
+      "name": "Sheep",
+      "category": "Animals",
+      "filename": "sticker_sheep.png",
+      "source": "64_sheep.png",
+      "sha256": "040bb6c39be58006dabc4d81baf0caff76740e56f3b195a216be74fce8c3052f",
+      "price": 15
+    },
+    {
+      "sku": "sticker_turtle",
+      "name": "Turtle",
+      "category": "Animals",
+      "filename": "sticker_turtle.png",
+      "source": "65_turtle.png",
+      "sha256": "a555d3fbe15f1cfc04159a1f429d9f8fe9c5eb2c5ffc377fc88d859c90deb94c",
+      "price": 15
+    },
+    {
+      "sku": "sticker_tree",
+      "name": "Tree",
+      "category": "Nature",
+      "filename": "sticker_tree.png",
+      "source": "66_tree.png",
+      "sha256": "be0f6edbe2f008910a6d7816301256f17f89ab6311901538557e0e9dfacfcbab",
+      "price": 5
+    },
+    {
+      "sku": "sticker_train",
+      "name": "Train",
+      "category": "Things",
+      "filename": "sticker_train.png",
+      "source": "67_train.png",
+      "sha256": "3f40b8cc70a1ef0a449bddb8d9d4b52a30fc16c90f6416b446f9e2bbc194abf6",
+      "price": 20
+    },
+    {
+      "sku": "sticker_teddy",
+      "name": "Teddy",
+      "category": "Things",
+      "filename": "sticker_teddy.png",
+      "source": "68_teddy.png",
+      "sha256": "01420ec82c39965955f7d1b71ece54973973fb904347767b37db458ccb3e63ca",
+      "price": 20
+    },
+    {
+      "sku": "sticker_umbrella",
+      "name": "Umbrella",
+      "category": "Things",
+      "filename": "sticker_umbrella.png",
+      "source": "69_umbrella.png",
+      "sha256": "56fc20f5d969b17e790efc6de0a4cde0d70c0ac55c08ec37c71d34af2f519ba6",
+      "price": 20
+    },
+    {
+      "sku": "sticker_unicorn",
+      "name": "Unicorn",
+      "category": "Animals",
+      "filename": "sticker_unicorn.png",
+      "source": "70_unicorn.png",
+      "sha256": "822919672ebb49ee58dc606e562732b3c66cc690c4cf677ad544ba150ef32de6",
+      "price": 15
+    },
+    {
+      "sku": "sticker_violin",
+      "name": "Violin",
+      "category": "Things",
+      "filename": "sticker_violin.png",
+      "source": "71_violin.png",
+      "sha256": "f12b34f03ba3147e5f0794747c2e928e349293a052233d9a9d0ea2dfbc197aa4",
+      "price": 20
+    },
+    {
+      "sku": "sticker_vegetables",
+      "name": "Vegetables",
+      "category": "Food",
+      "filename": "sticker_vegetables.png",
+      "source": "72_vegetables.png",
+      "sha256": "9f8076c90471a9cc9422aa4cdac7bd82960e3b3ed5f865519eeaab72c11396cb",
+      "price": 10
+    },
+    {
+      "sku": "sticker_volcano",
+      "name": "Volcano",
+      "category": "Nature",
+      "filename": "sticker_volcano.png",
+      "source": "73_volcano.png",
+      "sha256": "9858ea91dd5530f499e2fb9a8554c0bc1d6fb5c2d5f0159b0429a8f38a2caabb",
+      "price": 5
+    },
+    {
+      "sku": "sticker_yarn",
+      "name": "Yarn",
+      "category": "Learning",
+      "filename": "sticker_yarn.png",
+      "source": "81_yarn.png",
+      "sha256": "5e6a90c9e79cfb686b23c17a326768d8b3d7bd2f4bce44222cae008aab4fee05",
+      "price": 20
+    },
+    {
+      "sku": "sticker_yacht",
+      "name": "Yacht",
+      "category": "Things",
+      "filename": "sticker_yacht.png",
+      "source": "82_yacht.png",
+      "sha256": "0431067b97745c905e7f2df3ea7007eae388d24a93e94aa07c69d771594780f0",
+      "price": 20
+    },
+    {
+      "sku": "sticker_yo_yo",
+      "name": "Yo-yo",
+      "category": "Things",
+      "filename": "sticker_yo_yo.png",
+      "source": "83_yo_yo.png",
+      "sha256": "c547069484ba29df0948ffdee321115c74f72ce44d04833db0418ba01ed7ebb7",
+      "price": 20
+    },
+    {
+      "sku": "sticker_zebra",
+      "name": "Zebra",
+      "category": "Animals",
+      "filename": "sticker_zebra.png",
+      "source": "84_zebra.png",
+      "sha256": "dec363d3e2315798777ad243ba1e49fd1ef6dc26d9cec06754e5ba5845443d6d",
+      "price": 15
+    },
+    {
+      "sku": "sticker_zipper",
+      "name": "Zipper",
+      "category": "Learning",
+      "filename": "sticker_zipper.png",
+      "source": "85_zipper.png",
+      "sha256": "2a48440b9feea8d20d6f971b631bb6447c636bc61df6d99aa1ae2a91806a617c",
+      "price": 20
+    },
+    {
+      "sku": "sticker_zigzag",
+      "name": "Zigzag",
+      "category": "Learning",
+      "filename": "sticker_zigzag.png",
+      "source": "86_zigzag.png",
+      "sha256": "99c8301f345dd716c626dbe8798ebd41d67cfe8e0c49829ec43e9b98bc6f776f",
+      "price": 20
+    },
+    {
+      "sku": "sticker_zoo",
+      "name": "Zoo",
+      "category": "Places",
+      "filename": "sticker_zoo.png",
+      "source": "87_zoo.png",
+      "sha256": "27bf185b3cb0e8fcfdbf17fc84a28284077c3b24ed0556cd8bc92671e3f70b62",
+      "price": 20
+    },
+    {
+      "sku": "sticker_airplane",
+      "name": "Airplane",
+      "category": "Things",
+      "filename": "sticker_airplane.png",
+      "source": "88_airplane.png",
+      "sha256": "838afca723ffd67a25ea78f7c45d013d60a8a44f933e9ed109b147608630600d",
+      "price": 20
+    },
+    {
+      "sku": "sticker_ball",
+      "name": "Ball",
+      "category": "Things",
+      "filename": "sticker_ball.png",
+      "source": "89_ball.png",
+      "sha256": "a01a4a27dd8d298258f46e97ad711fd9e75876101e7050dfe16d3dfdd9e92063",
+      "price": 20
+    },
+    {
+      "sku": "sticker_cake",
+      "name": "Cake",
+      "category": "Food",
+      "filename": "sticker_cake.png",
+      "source": "90_cake.png",
+      "sha256": "1144fb45b217c495724a4b6f332f997fe3b46ab4a0f11c42deb721c5657d4e49",
+      "price": 10
+    }
+  ]
+}

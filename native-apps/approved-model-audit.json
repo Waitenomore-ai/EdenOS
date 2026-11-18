@@ -1,0 +1,43 @@
+{
+  "source": "staged copy of iMac approved source; audit only",
+  "models": [
+    {
+      "file": "parent_pin.py",
+      "sha256": "2896e1b76a3211bdabd10c7362367201f84b26a0556addc16bf63808707eca74",
+      "relative_imports": []
+    },
+    {
+      "file": "parent_consent.py",
+      "sha256": "26b08774c7717523d0dc96f731796d68a406c2f6eea5097d960c3726f56d38fb",
+      "relative_imports": [
+        "progress_store"
+      ]
+    },
+    {
+      "file": "profile_cards.py",
+      "sha256": "6afbc00a6a05b21043da94c761491ab713bef4198eee6c8fb5deb5a872540cdc",
+      "relative_imports": [
+        "age_policy"
+      ]
+    },
+    {
+      "file": "profile_store.py",
+      "sha256": "9c39b3541d619a2e93a864d77eb03cda8aff3cca234d1f7b56967067865a9878",
+      "relative_imports": [
+        "profile_cards"
+      ]
+    },
+    {
+      "file": "parent_activity_choices.py",
+      "sha256": "6c84a9a953a92584f051c35fe182aa7fcc67494b769256e03ed8482b520ce2f3",
+      "relative_imports": [
+        "child_profiles"
+      ]
+    },
+    {
+      "file": "age_policy.py",
+      "sha256": "c7fc77e651cea7c37347b6dc4c842277d2f7493c402cf55d041824c392d7de3f",
+      "relative_imports": []
+    }
+  ]
+}

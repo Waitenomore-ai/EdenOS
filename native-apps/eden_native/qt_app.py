@@ -1,0 +1,826 @@
+"""Native Qt Widgets preview. No browser wrapper or production profile access."""
+from __future__ import annotations
+from pathlib import Path
+import json
+import os
+from .core import NavigationState, detect_platform
+from .parent_session import ParentSession
+from .avatars import resolve_avatar
+from .parent_profiles import ParentProfileService
+from .approved_models.profile_cards import SELECTABLE_AVATARS
+from .activity_preferences import ActivityPreferences, ACTIVITIES
+from .approved_models.number_meadow_model import NumberMeadow
+from .approved_models.word_woodland_model import WordWoodland
+from .approved_models.puzzle_pond_model import PuzzlePond
+from .approved_models.nature_explorer_model import NatureExplorer
+from .approved_models.feelings_model import FeelingsSpace, FEELINGS, CALM_ACTIONS
+from .approved_models.art_studio_model import ArtBoard
+from .approved_models.time_routines_model import Routine, ROUTINES
+from .approved_models.story_garden_model import StoryGarden, SCENES
+from .art_canvas import ArtCanvas, PALETTE, BACKGROUNDS
+
+def create_window(*, pin_adapter=None, profiles=None):
+    from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QLineEdit, QComboBox, QCheckBox, QScrollArea, QSizePolicy, QGridLayout, QHBoxLayout
+    from PySide6.QtCore import Qt, QTimer, QSize, QUrl
+    try:
+        from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
+    except ImportError:
+        QMediaPlayer = QAudioOutput = None
+    from PySide6.QtGui import QPixmap, QIcon
+
+    art_root = Path(__file__).resolve().parent.parent / "assets" / "activities"
+
+    def picture_path(activity, word):
+        if not isinstance(word, str): return None
+        name = word.lower().replace(" ", "_")
+        if not name.replace("_", "").isalnum(): return None
+        path = art_root / activity / (name + ".png")
+        return path if path.is_file() and not path.is_symlink() else None
+
+    class EdenNativeWindow(QWidget):
+        def __init__(self):
+            super().__init__()
+            self.state = NavigationState()
+            self.pin_adapter = pin_adapter
+            self.profiles = profiles
+            self.session = ParentSession(self.state, pin_adapter.verify_pin) if pin_adapter else None
+            self.setWindowTitle("Eden OS — native desktop preview")
+            self.resize(1024, 768)
+            self.layout = QVBoxLayout(self)
+            self.title = QLabel("Eden OS")
+            self.title.setObjectName("edenTitle")
+            self.title.setStyleSheet("font-size: 26px; font-weight: bold;")
+            self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.layout.addWidget(self.title)
+            self.activity_toolbar = QWidget()
+            self.activity_toolbar.setObjectName("edenSharedActivityToolbar")
+            toolbar_layout = QGridLayout(self.activity_toolbar)
+            self.toolbar_home = QPushButton("⌂ Home")
+            self.toolbar_home.setObjectName("edenToolbarHome")
+            self.toolbar_home.setAccessibleName("Home")
+            self.toolbar_home.setMinimumSize(125, 56)
+            self.toolbar_home.clicked.connect(lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
+            toolbar_layout.addWidget(self.toolbar_home, 0, 0)
+            self.toolbar_heading = QLabel("")
+            self.toolbar_heading.setObjectName("edenSharedActivityHeading")
+            self.toolbar_heading.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.toolbar_heading.setStyleSheet("font-size: 23px; font-weight: bold;")
+            toolbar_layout.addWidget(self.toolbar_heading, 0, 1)
+            toolbar_layout.addWidget(QWidget(), 0, 2)
+            toolbar_layout.setColumnMinimumWidth(2, 125)
+            toolbar_layout.setColumnStretch(1, 1)
+            self.layout.addWidget(self.activity_toolbar)
+            self.info = QLabel()
+            self.info.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.layout.addWidget(self.info)
+            self.avatar_image = QLabel()
+            self.avatar_image.setObjectName("selectedAvatarImage")
+            self.avatar_image.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.avatar_image.setMaximumHeight(120)
+            self.layout.addWidget(self.avatar_image)
+            self.scroll_area = QScrollArea()
+            self.scroll_area.setObjectName("edenScrollableControls")
+            self.scroll_area.setWidgetResizable(True)
+            self.scroll_area.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+            self.scroll_area.setMinimumHeight(100)
+            self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+            self.controls_widget = QWidget()
+            self.controls_widget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
+            self.buttons = QVBoxLayout(self.controls_widget)
+            self.scroll_area.setWidget(self.controls_widget)
+            self.layout.addWidget(self.scroll_area, 1)
+            self.pin_input = None
+            self.pin_confirm = None
+            self.profile_name = None
+            self.profile_username = None
+            self.profile_avatar = None
+            self.activity_checks = {}
+            self.activity_grid = None
+            self.number_game = None
+            self.word_game = None
+            self.puzzle_game = None
+            self.puzzle_waiting = False
+            self.nature_game = None
+            self.feelings_game = None
+            self.art_game = None
+            self.art_canvas = None
+            self.day_game = None
+            self.story_game = None
+            self.story_books = ()
+            self.story_selected = None
+            self.story_page = 0
+            self.story_audio = None
+            self.story_output = None
+            self.render()
+
+        def transition(self, state):
+            self.state = state
+            if self.session: self.session.state = state
+            self.render()
+
+        def submit_pin(self):
+            if not self.session or not self.pin_input: return
+            value = self.pin_input.text()
+            self.pin_input.clear()
+            accepted = self.session.authenticate(value)
+            self.state = self.session.state
+            self.render()
+            if not accepted: self.info.setText("Incorrect PIN. Parent Corner remains locked.")
+
+        def setup_pin(self):
+            # First-time setup is a deliberate demonstration only. No existing PIN may be overwritten.
+            if not self.pin_adapter or self.pin_adapter.has_pin() or not self.pin_input: return
+            value = self.pin_input.text()
+            confirm = self.pin_confirm.text() if self.pin_confirm else None
+            self.pin_input.clear()
+            if self.pin_confirm: self.pin_confirm.clear()
+            if value != confirm:
+                self.info.setText("PINs must match.")
+                return
+            try:
+                self.pin_adapter.set_pin(value)
+            except (ValueError, OSError):
+                self.info.setText("Choose a valid 4–8 digit PIN.")
+                return
+            self.session.state = self.state.unlock_parent(True)
+            self.state = self.session.state
+            self.render()
+
+        def create_profile(self):
+            if not self.session or not self.profiles or not self.profile_name or not self.profile_username or not self.profile_avatar:
+                return
+            try:
+                ParentProfileService(self.session, self.profiles).create(
+                    self.profile_username.text(), self.profile_name.text(), self.profile_avatar.currentText())
+            except (ValueError, PermissionError, OSError) as exc:
+                self.info.setText("Profile not created: " + str(exc))
+                return
+            self.render()
+            self.info.setText("Child profile created. It will appear on the login screen.")
+
+        def save_activities(self):
+            if not self.session or not self.profiles or not self.activity_checks: return
+            try:
+                ActivityPreferences(self.session, self.profiles).save(
+                    self.state.child_id, {name: widget.isChecked() for name, widget in self.activity_checks.items()})
+            except (PermissionError, ValueError, OSError) as exc:
+                self.info.setText("Activity choices not saved: " + str(exc))
+                return
+            self.info.setText("Activity choices saved for this child.")
+
+        def open_activity(self, activity):
+            if self.state.page != "home" or not self.profiles or not self.session:
+                return
+            if self.profiles.get(self.state.child_id) is None:
+                return
+            if not ActivityPreferences(self.session, self.profiles).load(self.state.child_id).get(activity, True):
+                return
+            if activity == "number-meadow":
+                self.number_game = NumberMeadow()
+                self.number_game.new_round()
+                self.transition(NavigationState(page="number-meadow", child_id=self.state.child_id))
+            elif activity == "word-woodland":
+                self.word_game = WordWoodland()
+                self.word_game.new_round()
+                self.transition(NavigationState(page="word-woodland", child_id=self.state.child_id))
+            elif activity == "puzzle-pond":
+                self.puzzle_game = PuzzlePond()
+                self.puzzle_waiting = False
+                self.transition(NavigationState(page="puzzle-pond", child_id=self.state.child_id))
+            elif activity == "nature-explorer":
+                self.nature_game = NatureExplorer()
+                self.transition(NavigationState(page=activity, child_id=self.state.child_id))
+            elif activity == "feelings":
+                self.feelings_game = FeelingsSpace()
+                self.transition(NavigationState(page=activity, child_id=self.state.child_id))
+            elif activity == "art-studio":
+                self.art_game = ArtBoard()
+                self.art_canvas = ArtCanvas()
+                self.transition(NavigationState(page=activity, child_id=self.state.child_id))
+            elif activity == "my-day":
+                self.day_game = Routine(ROUTINES["full_day"])
+                self.transition(NavigationState(page=activity, child_id=self.state.child_id))
+            elif activity == "story-garden":
+                self.story_game = StoryGarden()
+                catalogue = Path(__file__).resolve().parent.parent / "assets" / "stories" / "75-books-staging.json"
+                try:
+                    data = json.loads(catalogue.read_text(encoding="utf-8"))
+                    self.story_books = tuple(book for book in data["books"] if isinstance(book, dict) and isinstance(book.get("id"), str) and isinstance(book.get("title"), str) and isinstance(book.get("pages"), list) and book["pages"] and all(isinstance(page, dict) and isinstance(page.get("text"), str) for page in book["pages"]))
+                except (OSError, ValueError, KeyError, TypeError):
+                    self.story_books = ()
+                self.story_selected = None
+                self.story_page = 0
+                self.transition(NavigationState(page=activity, child_id=self.state.child_id))
+            else:
+                self.info.setText("Activity integration pending")
+
+        def art_project_directory(self):
+            if self.state.page != "art-studio" or self.art_canvas is None or self.art_game is None:
+                return None
+            if not self.profiles or not self.session or not self.state.child_id:
+                return None
+            if self.profiles.get(self.state.child_id) is None:
+                return None
+            if not ActivityPreferences(self.session, self.profiles).load(self.state.child_id).get("art-studio", True):
+                return None
+            child = self.state.child_id
+            if not child.replace("_", "").replace("-", "").isalnum():
+                return None
+            return self.profiles.path.parent / "art-studio" / child
+
+        def move_art_sticker_layer(self, direction):
+            if self.art_project_directory() is None or self.art_canvas is None or self.art_game is None:
+                return
+            if not self.art_canvas.move_selected_sticker_layer(direction):
+                return
+            # Keep the canonical sticker model's ordering in sync with canvas layers.
+            root = Path(__file__).resolve().parent.parent / "assets" / "stickers"
+            try:
+                manifest = json.loads((root / "manifest.json").read_text())
+                free = {entry["sku"] for entry in manifest["items"] if entry.get("price") == 0}
+            except (OSError, ValueError, KeyError, TypeError):
+                return
+            old = [stamp for stamp in self.art_game.stamps if stamp.symbol in free]
+            new_order = self.art_canvas.sticker_skus
+            if len(old) != len(new_order):
+                return
+            buckets = {}
+            for stamp in old:
+                buckets.setdefault(stamp.symbol, []).append(stamp)
+            reordered = [buckets[sku].pop(0) for sku in new_order]
+            iterator = iter(reordered)
+            self.art_game.stamps[:] = [next(iterator) if stamp.symbol in free else stamp for stamp in self.art_game.stamps]
+            self.render()
+
+        def save_art_project(self):
+            directory = self.art_project_directory()
+            if directory is None: return
+            try:
+                # Only allow SKUs that are free in the approved manifest.
+                root = Path(__file__).resolve().parent.parent / "assets" / "stickers"
+                manifest = json.loads((root / "manifest.json").read_text())
+                free = {entry["sku"] for entry in manifest["items"] if entry.get("price") == 0}
+                skus = [stamp.symbol for stamp in self.art_game.stamps if stamp.symbol in free]
+                self.art_canvas.save_project(directory, skus)
+                self.info.setText("Editable drawing saved")
+            except (OSError, ValueError, TypeError, KeyError):
+                self.info.setText("Could not save editable drawing")
+
+        def load_art_project(self):
+            directory = self.art_project_directory()
+            if directory is None: return
+            try:
+                root = Path(__file__).resolve().parent.parent / "assets" / "stickers"
+                manifest = json.loads((root / "manifest.json").read_text())
+                free = {entry["sku"] for entry in manifest["items"] if entry.get("price") == 0}
+                skus = self.art_canvas.load_project(directory, allowed_stickers=free)
+                self.art_game.clear()
+                for sku in skus:
+                    if sku in free:
+                        self.art_game.add(sku, "approved")
+                self.render()
+                self.info.setText("Editable drawing restored")
+            except (OSError, ValueError, TypeError, KeyError):
+                self.info.setText("No valid saved drawing found")
+
+        def save_art_picture(self):
+            if self.state.page != "art-studio" or self.art_canvas is None or self.state.child_id is None:
+                return
+            if not self.profiles or self.profiles.get(self.state.child_id) is None:
+                return
+            if not self.session or not ActivityPreferences(self.session, self.profiles).load(self.state.child_id).get("art-studio", True):
+                return
+            safe_child = self.state.child_id
+            if not safe_child.replace("_", "").replace("-", "").isalnum():
+                return
+            directory = self.profiles.path.parent / "art-studio" / safe_child
+            try:
+                saved = self.art_canvas.save_png(directory)
+                self.info.setText("Saved picture: " + saved.name)
+            except OSError:
+                self.info.setText("Could not save your picture")
+
+        def stop_story_audio(self):
+            if self.story_audio is not None:
+                self.story_audio.stop()
+                self.story_audio.setSource(QUrl())
+
+        def play_story_audio(self):
+            if self.state.page != "story-garden" or self.story_selected is None: return
+            book = self.story_books[self.story_selected]
+            audio = Path(__file__).resolve().parent.parent / "assets" / "stories" / "audio" / book["id"] / ("page-" + str(self.story_page + 1).zfill(2) + ".mp3")
+            if QMediaPlayer is None or os.environ.get("QT_QPA_PLATFORM") == "offscreen":
+                self.info.setText("Narration playback needs an audio-enabled desktop")
+            elif audio.is_file() and not audio.is_symlink():
+                if self.story_audio is None:
+                    self.story_audio = QMediaPlayer(self)
+                    self.story_output = QAudioOutput(self)
+                    self.story_audio.setAudioOutput(self.story_output)
+                    self.story_output.setVolume(0.75)
+                self.stop_story_audio()
+                self.story_audio.setSource(QUrl.fromLocalFile(str(audio)))
+                self.story_audio.play()
+            else:
+                self.info.setText("Narration unavailable for this page")
+
+        def select_story(self, index):
+            if self.state.page != "story-garden" or not 0 <= index < len(self.story_books): return
+            self.stop_story_audio()
+            self.story_selected = index
+            self.story_page = 0
+            self.render()
+
+        def change_story_page(self, delta):
+            if self.state.page != "story-garden" or self.story_selected is None: return
+            self.stop_story_audio()
+            pages = self.story_books[self.story_selected]["pages"]
+            self.story_page = max(0, min(len(pages)-1, self.story_page + delta))
+            self.render()
+
+        def back_to_story_shelf(self):
+            if self.state.page != "story-garden": return
+            self.stop_story_audio()
+            self.story_selected = None
+            self.story_page = 0
+            self.render()
+
+        def answer_word(self, value):
+            if self.state.page != "word-woodland" or self.word_game is None: return
+            if self.word_game.answer(value):
+                self.word_game.new_round()
+                self.render()
+                self.info.setText("Well done! Let's try another word.")
+            else:
+                self.info.setText("Try another letter!")
+
+        def choose_puzzle(self, index):
+            if self.state.page != "puzzle-pond" or self.puzzle_game is None or self.puzzle_waiting: return
+            result = self.puzzle_game.choose(index)
+            if result == "second":
+                self.puzzle_waiting = True
+                game = self.puzzle_game
+                child = self.state.child_id
+                self.render()
+                QTimer.singleShot(850, lambda: self.finish_puzzle_mismatch(game, child))
+            else:
+                self.render()
+                if result == "matched":
+                    self.info.setText("Great match!" if not self.puzzle_game.complete else "All pairs found! Well done!")
+
+        def finish_puzzle_mismatch(self, game, child):
+            if self.state.page != "puzzle-pond" or self.state.child_id != child or self.puzzle_game is not game:
+                return
+            game.finish_mismatch()
+            self.puzzle_waiting = False
+            self.render()
+            self.info.setText("Not a match. Try again!")
+
+        def answer_number(self, value):
+            if self.state.page != "number-meadow" or self.number_game is None:
+                return
+            if self.number_game.answer(value):
+                self.number_game.new_round()
+                self.render()
+                self.info.setText("Well done! Here's another number.")
+            else:
+                self.info.setText("Try again — you can do it!")
+
+        def render(self):
+            while self.buttons.count():
+                item = self.buttons.takeAt(0)
+                if item.widget():
+                    item.widget().hide()
+                    item.widget().deleteLater()
+            self.pin_input = None
+            self.pin_confirm = None
+            self.profile_name = None
+            self.profile_username = None
+            self.profile_avatar = None
+            self.activity_checks = {}
+            self.activity_grid = None
+            self.avatar_image.clear()
+            self.avatar_image.hide()
+            activity_titles = {"number-meadow": "Number Meadow", "word-woodland": "Word Woodland",
+                               "puzzle-pond": "Puzzle Pond", "art-studio": "Art Studio",
+                               "nature-explorer": "Nature Explorer", "my-day": "My Day",
+                               "feelings": "Feelings", "story-garden": "Story Garden"}
+            is_activity = self.state.page in activity_titles
+            self.activity_toolbar.setVisible(is_activity)
+            self.title.setVisible(not is_activity)
+            if is_activity:
+                self.toolbar_heading.setText(activity_titles[self.state.page])
+                self.toolbar_heading.setAccessibleName(activity_titles[self.state.page])
+            self.info.setText("Native preview · " + self.state.page + " · " + detect_platform().name)
+            def action(label, callback, grid=None, index=None):
+                button = QPushButton(label)
+                button.setMinimumHeight(56)
+                button.setAccessibleName(label)
+                button.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+                button.clicked.connect(lambda _checked=False: callback())
+                if grid is None:
+                    self.buttons.addWidget(button)
+                else:
+                    grid.addWidget(button, index // 4, index % 4)
+            if self.state.page == "login":
+                if self.profiles is not None:
+                    cards = self.profiles.all()
+                    if not cards:
+                        self.info.setText("Welcome to Eden — ask a parent to set up the first child")
+                        if self.pin_adapter:
+                            action("Parent setup", lambda: self.transition(self.state.open_parent()))
+                    for card in cards:
+                        action(card.display_name, lambda username=card.username: self.transition(self.state.select_child(username)))
+                else:
+                    action("Preview child session", lambda: self.transition(self.state.select_child("demo-only")))
+            elif self.state.page in ("my-day", "story-garden"):
+                activity = self.state.page
+                game = self.day_game if activity == "my-day" else self.story_game
+                if not self.profiles or not self.session or self.profiles.get(self.state.child_id) is None or game is None:
+                    self.transition(self.state.logout())
+                    return
+                if not ActivityPreferences(self.session, self.profiles).load(self.state.child_id).get(activity, True):
+                    self.transition(NavigationState(page="home", child_id=self.state.child_id))
+                    return
+                if activity == "my-day":
+                    self.info.setText("My Day — tick the things you've done")
+                    grid_widget = QWidget()
+                    grid = QGridLayout(grid_widget)
+                    for index, step in enumerate(game.steps):
+                        label = ("✓ " if game.completed[index] else "○ ") + step.symbol + " " + step.label
+                        action(label, lambda i=index: (game.toggle(i), self.render()), grid, index)
+                    self.buttons.addWidget(grid_widget)
+                    if game.finished:
+                        self.buttons.addWidget(QLabel("All done — wonderful!"))
+                    action("Start again", lambda: (game.reset(), self.render()))
+                else:
+                    self.info.setText("Story Garden — choose a book")
+                    if self.story_books and self.story_selected is None:
+                        grid_widget = QWidget()
+                        grid = QGridLayout(grid_widget)
+                        for index, book in enumerate(self.story_books):
+                            action(book["title"] + (" (draft)" if book.get("status") == "text-draft" else ""), lambda i=index: self.select_story(i), grid, index)
+                        self.buttons.addWidget(grid_widget)
+                    elif self.story_books and self.story_selected is not None:
+                        book = self.story_books[self.story_selected]
+                        page = book["pages"][self.story_page]
+                        self.info.setText(book["title"] + (" — draft, not approved" if book.get("status") == "text-draft" else ""))
+                        picture_file = (Path(__file__).resolve().parent.parent / "assets" / "stories" / "artwork-staging" / book["id"] / ("page-" + str(self.story_page + 1).zfill(2) + ".png"))
+                        if picture_file.is_file() and not picture_file.is_symlink():
+                            pixmap = QPixmap(str(picture_file))
+                            if not pixmap.isNull():
+                                illustration = QLabel()
+                                illustration.setObjectName("storyPageIllustration")
+                                illustration.setAccessibleName("Staging illustration for " + book["title"])
+                                illustration.setPixmap(pixmap.scaled(500, 260, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+                                illustration.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                                self.buttons.addWidget(illustration)
+                        story_text = QLabel(page["text"])
+                        story_text.setWordWrap(True)
+                        story_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                        story_text.setAccessibleName("Story page " + str(self.story_page + 1))
+                        self.buttons.addWidget(story_text)
+                        self.buttons.addWidget(QLabel("Page " + str(self.story_page + 1) + " of " + str(len(book["pages"]))))
+                        action("Listen to page", self.play_story_audio)
+                        action("Stop narration", self.stop_story_audio)
+                        if self.story_page > 0:
+                            action("Previous page", lambda: self.change_story_page(-1))
+                        if self.story_page < len(book["pages"]) - 1:
+                            action("Next page", lambda: self.change_story_page(1))
+                        else:
+                            action("Read again", lambda: self.select_story(self.story_selected))
+                        action("Choose another book", self.back_to_story_shelf)
+                    else:
+                        self.info.setText("Story Garden — sample story (catalogue unavailable)")
+                        scene = game.scene
+                        picture = QLabel(scene.symbol)
+                        picture.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                        self.buttons.addWidget(picture)
+                        story_text = QLabel(scene.sentence)
+                        story_text.setWordWrap(True)
+                        self.buttons.addWidget(story_text)
+                        if game.finished:
+                            action("Read again", lambda: (game.restart(), self.render()))
+                        else:
+                            action("Next page", lambda: (game.next_scene(), self.render()))
+                action("Back to home", lambda: (self.stop_story_audio(), self.transition(NavigationState(page="home", child_id=self.state.child_id))))
+                action("Log out", lambda: (self.stop_story_audio(), self.transition(self.state.logout())))
+            elif self.state.page == "art-studio":
+                game = self.art_game
+                if not self.profiles or not self.session or self.profiles.get(self.state.child_id) is None or game is None:
+                    self.transition(self.state.logout())
+                    return
+                if not ActivityPreferences(self.session, self.profiles).load(self.state.child_id).get("art-studio", True):
+                    self.transition(NavigationState(page="home", child_id=self.state.child_id))
+                    return
+                self.info.setText("Art Studio — draw, add stickers and save your picture")
+                if self.art_canvas is not None:
+                    self.art_canvas.setParent(None)
+                    self.buttons.addWidget(self.art_canvas)
+                    colour_widget = QWidget()
+                    colour_grid = QGridLayout(colour_widget)
+                    for index, colour in enumerate(PALETTE):
+                        action(colour, lambda c=colour: self.art_canvas.set_colour(c), colour_grid, index)
+                    self.buttons.addWidget(colour_widget)
+                    background_widget = QWidget()
+                    background_grid = QGridLayout(background_widget)
+                    for index, background in enumerate(BACKGROUNDS):
+                        action("Background: " + background, lambda name=background: self.art_canvas.set_background(name), background_grid, index)
+                    self.buttons.addWidget(background_widget)
+                    action("Small brush", lambda: self.art_canvas.set_brush_width(3))
+                    action("Medium brush", lambda: self.art_canvas.set_brush_width(6))
+                    action("Large brush", lambda: self.art_canvas.set_brush_width(12))
+                    action("Pen", lambda: self.art_canvas.set_brush_width(3))
+                    action("Pencil", lambda: self.art_canvas.set_brush_width(4))
+                    action("Crayon", lambda: self.art_canvas.set_brush_width(13))
+                    action("Paint", lambda: self.art_canvas.set_brush_width(20))
+                    action("Eraser", lambda: self.art_canvas.set_eraser(True))
+                    action("Sticker layer back", lambda: self.move_art_sticker_layer(-1))
+                    action("Sticker layer forward", lambda: self.move_art_sticker_layer(1))
+                    action("Undo drawing", self.art_canvas.undo)
+                    action("Redo drawing", self.art_canvas.redo)
+                    action("Clear drawing", self.art_canvas.clear)
+                    action("Save picture", self.save_art_picture)
+                    action("Save editable drawing", self.save_art_project)
+                    action("Open saved drawing", self.load_art_project)
+                sticker_root = Path(__file__).resolve().parent.parent / "assets" / "stickers"
+                sticker_map = {}
+                try:
+                    sticker_manifest = json.loads((sticker_root / "manifest.json").read_text())
+                    for entry in sticker_manifest.get("items", []):
+                        if entry.get("price") == 0 and isinstance(entry.get("sku"), str) and isinstance(entry.get("filename"), str):
+                            candidate = sticker_root / entry["filename"]
+                            if candidate.is_file() and not candidate.is_symlink() and candidate.parent == sticker_root:
+                                sticker_map[entry["sku"]] = (entry["name"], candidate)
+                except (OSError, ValueError, TypeError):
+                    pass
+                if self.art_canvas is not None:
+                    selected_skus = [stamp.symbol for stamp in game.stamps if stamp.symbol in sticker_map]
+                    self.art_canvas.set_stickers([sticker_map[sku][1] for sku in selected_skus], selected_skus)
+                picture = QLabel(" ".join(stamp.symbol for stamp in game.stamps if stamp.symbol not in sticker_map) or "Choose a sticker to begin")
+                picture.setObjectName("artStudioCanvas")
+                picture.setWordWrap(True)
+                picture.setMinimumHeight(90)
+                picture.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                picture.setStyleSheet("font-size: 30px;")
+                self.buttons.addWidget(picture)
+                grid_widget = QWidget()
+                grid = QGridLayout(grid_widget)
+                for index, (symbol, colour) in enumerate((("🌼", "yellow"), ("🦋", "blue"), ("🌳", "green"), ("🐝", "yellow"))):
+                    action("Add " + symbol, lambda sym=symbol, col=colour: (game.add(sym, col), self.render()), grid, index)
+                self.buttons.addWidget(grid_widget)
+                free_widget = QWidget()
+                free_grid = QGridLayout(free_widget)
+                for index, (sku, (name, path)) in enumerate(sticker_map.items()):
+                    action("Sticker: " + name, lambda item=sku: (game.add(item, "approved"), self.render()), free_grid, index)
+                self.buttons.addWidget(free_widget)
+                action("Undo", lambda: (game.undo(), self.render()))
+                action("Redo", lambda: (game.redo(), self.render()))
+                action("Clear", lambda: (game.clear(), self.render()))
+                action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
+                action("Log out", lambda: self.transition(self.state.logout()))
+            elif self.state.page in ("nature-explorer", "feelings"):
+                activity = self.state.page
+                game = self.nature_game if activity == "nature-explorer" else self.feelings_game
+                if not self.profiles or not self.session or self.profiles.get(self.state.child_id) is None or game is None:
+                    self.transition(self.state.logout())
+                    return
+                if not ActivityPreferences(self.session, self.profiles).load(self.state.child_id).get(activity, True):
+                    self.transition(NavigationState(page="home", child_id=self.state.child_id))
+                    return
+                if activity == "nature-explorer":
+                    item = game.current
+                    self.info.setText("Nature Explorer — " + str(game.found_count) + " found")
+                    art = picture_path("word-woodland", item.label)
+                    picture = QLabel(item.symbol + "  " + item.label)
+                    picture.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                    picture.setAccessibleName(item.label)
+                    picture.setStyleSheet("font-size: 28px;")
+                    if art:
+                        pixmap = QPixmap(str(art))
+                        if not pixmap.isNull():
+                            picture.setPixmap(pixmap.scaled(140, 125, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+                    self.buttons.addWidget(picture)
+                    hint = QLabel(item.hint)
+                    hint.setWordWrap(True)
+                    hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                    self.buttons.addWidget(hint)
+                    action("I found it!" if not game.is_found else "Found ✓", lambda: (game.mark_found(), self.render()))
+                    action("Previous", lambda: (game.previous(), self.render()))
+                    action("Next", lambda: (game.next(), self.render()))
+                else:
+                    self.info.setText("Feelings — how are you feeling today?")
+                    grid_widget = QWidget()
+                    grid = QGridLayout(grid_widget)
+                    for index, feeling in enumerate(FEELINGS):
+                        action(feeling.symbol + " " + feeling.label, lambda key=feeling.key: (game.choose_mood(key), self.render()), grid, index)
+                    self.buttons.addWidget(grid_widget)
+                    if game.mood:
+                        mood_label = QLabel("You chose: " + game.mood.label + ". You can take your time.")
+                        mood_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                        self.buttons.addWidget(mood_label)
+                    for index, (symbol, instruction) in enumerate(CALM_ACTIONS):
+                        action(("✓ " if game.completed[index] else "○ ") + symbol + " " + instruction, lambda i=index: (game.toggle_action(i), self.render()))
+                action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
+                action("Log out", lambda: self.transition(self.state.logout()))
+            elif self.state.page in ("word-woodland", "puzzle-pond"):
+                activity = self.state.page
+                game = self.word_game if activity == "word-woodland" else self.puzzle_game
+                if not self.profiles or not self.session or self.profiles.get(self.state.child_id) is None or game is None:
+                    self.transition(self.state.logout())
+                    return
+                if not ActivityPreferences(self.session, self.profiles).load(self.state.child_id).get(activity, True):
+                    self.transition(NavigationState(page="home", child_id=self.state.child_id))
+                    return
+                self.info.setText("Word Woodland — choose the first letter" if activity == "word-woodland" else "Puzzle Pond — find the matching pairs")
+                if activity == "word-woodland":
+                    round_ = game.round
+                    picture = QLabel(round_.symbol + "  " + round_.word)
+                    picture.setObjectName("wordWoodlandPrompt")
+                    picture.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                    picture.setStyleSheet("font-size: 30px;")
+                    art = picture_path("word-woodland", round_.word)
+                    if art:
+                        pixmap = QPixmap(str(art))
+                        if not pixmap.isNull():
+                            picture.setPixmap(pixmap.scaled(140, 125, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+                            picture.setAccessibleName(round_.word)
+                    self.buttons.addWidget(picture)
+                    grid_widget = QWidget()
+                    grid = QGridLayout(grid_widget)
+                    for index, letter in enumerate(round_.choices):
+                        action(letter, lambda value=letter: self.answer_word(value), grid, index)
+                    self.buttons.addWidget(grid_widget)
+                else:
+                    grid_widget = QWidget()
+                    grid = QGridLayout(grid_widget)
+                    for card in game.cards:
+                        label = card.symbol if card.revealed or card.matched else "?"
+                        action(label, lambda index=card.index: self.choose_puzzle(index), grid, card.index)
+                        button = grid.itemAtPosition(card.index // 4, card.index % 4).widget()
+                        if card.revealed or card.matched:
+                            art = picture_path("word-woodland", card.symbol)
+                            if art is None and card.symbol == "Eden":
+                                art = resolve_avatar("approved-eden")
+                            if art and not QPixmap(str(art)).isNull():
+                                button.setIcon(QIcon(str(art)))
+                                button.setIconSize(QSize(52, 52))
+                                button.setText("")
+                                button.setAccessibleName(card.symbol)
+                    self.buttons.addWidget(grid_widget)
+                    if game.complete:
+                        action("Play again", lambda: (game.restart(), self.render()))
+                action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
+                action("Log out", lambda: self.transition(self.state.logout()))
+            elif self.state.page == "number-meadow":
+                if not self.profiles or not self.session or self.profiles.get(self.state.child_id) is None or self.number_game is None:
+                    self.transition(self.state.logout())
+                    return
+                if not ActivityPreferences(self.session, self.profiles).load(self.state.child_id).get("number-meadow", True):
+                    self.transition(NavigationState(page="home", child_id=self.state.child_id))
+                    return
+                round_ = self.number_game.round
+                self.info.setText("Number Meadow — how many can you count?")
+                art = picture_path("number-meadow", "bee")
+                if art and not QPixmap(str(art)).isNull():
+                    pictures_widget = QWidget()
+                    pictures_widget.setObjectName("numberMeadowObjects")
+                    pictures_grid = QGridLayout(pictures_widget)
+                    pictures_grid.setSpacing(3)
+                    pixmap = QPixmap(str(art)).scaled(56, 48, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+                    for index in range(round_.count):
+                        item = QLabel()
+                        item.setPixmap(pixmap)
+                        item.setAccessibleName("Bee " + str(index + 1))
+                        item.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                        pictures_grid.addWidget(item, index // 5, index % 5)
+                    self.buttons.addWidget(pictures_widget)
+                else:
+                    picture = QLabel("🌼 " * round_.count)
+                    picture.setObjectName("numberMeadowObjects")
+                    picture.setWordWrap(True)
+                    picture.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                    picture.setStyleSheet("font-size: 23px;")
+                    self.buttons.addWidget(picture)
+                choices_widget = QWidget()
+                choices_grid = QGridLayout(choices_widget)
+                for index, number in enumerate(round_.choices):
+                    action(str(number), lambda value=number: self.answer_number(value), choices_grid, index)
+                self.buttons.addWidget(choices_widget)
+                action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
+                action("Log out", lambda: self.transition(self.state.logout()))
+            elif self.state.page == "home":
+                if self.profiles is not None:
+                    card = self.profiles.get(self.state.child_id)
+                    if card is None:
+                        self.transition(self.state.logout())
+                        return
+                    self.info.setText("Welcome, " + card.display_name)
+                    path = resolve_avatar(card.avatar)
+                    if path:
+                        pixmap = QPixmap(str(path))
+                        if not pixmap.isNull():
+                            self.avatar_image.setPixmap(pixmap.scaled(110, 115, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+                            self.avatar_image.show()
+                if self.profiles is not None and self.session is not None:
+                    enabled = ActivityPreferences(self.session, self.profiles).load(self.state.child_id)
+                    grid_widget = QWidget()
+                    self.activity_grid = QGridLayout(grid_widget)
+                    self.activity_grid.setSpacing(8)
+                    position = 0
+                    for activity in ACTIVITIES:
+                        if enabled.get(activity, True):
+                            action(activity.replace("-", " ").title(), lambda name=activity: self.open_activity(name), self.activity_grid, position)
+                            position += 1
+                    self.buttons.addWidget(grid_widget)
+                action("Parent Corner", lambda: self.transition(self.state.open_parent()))
+                action("Log out", lambda: self.transition(self.state.logout()))
+            else:
+                if self.state.parent_unlocked:
+                    self.info.setText("Parent Corner unlocked — child profiles")
+                    if self.profiles is not None and self.session is not None:
+                        self.profile_username = QLineEdit()
+                        self.profile_username.setObjectName("newProfileUsername")
+                        self.profile_username.setPlaceholderText("Child username (e.g. eden_demo)")
+                        self.profile_username.setAccessibleName("Child username")
+                        self.buttons.addWidget(self.profile_username)
+                        self.profile_name = QLineEdit()
+                        self.profile_name.setObjectName("newProfileName")
+                        self.profile_name.setPlaceholderText("Child display name")
+                        self.profile_name.setAccessibleName("Child display name")
+                        self.buttons.addWidget(self.profile_name)
+                        self.profile_avatar = QComboBox()
+                        self.profile_avatar.setObjectName("newProfileAvatar")
+                        self.profile_avatar.setAccessibleName("Choose approved character")
+                        self.profile_avatar.addItems(SELECTABLE_AVATARS)
+                        self.buttons.addWidget(self.profile_avatar)
+                        action("Create child profile", self.create_profile)
+                        if self.profiles.get(self.state.child_id) is not None:
+                            self.buttons.addWidget(QLabel("Activities for current child"))
+                            enabled = ActivityPreferences(self.session, self.profiles).load(self.state.child_id)
+                            checks_widget = QWidget()
+                            checks_grid = QGridLayout(checks_widget)
+                            for index, activity in enumerate(ACTIVITIES):
+                                checkbox = QCheckBox(activity.replace("-", " ").title())
+                                checkbox.setObjectName("activity_" + activity)
+                                checkbox.setAccessibleName("Enable " + activity.replace("-", " "))
+                                checkbox.setChecked(enabled.get(activity, True))
+                                self.activity_checks[activity] = checkbox
+                                checks_grid.addWidget(checkbox, index // 4, index % 4)
+                            self.buttons.addWidget(checks_widget)
+                            action("Save activity choices", self.save_activities)
+                elif self.pin_adapter:
+                    self.pin_input = QLineEdit()
+                    self.pin_input.setObjectName("parentPinInput")
+                    self.pin_input.setAccessibleName("Parent PIN")
+                    self.pin_input.setEchoMode(QLineEdit.EchoMode.Password)
+                    self.pin_input.setPlaceholderText("Parent PIN (4–8 digits)")
+                    self.pin_input.setMaxLength(8)
+                    self.buttons.addWidget(self.pin_input)
+                    if self.pin_adapter.has_pin():
+                        action("Unlock Parent Corner", self.submit_pin)
+                    else:
+                        self.pin_confirm = QLineEdit()
+                        self.pin_confirm.setObjectName("parentPinConfirm")
+                        self.pin_confirm.setAccessibleName("Confirm Parent PIN")
+                        self.pin_confirm.setEchoMode(QLineEdit.EchoMode.Password)
+                        self.pin_confirm.setPlaceholderText("Confirm Parent PIN")
+                        self.pin_confirm.setMaxLength(8)
+                        self.buttons.addWidget(self.pin_confirm)
+                        action("Set first Parent PIN (demo only)", self.setup_pin)
+                else:
+                    self.info.setText("Parent Corner locked — PIN adapter not configured")
+                if self.state.child_id is None:
+                    action("Back to profiles", lambda: self.transition(self.state.logout()))
+                else:
+                    action("Back to child home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
+                action("Log out", lambda: self.transition(self.state.logout()))
+            self.buttons.activate()
+            required_height = self.buttons.contentsMargins().top() + self.buttons.contentsMargins().bottom()
+            for index in range(self.buttons.count()):
+                widget = self.buttons.itemAt(index).widget()
+                if widget is not None:
+                    required_height += max(widget.minimumHeight(), widget.sizeHint().height())
+            required_height += max(0, self.buttons.count() - 1) * self.buttons.spacing()
+            self.controls_widget.setMinimumHeight(required_height)
+            self.controls_widget.adjustSize()
+            self.controls_widget.updateGeometry()
+    return EdenNativeWindow()
+
+def main():
+    import sys
+    from PySide6.QtWidgets import QApplication
+    app = QApplication(sys.argv)
+    from .approved_pin import ApprovedPinAdapter
+    from .profiles import ProfileRepository
+    # Explicit preview-only paths: never share live Eden OS configuration or profiles.
+    base = Path.home() / ".eden-native-preview"
+    preview_env = {"XDG_CONFIG_HOME": str(base / "config"), "XDG_DATA_HOME": str(base / "data"), "XDG_CACHE_HOME": str(base / "cache"),
+                   "APPDATA": str(base / "config"), "LOCALAPPDATA": str(base / "data")}
+    platform = detect_platform(environ=preview_env)
+    pin_source = Path(__file__).resolve().parent / "approved_models" / "parent_pin.py"
+    window = create_window(pin_adapter=ApprovedPinAdapter(platform, pin_source), profiles=ProfileRepository(platform))
+    window.show()
+    return app.exec()
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -8,3 +8,8 @@ build/
 
 config/includes.chroot/usr/share/eden-os/eden_shell/
 config/includes.chroot/usr/share/eden-os/find-eden/
+native-apps/.venv/
+native-apps/__pycache__/
+native-apps/**/__pycache__/
+native-apps/dist/
+native-apps/build/

@@ -1,0 +1,53 @@
+import tempfile,unittest
+from pathlib import Path
+from PySide6.QtWidgets import QApplication,QPushButton
+from eden_native.core import detect_platform
+from eden_native.profiles import ProfileRepository
+from eden_native.approved_pin import ApprovedPinAdapter
+from eden_native.qt_app import create_window
+from eden_native.approved_models.art_studio_model import ArtBoard
+SOURCE=Path(__file__).resolve().parents[1] / 'eden_native' / 'approved_models' / 'parent_pin.py'
+class ArtStudioTests(unittest.TestCase):
+ @classmethod
+ def setUpClass(cls):cls.app=QApplication.instance() or QApplication([])
+ def setUp(self):
+  self.tmp=tempfile.TemporaryDirectory()
+  plat=detect_platform('linux',Path(self.tmp.name),{'XDG_DATA_HOME':self.tmp.name+'/data','XDG_CONFIG_HOME':self.tmp.name+'/config'})
+  repo=ProfileRepository(plat);repo.create('eden_demo','Eden Demo','approved-eden')
+  pin=ApprovedPinAdapter(plat,SOURCE);pin.set_pin('1234')
+  self.window=create_window(pin_adapter=pin,profiles=repo);self.window.show();self.app.processEvents()
+ def tearDown(self):self.window.close();self.app.processEvents();self.tmp.cleanup()
+ def click(self,label):
+  found=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible() and b.text()==label]
+  self.assertEqual(len(found),1,label);found[0].click();self.app.processEvents()
+ def test_stamps_undo_redo_clear(self):
+  self.click('Eden Demo');self.click('Art Studio')
+  self.assertIsInstance(self.window.art_game,ArtBoard)
+  self.click('Sticker: Apple');self.assertEqual(len(self.window.art_game.stamps),1)
+  self.assertEqual(len(self.window.art_canvas.sticker_paths),1)
+  self.assertTrue(self.window.art_canvas.sticker_paths[0].is_file())
+  self.click('Undo');self.assertEqual(len(self.window.art_game.stamps),0)
+  self.click('Redo');self.assertEqual(len(self.window.art_game.stamps),1)
+  self.click('Clear');self.assertEqual(len(self.window.art_game.stamps),0)
+  self.click('Back to home');self.assertEqual(self.window.state.page,'home')
+ def test_editable_project_is_child_scoped(self):
+  from PySide6.QtCore import Qt, QPoint
+  from PySide6.QtTest import QTest
+  self.click('Eden Demo');self.click('Art Studio')
+  canvas=self.window.art_canvas
+  QTest.mousePress(canvas,Qt.MouseButton.LeftButton,pos=QPoint(40,40))
+  QTest.mouseRelease(canvas,Qt.MouseButton.LeftButton,pos=QPoint(90,80))
+  self.assertEqual(len(canvas.strokes),1)
+  self.click('Sticker: Apple')
+  self.click('Save editable drawing')
+  project=self.window.art_project_directory()/'current-art-project.json'
+  self.assertTrue(project.exists())
+  self.click('Clear drawing')
+  self.click('Clear')
+  self.assertEqual(len(canvas.strokes),0)
+  self.click('Open saved drawing')
+  self.assertEqual(len(canvas.strokes),1)
+  self.assertEqual(len(self.window.art_game.stamps),1)
+  self.assertEqual(self.window.art_game.stamps[0].symbol,'sticker_apple')
+
+if __name__=='__main__':unittest.main()
