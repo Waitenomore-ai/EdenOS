@@ -113,6 +113,31 @@ class NativeWindowTests(unittest.TestCase):
         self.assertEqual(len(matches), 1)
         self.assertEqual(matches[0].text(), "PIN && Security")
 
+    def test_unlocked_parent_can_change_selected_child_activity_only(self):
+        import json
+        from native_eden_v0.eden_core.parent_pin import set_pin
+        config = Path(self.tmp.name)
+        profiles = config / "profiles.json"
+        profiles.write_text(json.dumps({"profiles": [
+            {"username": "sample_one", "display_name": "Sample One", "avatar": "approved-eden"}
+        ]}))
+        other = EdenNativeWindow(profile_source=profiles)
+        try:
+            other.choose_character(0)
+            self.assertFalse(other.set_child_activity_choice("art-studio", False))
+            self.assertFalse((config / "activity-choices").exists())
+            set_pin("482761")
+            self.assertTrue(other.unlock_parent("482761"))
+            self.assertTrue(other.set_child_activity_choice("art-studio", False))
+            stored = json.loads((config / "activity-choices" / "sample_one.json").read_text())
+            self.assertEqual(stored["enabled"]["art-studio"], False)
+            other.return_home()
+            self.assertFalse(other.set_child_activity_choice("art-studio", True))
+            self.assertEqual(json.loads((config / "activity-choices" / "sample_one.json").read_text())["enabled"]["art-studio"], False)
+        finally:
+            other.close()
+            other.deleteLater()
+
     def test_parent_activity_controls_show_existing_child_restrictions_read_only(self):
         import json
         from native_eden_v0.eden_core.parent_pin import set_pin

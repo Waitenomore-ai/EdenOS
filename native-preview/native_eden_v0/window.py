@@ -5,12 +5,12 @@ from pathlib import Path
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import (
-    QApplication, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
+    QApplication, QCheckBox, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
     QMainWindow, QPushButton, QStackedWidget, QVBoxLayout, QWidget,
 )
 from .eden_core.profile_cards import APPROVED_AVATARS, make_profile_card
 from .eden_core.profile_source import read_profile_cards
-from .eden_core.activity_choices import read_choices
+from .eden_core.activity_choices import read_choices, save_choices
 from .eden_core.profile_chooser_model import ProfileChooser
 from .eden_core.parent_pin import has_pin, verify_pin
 from .eden_core.activity_visibility import REVIEWED_RATINGS
@@ -178,6 +178,10 @@ class EdenNativeWindow(QMainWindow):
         self._section_description.setWordWrap(True)
         self._section_description.setAlignment(Qt.AlignmentFlag.AlignCenter)
         dashboard_layout.addWidget(self._section_description)
+        self._activity_box = QWidget()
+        self._activity_layout = QGridLayout(self._activity_box)
+        self._activity_box.hide()
+        dashboard_layout.addWidget(self._activity_box)
         lock_button = QPushButton("Lock Parent Corner and Return Home")
         lock_button.setAccessibleName("Lock Parent Corner and return Home")
         lock_button.clicked.connect(self.return_home)
@@ -220,6 +224,46 @@ class EdenNativeWindow(QMainWindow):
         self._pin.clear()
         self._stack.setCurrentWidget(self._home)
 
+    def set_child_activity_choice(self, activity: str, enabled: bool) -> bool:
+        if (not self._unlocked or self._profile_source is None or
+                not self._chooser.selected_username()):
+            return False
+        child = self._chooser.selected_username()
+        choices = read_choices(self._profile_source.parent, child, self._known_usernames)
+        choices[activity] = enabled
+        try:
+            save_choices(self._profile_source.parent, child, choices,
+                         self._known_usernames, parent_unlocked=self._unlocked)
+            return True
+        except (PermissionError, ValueError, OSError):
+            return False
+
+    def _show_activity_switches(self):
+        while self._activity_layout.count():
+            item = self._activity_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        child = self._chooser.selected_username()
+        if self._is_demo or not self._unlocked or not child:
+            self._activity_box.hide()
+            return
+        choices = read_choices(self._profile_source.parent, child, self._known_usernames)
+        for index, activity in enumerate(sorted(REVIEWED_RATINGS)):
+            checkbox = QCheckBox(activity.replace("-", " ").title())
+            checkbox.setAccessibleName("Allow " + activity)
+            checkbox.setChecked(choices.get(activity, True))
+            checkbox.toggled.connect(
+                lambda checked, key=activity: self._activity_toggled(key, checked)
+            )
+            self._activity_layout.addWidget(checkbox, index // 3, index % 3)
+        self._activity_box.show()
+
+    def _activity_toggled(self, activity: str, enabled: bool):
+        if not self.set_child_activity_choice(activity, enabled):
+            self._section_description.setText("Could not save activity setting. Parent Corner remains protected.")
+        else:
+            self._section_description.setText("Saved " + activity + ": " + ("on" if enabled else "off"))
+
     def character_count(self):
         return len(self._chooser.tiles())
 
@@ -253,6 +297,7 @@ class EdenNativeWindow(QMainWindow):
     def _switch_parent_section(self, name):
         if not self._unlocked or name not in self._parent_section_names:
             return False
+        self._activity_box.hide()
         if name == "Child Profiles":
             names = self.character_names()
             selected = self._chooser.selected_public_card()
@@ -280,6 +325,7 @@ class EdenNativeWindow(QMainWindow):
                     f"{len(REVIEWED_RATINGS)} reviewed activities: {catalogue}. "
                     "Read-only catalogue; no child-specific choices loaded."
                 )
+            self._show_activity_switches()
         elif name == "Learning Progress":
             self._section_description.setText(
                 "Learning Progress — no learning records loaded. "
@@ -303,11 +349,13 @@ class EdenNativeWindow(QMainWindow):
 
     def return_home(self):
         self._unlocked = False
+        self._activity_box.hide()
         self._pin.clear()
         self._stack.setCurrentWidget(self._child_home if self._chooser.selected_username() else self._home)
 
     def _show_parent(self):
         self._unlocked = False
+        self._activity_box.hide()
         self._pin.clear()
         self._parent_message.setText("Enter your existing Eden parent PIN to unlock.")
         self._stack.setCurrentWidget(self._parent)
