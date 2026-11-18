@@ -59,6 +59,12 @@ class ArtCanvas(QWidget):
             if not self.strokes:
                 return False
             self.strokes.pop()
+        elif kind == "sticker_layer":
+            index, target = payload
+            if max(index, target) >= len(self.sticker_paths):
+                return False
+            self._swap_sticker_layers(index, target)
+            self.sticker_layer_changed.emit()
         elif kind == "sticker_remove":
             index, path, sku, position = payload
             if len(self.sticker_paths) >= 24:
@@ -97,6 +103,12 @@ class ArtCanvas(QWidget):
         kind, payload = self.action_redo.pop()
         if kind == "stroke":
             self.strokes.append(payload)
+        elif kind == "sticker_layer":
+            index, target = payload
+            if max(index, target) >= len(self.sticker_paths):
+                return False
+            self._swap_sticker_layers(index, target)
+            self.sticker_layer_changed.emit()
         elif kind == "sticker_remove":
             index, path, sku, position = payload
             if index >= len(self.sticker_paths):
@@ -179,6 +191,13 @@ class ArtCanvas(QWidget):
                 return index
         return None
 
+    def _swap_sticker_layers(self, index, target):
+        self.sticker_paths[index], self.sticker_paths[target] = self.sticker_paths[target], self.sticker_paths[index]
+        if self.sticker_skus:
+            self.sticker_skus[index], self.sticker_skus[target] = self.sticker_skus[target], self.sticker_skus[index]
+        self.sticker_positions[index], self.sticker_positions[target] = self.sticker_positions[target], self.sticker_positions[index]
+        self.selected_sticker = target if self.selected_sticker == index else index if self.selected_sticker == target else self.selected_sticker
+
     def move_selected_sticker_layer(self, direction):
         """Move selected sticker forward/back one layer, keeping its saved position."""
         if direction not in (-1, 1):
@@ -189,15 +208,10 @@ class ArtCanvas(QWidget):
         target = index + direction
         if not 0 <= target < len(self.sticker_paths):
             return False
-        self.sticker_paths[index], self.sticker_paths[target] = self.sticker_paths[target], self.sticker_paths[index]
-        if self.sticker_skus:
-            self.sticker_skus[index], self.sticker_skus[target] = self.sticker_skus[target], self.sticker_skus[index]
-        self.sticker_positions[index], self.sticker_positions[target] = self.sticker_positions[target], self.sticker_positions[index]
-        self.selected_sticker = target
+        self._swap_sticker_layers(index, target)
         self.sticker_move_undo.clear()
         self.sticker_move_redo.clear()
-        self.action_undo.clear()
-        self.action_redo.clear()
+        self._record_action("sticker_layer", (index, target))
         self.update()
         self.sticker_layer_changed.emit()
         return True

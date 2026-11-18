@@ -63,6 +63,20 @@ class ArtStudioTests(unittest.TestCase):
   project=self.window.art_project_directory()/'current-art-project.json'
   self.assertEqual(json.loads(project.read_text())['stickers'],['sticker_apple'])
 
+ def test_layer_reorder_is_reversible_in_combined_history(self):
+  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Sticker: Apple');self.click('Sticker: Butterfly')
+  canvas=self.window.art_canvas
+  canvas.selected_sticker=0
+  self.assertTrue(canvas.move_selected_sticker_layer(1))
+  self.assertEqual(canvas.sticker_skus,['sticker_butterfly','sticker_apple'])
+  self.assertTrue(canvas.undo_action())
+  self.assertEqual(canvas.sticker_skus,['sticker_apple','sticker_butterfly'])
+  self.assertEqual([x.symbol for x in self.window.art_game.stamps],canvas.sticker_skus)
+  self.assertTrue(canvas.redo_action())
+  self.assertEqual(canvas.sticker_skus,['sticker_butterfly','sticker_apple'])
+  self.assertEqual([x.symbol for x in self.window.art_game.stamps],canvas.sticker_skus)
+
  def test_keyboard_layer_change_syncs_canonical_model_and_saved_project(self):
   import json
   from PySide6.QtCore import Qt
