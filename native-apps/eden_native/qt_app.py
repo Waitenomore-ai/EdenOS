@@ -10,6 +10,7 @@ from .avatars import resolve_avatar
 from .parent_profiles import ParentProfileService
 from .approved_models.profile_cards import SELECTABLE_AVATARS
 from .activity_preferences import ActivityPreferences, ACTIVITIES
+from .home_categories import HOME_CATEGORIES, activities_in_category
 from .approved_models.number_meadow_model import NumberMeadow
 from .approved_models.word_woodland_model import WordWoodland
 from .approved_models.puzzle_pond_model import PuzzlePond
@@ -561,12 +562,15 @@ def create_window(*, pin_adapter=None, profiles=None):
                 self.toolbar_heading.setText(activity_titles[self.state.page])
                 self.toolbar_heading.setAccessibleName(activity_titles[self.state.page])
             self.info.setText("Native preview · " + self.state.page + " · " + detect_platform().name)
-            def action(label, callback, grid=None, index=None, portrait=None):
-                button = QPushButton(label)
-                button.setMinimumHeight(112 if portrait else 56)
-                if portrait:
-                    button.setIcon(QIcon(str(portrait)))
-                    button.setIconSize(QSize(80, 98))
+            def action(label, callback, grid=None, index=None, portrait=None, artwork=None):
+                button = QPushButton("" if artwork else label)
+                button.setMinimumHeight(214 if artwork else (112 if portrait else 56))
+                if portrait or artwork:
+                    button.setIcon(QIcon(str(artwork or portrait)))
+                    button.setIconSize(QSize(344, 196) if artwork else QSize(80, 98))
+                if artwork:
+                    button.setStyleSheet("background:transparent; border:0; padding:4px;")
+                    button.setObjectName("edenHome" + label + "Artwork")
                 button.setAccessibleName(label)
                 button.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
                 button.clicked.connect(lambda _checked=False: callback())
@@ -1010,6 +1014,19 @@ def create_window(*, pin_adapter=None, profiles=None):
                 self.buttons.addWidget(sticker_grid_widget)
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
                 action("Log out", lambda: self.transition(self.state.logout()))
+            elif self.state.page in HOME_CATEGORIES:
+                category = self.state.page
+                self.info.setText(category.title())
+                enabled = (ActivityPreferences(self.session, self.profiles).load(self.state.child_id)
+                           if self.session and self.profiles and self.profiles.get(self.state.child_id) else {})
+                activity_grid_widget = QWidget()
+                activity_grid = QGridLayout(activity_grid_widget)
+                for index, activity in enumerate(name for name in activities_in_category(category)
+                                                  if enabled.get(name, True)):
+                    action(activity.replace("-", " ").title(), lambda name=activity: self.open_activity(name),
+                           activity_grid, index)
+                self.buttons.addWidget(activity_grid_widget)
+                action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
             elif self.state.page == "home":
                 if self.profiles is not None:
                     card = self.profiles.get(self.state.child_id)
@@ -1023,17 +1040,14 @@ def create_window(*, pin_adapter=None, profiles=None):
                         if not pixmap.isNull():
                             self.avatar_image.setPixmap(pixmap.scaled(110, 115, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
                             self.avatar_image.show()
-                if self.profiles is not None and self.session is not None:
-                    enabled = ActivityPreferences(self.session, self.profiles).load(self.state.child_id)
-                    grid_widget = QWidget()
-                    self.activity_grid = QGridLayout(grid_widget)
-                    self.activity_grid.setSpacing(8)
-                    position = 0
-                    for activity in ACTIVITIES:
-                        if enabled.get(activity, True):
-                            action(activity.replace("-", " ").title(), lambda name=activity: self.open_activity(name), self.activity_grid, position)
-                            position += 1
-                    self.buttons.addWidget(grid_widget)
+                home_grid_widget = QWidget()
+                self.activity_grid = QGridLayout(home_grid_widget)
+                self.activity_grid.setHorizontalSpacing(20)
+                for index, category in enumerate(HOME_CATEGORIES):
+                    art_path = Path(__file__).resolve().parent.parent / "assets" / "home" / (category + ".png")
+                    action(category.title(), lambda name=category: self.transition(NavigationState(page=name, child_id=self.state.child_id)),
+                           self.activity_grid, index, artwork=art_path if art_path.is_file() and not art_path.is_symlink() else None)
+                self.buttons.addWidget(home_grid_widget)
                 extras_widget = QWidget()
                 extras_grid = QGridLayout(extras_widget)
                 action("My Garden Stars", self.open_garden_stars, extras_grid, 0)

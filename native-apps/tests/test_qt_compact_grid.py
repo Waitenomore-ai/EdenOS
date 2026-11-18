@@ -19,7 +19,7 @@ class CompactGridTests(unittest.TestCase):
   self.window.resize(800,600);self.window.show();self.app.processEvents()
  def tearDown(self):self.window.close();self.app.processEvents();self.tmp.cleanup()
  def click(self,label):
-  buttons=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible() and b.text()==label]
+  buttons=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible() and (b.text()==label or b.accessibleName()==label)]
   self.assertEqual(len(buttons),1);buttons[0].click();self.app.processEvents()
  def test_eight_activities_four_by_two_no_scroll(self):
   self.click("Eden Demo")

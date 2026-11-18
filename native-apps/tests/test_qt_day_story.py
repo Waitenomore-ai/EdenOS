@@ -39,7 +39,7 @@ class DayStoryTests(unittest.TestCase):
 
     def test_my_day(self):
         self.click("Eden Demo")
-        self.click("My Day")
+        self.click("Learn"); self.click("My Day")
         self.click("○ 🌞 Wake up")
         self.assertTrue(self.window.day_game.completed[0])
         self.click("Start again")
@@ -47,7 +47,7 @@ class DayStoryTests(unittest.TestCase):
 
     def test_story_pages(self):
         self.click("Eden Demo")
-        self.click("Story Garden")
+        self.click("Play"); self.click("Story Garden")
         self.assertEqual(len(self.window.story_books), 75)
         self.click("The Tiny Seed")
         for _ in range(len(SCENES)-1):

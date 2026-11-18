@@ -16,7 +16,7 @@ class OnboardingTests(unittest.TestCase):
   self.window=create_window(pin_adapter=self.pin,profiles=self.repo);self.window.show();self.app.processEvents()
  def tearDown(self):self.window.close();self.app.processEvents();self.tmp.cleanup()
  def click(self,label):
-  matches=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible() and b.text()==label]
+  matches=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible() and (b.text()==label or b.accessibleName()==label)]
   self.assertEqual(len(matches),1,label);matches[0].click();self.app.processEvents()
  def test_first_parent_pin_and_child(self):
   self.click("Parent setup")

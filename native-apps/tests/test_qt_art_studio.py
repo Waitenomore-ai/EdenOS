@@ -18,7 +18,7 @@ class ArtStudioTests(unittest.TestCase):
   self.window=create_window(pin_adapter=pin,profiles=repo);self.window.show();self.app.processEvents()
  def tearDown(self):self.window.close();self.app.processEvents();self.tmp.cleanup()
  def click(self,label):
-  found=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible() and b.text()==label]
+  found=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible() and (b.text()==label or b.accessibleName()==label)]
   self.assertEqual(len(found),1,label);found[0].click();self.app.processEvents()
  def test_parent_sticker_unlock_requires_verified_pin(self):
   from eden_native.garden_stars import GardenStars

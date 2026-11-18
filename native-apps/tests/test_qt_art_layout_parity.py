@@ -28,7 +28,7 @@ class ArtLayoutParityTests(unittest.TestCase):
             self.app.processEvents()
             try:
                 for label in ('Layout Parity Child','Art Studio'):
-                    matches=[b for b in window.controls_widget.findChildren(QPushButton) if b.text()==label]
+                    matches=[b for b in window.controls_widget.findChildren(QPushButton) if (b.text()==label or b.accessibleName()==label)]
                     self.assertEqual(len(matches),1,label)
                     matches[0].click()
                     self.app.processEvents()

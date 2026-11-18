@@ -30,6 +30,29 @@ class ApprovedShellTests(unittest.TestCase):
             self.assertFalse(buttons[0].icon().isNull())
             window.close()
 
+    def test_home_uses_exact_imac_three_artwork_routes(self):
+        from eden_native.core import detect_platform
+        from eden_native.profiles import ProfileRepository
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory(prefix="eden-home-") as folder:
+            platform = detect_platform("linux", Path(folder), {"XDG_DATA_HOME": folder + "/data", "XDG_CONFIG_HOME": folder + "/config"})
+            profiles = ProfileRepository(platform)
+            profiles.create("eden", "Eden", "approved-eden")
+            window = create_window(profiles=profiles)
+            window.show(); self.app.processEvents()
+            portrait = next(b for b in window.findChildren(QPushButton) if b.text() == "Eden")
+            portrait.click(); self.app.processEvents()
+            for name in ("Play", "Learn", "Create"):
+                artwork = window.findChild(QPushButton, "edenHome" + name + "Artwork")
+                self.assertIsNotNone(artwork)
+                self.assertFalse(artwork.icon().isNull())
+                self.assertEqual(artwork.accessibleName(), name)
+            window.findChild(QPushButton, "edenHomePlayArtwork").click(); self.app.processEvents()
+            self.assertEqual(window.state.page, "play")
+            self.assertTrue(any(b.text() == "Story Garden" for b in window.findChildren(QPushButton)))
+            window.close()
+
 
 if __name__ == "__main__":
     unittest.main()
