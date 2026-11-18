@@ -245,6 +245,33 @@ class ArtCanvasTests(unittest.TestCase):
         self.assertFalse(self.canvas.undo_sticker_move())
         self.canvas.hide()
 
+    def test_unified_history_reverses_interleaved_stroke_and_sticker_move(self):
+        from PySide6.QtCore import Qt
+        from PySide6.QtTest import QTest
+        import json
+        root=Path(__file__).resolve().parents[1]/'assets'/'stickers'
+        apple=next(item for item in json.loads((root/'manifest.json').read_text())['items'] if item['sku']=='sticker_apple')
+        self.canvas.set_stickers([root/apple['filename']],['sticker_apple'])
+        stroke={'colour':'Blue','width':6,'points':[[.1,.1],[.2,.2]],'mode':'paint'}
+        self.canvas.strokes.append(stroke)
+        self.canvas._record_action('stroke',stroke)
+        self.canvas.show();self.app.processEvents();self.canvas.setFocus()
+        QTest.keyClick(self.canvas,Qt.Key.Key_1)
+        before=self.canvas.sticker_positions[0][:]
+        QTest.keyClick(self.canvas,Qt.Key.Key_Right)
+        after=self.canvas.sticker_positions[0][:]
+        self.assertTrue(self.canvas.undo_action())
+        self.assertEqual(self.canvas.sticker_positions[0],before)
+        self.assertEqual(len(self.canvas.strokes),1)
+        self.assertTrue(self.canvas.undo_action())
+        self.assertEqual(len(self.canvas.strokes),0)
+        self.assertTrue(self.canvas.redo_action())
+        self.assertEqual(self.canvas.strokes,[stroke])
+        self.assertTrue(self.canvas.redo_action())
+        self.assertEqual(self.canvas.sticker_positions[0],after)
+        self.assertFalse(self.canvas.redo_action())
+        self.canvas.hide()
+
     def test_drag_sticker_undo_redo(self):
         from PySide6.QtCore import Qt,QPoint
         from PySide6.QtTest import QTest

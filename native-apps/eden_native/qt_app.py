@@ -534,6 +534,24 @@ def create_window(*, pin_adapter=None, profiles=None):
                     # action strip, 220px tool sidebar and large drawing area.
                     studio = QWidget()
                     studio.setObjectName("edenArtStudioScene")
+                    # Approved live iMac art-studio-refresh.css palette; scoped
+                    # to this scene to avoid changing other activities.
+                    studio.setStyleSheet("""
+                        QWidget#edenArtStudioScene { background: #f8f4df; }
+                        QScrollArea#edenArtStudioSidebar {
+                            background: #f9f5d9; border: 4px solid #85aa80;
+                            border-radius: 23px; }
+                        QWidget#edenArtStudioSidebarContent { background: #f9f5d9; }
+                        QLabel#edenArtStudioBrushHeading,
+                        QLabel#edenArtStudioColourHeading,
+                        QLabel#edenArtStudioWallpaperHeading {
+                            color: #245e47; font-size: 24px; font-weight: 900; }
+                        QWidget#edenArtStudioActions QPushButton,
+                        QWidget#edenArtStudioDock QPushButton {
+                            min-height: 48px; font-size: 18px; font-weight: 800; }
+                        QWidget#edenArtStudioWorkspace QWidget#artStudioDrawingCanvas {
+                            border: 5px solid #b991cf; border-radius: 23px; }
+                    """)
                     studio_layout = QVBoxLayout(studio)
                     studio_layout.setSpacing(8)
                     topbar = QWidget()
@@ -552,6 +570,8 @@ def create_window(*, pin_adapter=None, profiles=None):
                         ("Draw", lambda: self.art_canvas.set_eraser(False)),
                         ("Undo drawing", self.art_canvas.undo),
                         ("Redo drawing", self.art_canvas.redo),
+                        ("Undo last action", self.art_canvas.undo_action),
+                        ("Redo last action", self.art_canvas.redo_action),
                         ("Save", self.save_art_picture),
                         ("Clear drawing", self.art_canvas.clear),
                     ):
@@ -567,6 +587,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                     sidebar_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
                     sidebar_scroll.setFixedWidth(220)
                     sidebar = QWidget()
+                    sidebar.setObjectName("edenArtStudioSidebarContent")
                     sidebar_layout = QVBoxLayout(sidebar)
                     sidebar_layout.setSpacing(7)
                     brush_label = QLabel("✏️ Brushes")

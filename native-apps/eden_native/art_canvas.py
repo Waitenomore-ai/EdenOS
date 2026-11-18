@@ -41,6 +41,50 @@ class ArtCanvas(QWidget):
         self.sticker_move_undo = []
         self.sticker_move_redo = []
         self._drag_origin = None
+        self.action_undo = []
+        self.action_redo = []
+
+    def _record_action(self, kind, payload):
+        self.action_undo.append((kind, payload))
+        if len(self.action_undo) > 500:
+            self.action_undo.pop(0)
+        self.action_redo.clear()
+
+    def undo_action(self):
+        if not self.action_undo:
+            return False
+        kind, payload = self.action_undo.pop()
+        if kind == "stroke":
+            if not self.strokes:
+                return False
+            self.strokes.pop()
+        elif kind == "sticker_move":
+            index, before, after = payload
+            if index >= len(self.sticker_positions):
+                return False
+            self.sticker_positions[index] = before[:]
+        else:
+            return False
+        self.action_redo.append((kind, payload))
+        self.update()
+        return True
+
+    def redo_action(self):
+        if not self.action_redo:
+            return False
+        kind, payload = self.action_redo.pop()
+        if kind == "stroke":
+            self.strokes.append(payload)
+        elif kind == "sticker_move":
+            index, before, after = payload
+            if index >= len(self.sticker_positions):
+                return False
+            self.sticker_positions[index] = after[:]
+        else:
+            return False
+        self.action_undo.append((kind, payload))
+        self.update()
+        return True
 
     def set_stickers(self, paths, skus=None):
         self.sticker_paths = list(paths[:24])
@@ -53,6 +97,8 @@ class ArtCanvas(QWidget):
         self.sticker_positions = self.sticker_positions[:len(self.sticker_paths)]
         self.sticker_move_undo.clear()
         self.sticker_move_redo.clear()
+        self.action_undo.clear()
+        self.action_redo.clear()
         if self.selected_sticker is not None and self.selected_sticker >= len(self.sticker_paths):
             self.selected_sticker = None
         self.update()
@@ -81,6 +127,8 @@ class ArtCanvas(QWidget):
         self.selected_sticker = target
         self.sticker_move_undo.clear()
         self.sticker_move_redo.clear()
+        self.action_undo.clear()
+        self.action_redo.clear()
         self.update()
         self.sticker_layer_changed.emit()
         return True
@@ -145,6 +193,7 @@ class ArtCanvas(QWidget):
         if self.active is not None:
             self.active["points"].append(self._point(event))
             self.strokes.append(self.active)
+            self._record_action("stroke", self.active)
             self.redo_strokes.clear()
             self.active = None
             self.update()
@@ -154,6 +203,7 @@ class ArtCanvas(QWidget):
         if len(self.sticker_move_undo) > 100:
             self.sticker_move_undo.pop(0)
         self.sticker_move_redo.clear()
+        self._record_action("sticker_move", (index, before[:], after[:]))
 
     def undo_sticker_move(self):
         if not self.sticker_move_undo:
@@ -163,6 +213,8 @@ class ArtCanvas(QWidget):
             return False
         self.sticker_positions[index] = before[:]
         self.sticker_move_redo.append((index, before, after))
+        self.action_undo.clear()
+        self.action_redo.clear()
         self.update()
         return True
 
@@ -174,22 +226,30 @@ class ArtCanvas(QWidget):
             return False
         self.sticker_positions[index] = after[:]
         self.sticker_move_undo.append((index, before, after))
+        self.action_undo.clear()
+        self.action_redo.clear()
         self.update()
         return True
 
     def undo(self):
         if self.strokes:
             self.redo_strokes.append(self.strokes.pop())
+            self.action_undo.clear()
+            self.action_redo.clear()
             self.update()
 
     def redo(self):
         if self.redo_strokes:
             self.strokes.append(self.redo_strokes.pop())
+            self.action_undo.clear()
+            self.action_redo.clear()
             self.update()
 
     def clear(self):
         self.strokes.clear()
         self.redo_strokes.clear()
+        self.action_undo.clear()
+        self.action_redo.clear()
         self.active = None
         self.update()
 
@@ -321,6 +381,8 @@ class ArtCanvas(QWidget):
         self.sticker_move_undo.clear()
         self.sticker_move_redo.clear()
         self.redo_strokes.clear()
+        self.action_undo.clear()
+        self.action_redo.clear()
         self.active = None
         self.update()
         return stickers
