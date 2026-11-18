@@ -82,7 +82,11 @@ class EdenNativeWindow(QMainWindow):
         for action in self._home_action_names:
             button = QPushButton(action)
             button.setAccessibleName(action + " activities")
-            button.setMinimumSize(180, 135)
+            image = Path(__file__).parent / "assets" / "home" / (action.lower() + ".png")
+            if image.is_file():
+                button.setIcon(QIcon(str(image)))
+                button.setIconSize(QSize(260, 160))
+            button.setMinimumSize(260, 180)
             button.clicked.connect(lambda checked=False, name=action: self.navigate_home_action(name))
             actions.addWidget(button)
         child_layout.addLayout(actions)

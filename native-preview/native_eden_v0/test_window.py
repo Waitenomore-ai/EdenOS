@@ -46,6 +46,15 @@ class NativeWindowTests(unittest.TestCase):
         self.assertIsNone(self.window.selected_profile_id())
         self.assertFalse(self.window.parent_is_unlocked())
 
+    def test_child_home_has_approved_imac_artwork_for_three_actions(self):
+        from PySide6.QtWidgets import QPushButton
+        self.window.choose_character(0)
+        buttons = [button for button in self.window._child_home.findChildren(QPushButton)
+                   if button.text() in ("Play", "Learn", "Create")]
+        self.assertEqual(len(buttons), 3)
+        self.assertTrue(all(not button.icon().isNull() for button in buttons))
+        self.assertTrue(all(button.iconSize().width() >= 180 for button in buttons))
+
     def test_child_home_navigation_never_opens_unimplemented_games(self):
         self.window.choose_character(0)
         self.assertFalse(self.window.navigate_home_action("Play"))
