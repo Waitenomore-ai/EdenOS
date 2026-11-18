@@ -20,6 +20,7 @@ from .approved_models.time_routines_model import Routine, ROUTINES
 from .approved_models.story_garden_model import StoryGarden, SCENES
 from .art_canvas import ArtCanvas, PALETTE, BACKGROUNDS
 from .garden_stars import GardenStars
+from .sticker_garden import load_garden, save_garden, SLOTS
 
 def create_window(*, pin_adapter=None, profiles=None):
     from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QLineEdit, QComboBox, QCheckBox, QScrollArea, QSizePolicy, QGridLayout, QHBoxLayout
@@ -99,6 +100,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             self.activity_checks = {}
             self.parent_reward_combo = None
             self.artwork_preview = None
+            self.garden_selected_sku = None
             self.activity_grid = None
             self.number_game = None
             self.word_game = None
@@ -239,6 +241,62 @@ def create_window(*, pin_adapter=None, profiles=None):
             if not path.is_file() or path.is_symlink():
                 return False
             self.artwork_preview = filename
+            self.render()
+            return True
+
+        def sticker_garden_path(self):
+            if self.state.page != "sticker-garden" or self.garden_stars_service() is None:
+                return None
+            if not self.state.child_id.replace("_", "").replace("-", "").isalnum():
+                return None
+            return self.profiles.path.parent / "sticker-garden" / (self.state.child_id + ".json")
+
+        def open_sticker_garden(self):
+            if self.state.page != "home" or self.garden_stars_service() is None:
+                return False
+            self.garden_selected_sku = None
+            self.transition(NavigationState(page="sticker-garden", child_id=self.state.child_id))
+            return True
+
+        def select_garden_sticker(self, sku):
+            if self.sticker_garden_path() is None or sku not in self.art_allowed_stickers_for_garden():
+                return False
+            self.garden_selected_sku = sku
+            self.render()
+            return True
+
+        def art_allowed_stickers_for_garden(self):
+            service = self.garden_stars_service()
+            if service is None:
+                return set()
+            root = Path(__file__).resolve().parent.parent / "assets" / "stickers"
+            catalogue = json.loads((root / "manifest.json").read_text(encoding="utf-8"))["items"]
+            owned = {item["sku"] for item in service.collection(self.state.child_id)}
+            return {item["sku"] for item in catalogue if item["price"] == 0 or item["sku"] in owned}
+
+        def place_garden_sticker(self, slot):
+            path = self.sticker_garden_path()
+            if path is None or type(slot) is not int or not 0 <= slot < SLOTS:
+                return False
+            allowed = self.art_allowed_stickers_for_garden()
+            if self.garden_selected_sku not in allowed:
+                return False
+            placements = load_garden(path, allowed)
+            placements[slot] = self.garden_selected_sku
+            save_garden(path, placements, allowed)
+            self.render()
+            return True
+
+        def remove_garden_sticker(self, slot):
+            path = self.sticker_garden_path()
+            if path is None or type(slot) is not int or not 0 <= slot < SLOTS:
+                return False
+            allowed = self.art_allowed_stickers_for_garden()
+            placements = load_garden(path, allowed)
+            if slot not in placements:
+                return False
+            del placements[slot]
+            save_garden(path, placements, allowed)
             self.render()
             return True
 
@@ -962,6 +1020,61 @@ def create_window(*, pin_adapter=None, profiles=None):
                     action(path.name, lambda name=path.name: self.select_artwork(name))
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
                 action("Log out", lambda: self.transition(self.state.logout()))
+            elif self.state.page == "sticker-garden":
+                path = self.sticker_garden_path()
+                if path is None:
+                    self.transition(self.state.logout())
+                    return
+                allowed = self.art_allowed_stickers_for_garden()
+                placements = load_garden(path, allowed)
+                self.info.setText("My Sticker Garden — choose a sticker, then choose a place")
+                root = Path(__file__).resolve().parent.parent / "assets" / "stickers"
+                catalogue = json.loads((root / "manifest.json").read_text(encoding="utf-8"))["items"]
+                names = {entry["sku"]: entry["name"] for entry in catalogue}
+                filenames = {entry["sku"]: entry["filename"] for entry in catalogue}
+                board = QWidget()
+                board.setObjectName("stickerGardenBoard")
+                board_grid = QGridLayout(board)
+                for slot in range(SLOTS):
+                    sku = placements.get(slot)
+                    label = "Place " + str(slot + 1) + (" — " + names[sku] if sku else " — +")
+                    button = QPushButton(label)
+                    button.setObjectName("stickerGardenSlot")
+                    button.setAccessibleName(label)
+                    button.setMinimumHeight(110)
+                    button.setIconSize(QSize(80, 80))
+                    if sku:
+                        image = root / filenames[sku]
+                        if image.is_file() and not image.is_symlink():
+                            button.setIcon(QIcon(str(image)))
+                    button.clicked.connect(lambda _checked=False, position=slot: self.place_garden_sticker(position))
+                    board_grid.addWidget(button, slot // 4, slot % 4)
+                self.buttons.addWidget(board)
+                if self.garden_selected_sku:
+                    self.buttons.addWidget(QLabel("Selected: " + names.get(self.garden_selected_sku, "Sticker")))
+                sticker_picker = QWidget()
+                picker_grid = QGridLayout(sticker_picker)
+                for index, entry in enumerate(item for item in catalogue if item["sku"] in allowed):
+                    sku = entry["sku"]
+                    button = QPushButton(entry["name"])
+                    button.setObjectName("stickerGardenPicker")
+                    button.setAccessibleName("Select " + entry["name"])
+                    button.setMinimumHeight(75)
+                    button.setIconSize(QSize(55, 55))
+                    image = root / entry["filename"]
+                    if image.is_file() and not image.is_symlink():
+                        button.setIcon(QIcon(str(image)))
+                    button.clicked.connect(lambda _checked=False, item=sku: self.select_garden_sticker(item))
+                    picker_grid.addWidget(button, index // 4, index % 4)
+                self.buttons.addWidget(sticker_picker)
+                if placements:
+                    remove_grid_widget = QWidget()
+                    remove_grid = QGridLayout(remove_grid_widget)
+                    for index, slot in enumerate(sorted(placements)):
+                        action("Remove place " + str(slot + 1), lambda position=slot: self.remove_garden_sticker(position), remove_grid, index)
+                    self.buttons.addWidget(remove_grid_widget)
+                action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
+                action("Log out", lambda: self.transition(self.state.logout()))
             elif self.state.page == "garden-stars":
                 service = self.garden_stars_service()
                 if service is None:
@@ -1023,6 +1136,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                 extras_grid = QGridLayout(extras_widget)
                 action("My Garden Stars", self.open_garden_stars, extras_grid, 0)
                 action("My saved pictures", self.open_my_artwork, extras_grid, 1)
+                action("My Sticker Garden", self.open_sticker_garden, extras_grid, 2)
                 self.buttons.addWidget(extras_widget)
                 action("Parent Corner", lambda: self.transition(self.state.open_parent()))
                 action("Log out", lambda: self.transition(self.state.logout()))

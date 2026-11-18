@@ -20,6 +20,35 @@ class ArtStudioTests(unittest.TestCase):
  def click(self,label):
   found=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible() and b.text()==label]
   self.assertEqual(len(found),1,label);found[0].click();self.app.processEvents()
+ def test_sticker_garden_places_and_removes_only_unlocked_stickers(self):
+  from eden_native.sticker_garden import load_garden
+  from PySide6.QtWidgets import QPushButton
+  self.click('Eden Demo');self.click('My Sticker Garden')
+  self.assertEqual(self.window.state.page,'sticker-garden')
+  self.assertFalse(self.window.select_garden_sticker('sticker_acorn'))
+  self.assertFalse(self.window.place_garden_sticker(0))
+  self.assertFalse(self.window.remove_garden_sticker(0))
+  self.click('Apple')
+  slots=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.objectName()=='stickerGardenSlot' and b.isVisible()]
+  self.assertEqual(len(slots),12)
+  slots[0].click();self.app.processEvents()
+  path=self.window.sticker_garden_path()
+  self.assertEqual(load_garden(path,{'sticker_apple'}),{0:'sticker_apple'})
+  self.assertFalse(self.window.place_garden_sticker(12))
+  self.click('Remove place 1')
+  self.assertEqual(load_garden(path,{'sticker_apple'}),{})
+  self.window.transition(self.window.state.logout())
+  self.assertFalse(self.window.place_garden_sticker(0))
+
+ def test_sticker_garden_persists_between_visits(self):
+  from eden_native.sticker_garden import load_garden
+  self.click('Eden Demo');self.click('My Sticker Garden');self.click('Apple')
+  self.assertTrue(self.window.place_garden_sticker(7))
+  path=self.window.sticker_garden_path()
+  self.window.transition(self.window.state.logout());self.app.processEvents();self.click('Eden Demo');self.click('My Sticker Garden')
+  self.assertEqual(load_garden(path,{'sticker_apple'}),{7:'sticker_apple'})
+  self.assertFalse(self.window.select_garden_sticker('sticker_acorn'))
+
  def test_parent_sticker_unlock_requires_verified_pin(self):
   from eden_native.garden_stars import GardenStars
   self.click('Eden Demo')
