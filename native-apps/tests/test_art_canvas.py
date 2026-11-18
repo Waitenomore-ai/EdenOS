@@ -286,6 +286,22 @@ class ArtCanvasTests(unittest.TestCase):
         self.assertFalse(self.canvas.undo_sticker_move())
         self.canvas.hide()
 
+    def test_specialised_undo_respects_mixed_action_chronology(self):
+        QTest.mousePress(self.canvas,Qt.MouseButton.LeftButton,pos=QPoint(30,30))
+        QTest.mouseRelease(self.canvas,Qt.MouseButton.LeftButton,pos=QPoint(100,90))
+        self.canvas.set_background('Sky')
+        self.assertFalse(self.canvas.undo())
+        self.assertEqual(len(self.canvas.strokes),1)
+        self.assertEqual(len(self.canvas.action_undo),2)
+        self.assertTrue(self.canvas.undo_action())
+        self.assertTrue(self.canvas.undo())
+        self.assertEqual(len(self.canvas.strokes),0)
+        self.assertTrue(self.canvas.redo())
+        self.assertEqual(len(self.canvas.strokes),1)
+        self.assertTrue(self.canvas.redo_action())
+        self.assertEqual(self.canvas.background.name(),'#e4f2ff')
+        self.assertFalse(self.canvas.undo_sticker_move())
+
     def test_unified_history_tracks_background_changes_and_redo_invalidation(self):
         self.assertEqual(self.canvas.background.name(),'#ffffff')
         self.canvas.set_background('Sky')

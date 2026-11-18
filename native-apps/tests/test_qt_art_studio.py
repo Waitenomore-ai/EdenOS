@@ -30,6 +30,22 @@ class ArtStudioTests(unittest.TestCase):
   self.click('Redo');self.assertEqual(len(self.window.art_game.stamps),1)
   self.click('Clear');self.assertEqual(len(self.window.art_game.stamps),0)
   self.click('Back to home');self.assertEqual(self.window.state.page,'home')
+ def test_render_keeps_combined_history_after_sticker_and_background(self):
+  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Sticker: Apple')
+  canvas=self.window.art_canvas
+  canvas.set_background('Sky')
+  self.window.render()
+  self.assertEqual(len(canvas.action_undo),2)
+  self.assertTrue(canvas.undo_action())
+  self.assertEqual(canvas.background.name(),'#ffffff')
+  self.assertTrue(canvas.undo_action())
+  self.assertEqual(canvas.sticker_skus,[])
+  self.assertTrue(canvas.redo_action())
+  self.assertTrue(canvas.redo_action())
+  self.assertEqual(canvas.sticker_skus,['sticker_apple'])
+  self.assertEqual(canvas.background.name(),'#e4f2ff')
+
  def test_remove_selected_sticker_accessible_button(self):
   self.click('Eden Demo');self.click('Art Studio')
   self.click('Sticker: Apple');self.click('Sticker: Butterfly')

@@ -302,44 +302,24 @@ class ArtCanvas(QWidget):
         self._record_action("sticker_move", (index, before[:], after[:]))
 
     def undo_sticker_move(self):
-        if not self.sticker_move_undo:
+        if not self.action_undo or self.action_undo[-1][0] != "sticker_move":
             return False
-        index, before, after = self.sticker_move_undo.pop()
-        if index >= len(self.sticker_positions):
-            return False
-        self.sticker_positions[index] = before[:]
-        self.sticker_move_redo.append((index, before, after))
-        self.action_undo.clear()
-        self.action_redo.clear()
-        self.update()
-        return True
+        return self.undo_action()
 
     def redo_sticker_move(self):
-        if not self.sticker_move_redo:
+        if not self.action_redo or self.action_redo[-1][0] != "sticker_move":
             return False
-        index, before, after = self.sticker_move_redo.pop()
-        if index >= len(self.sticker_positions):
-            return False
-        self.sticker_positions[index] = after[:]
-        self.sticker_move_undo.append((index, before, after))
-        self.action_undo.clear()
-        self.action_redo.clear()
-        self.update()
-        return True
+        return self.redo_action()
 
     def undo(self):
-        if self.strokes:
-            self.redo_strokes.append(self.strokes.pop())
-            self.action_undo.clear()
-            self.action_redo.clear()
-            self.update()
+        if not self.action_undo or self.action_undo[-1][0] != "stroke":
+            return False
+        return self.undo_action()
 
     def redo(self):
-        if self.redo_strokes:
-            self.strokes.append(self.redo_strokes.pop())
-            self.action_undo.clear()
-            self.action_redo.clear()
-            self.update()
+        if not self.action_redo or self.action_redo[-1][0] != "stroke":
+            return False
+        return self.redo_action()
 
     def clear(self):
         self.strokes.clear()
