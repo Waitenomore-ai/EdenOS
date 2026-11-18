@@ -43,6 +43,9 @@ class ApprovedShellTests(unittest.TestCase):
             window.show(); self.app.processEvents()
             portrait = next(b for b in window.findChildren(QPushButton) if b.text() == "Eden")
             portrait.click(); self.app.processEvents()
+            self.assertIsNotNone(window.home_wallpaper)
+            self.assertFalse(window.home_wallpaper.isNull())
+            self.assertEqual((window.home_wallpaper.width(), window.home_wallpaper.height()), (1920, 1080))
             for name in ("Play", "Learn", "Create"):
                 artwork = window.findChild(QPushButton, "edenHome" + name + "Artwork")
                 self.assertIsNotNone(artwork)

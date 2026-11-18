@@ -1,6 +1,7 @@
 """Native Qt Widgets preview. No browser wrapper or production profile access."""
 from __future__ import annotations
 from pathlib import Path
+from datetime import date
 import json
 import os
 import uuid
@@ -29,7 +30,7 @@ def create_window(*, pin_adapter=None, profiles=None):
         from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
     except ImportError:
         QMediaPlayer = QAudioOutput = None
-    from PySide6.QtGui import QPixmap, QIcon
+    from PySide6.QtGui import QPixmap, QIcon, QPainter, QColor
 
     art_root = Path(__file__).resolve().parent.parent / "assets" / "activities"
 
@@ -41,9 +42,23 @@ def create_window(*, pin_adapter=None, profiles=None):
         return path if path.is_file() and not path.is_symlink() else None
 
     class EdenNativeWindow(QWidget):
+        def paintEvent(self, event):
+            super().paintEvent(event)
+            painter = QPainter(self)
+            wallpaper = self.home_wallpaper if self.state.page == "home" else None
+            if wallpaper is not None and not wallpaper.isNull():
+                image = wallpaper.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation)
+                painter.drawPixmap((self.width() - image.width()) // 2, (self.height() - image.height()) // 2, image)
+            else:
+                painter.fillRect(self.rect(), QColor("#e9f5e8"))
+            painter.end()
+
         def __init__(self):
             super().__init__()
             self.state = NavigationState()
+            approved_backgrounds = sorted(path for path in (Path(__file__).resolve().parent.parent / "assets" / "backgrounds").glob("*.png") if path.is_file() and not path.is_symlink())
+            wallpaper_file = approved_backgrounds[date.today().toordinal() % len(approved_backgrounds)] if approved_backgrounds else None
+            self.home_wallpaper = QPixmap(str(wallpaper_file)) if wallpaper_file is not None else None
             self.pin_adapter = pin_adapter
             self.profiles = profiles
             self.session = ParentSession(self.state, pin_adapter.verify_pin) if pin_adapter else None
@@ -56,7 +71,9 @@ def create_window(*, pin_adapter=None, profiles=None):
                 QPushButton:focus { border: 3px solid #3a7452; }
                 QLineEdit, QComboBox { background: white; color: #214b39;
                     border: 2px solid #83b397; border-radius: 12px; padding: 9px; }
-                QScrollArea { border: none; }
+                QLabel { background: transparent; }
+                QScrollArea { border: none; background: transparent; }
+                QWidget#edenControls { background: transparent; }
             """)
             self.layout = QVBoxLayout(self)
             self.title = QLabel("Eden OS")
@@ -107,6 +124,9 @@ def create_window(*, pin_adapter=None, profiles=None):
             self.scroll_area.setMinimumHeight(100)
             self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
             self.controls_widget = QWidget()
+            self.controls_widget.setObjectName("edenControls")
+            self.controls_widget.setStyleSheet("background:transparent;")
+            self.scroll_area.viewport().setStyleSheet("background:transparent;")
             self.controls_widget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
             self.buttons = QVBoxLayout(self.controls_widget)
             self.scroll_area.setWidget(self.controls_widget)
@@ -1043,6 +1063,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                             self.avatar_image.setPixmap(pixmap.scaled(110, 115, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
                             self.avatar_image.show()
                 home_grid_widget = QWidget()
+                home_grid_widget.setStyleSheet("background:transparent;")
                 self.activity_grid = QGridLayout(home_grid_widget)
                 self.activity_grid.setHorizontalSpacing(20)
                 for index, category in enumerate(HOME_CATEGORIES):
@@ -1051,6 +1072,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                            self.activity_grid, index, artwork=art_path if art_path.is_file() and not art_path.is_symlink() else None)
                 self.buttons.addWidget(home_grid_widget)
                 extras_widget = QWidget()
+                extras_widget.setStyleSheet("background:transparent;")
                 extras_grid = QGridLayout(extras_widget)
                 action("My Garden Stars", self.open_garden_stars, extras_grid, 0)
                 action("My saved pictures", self.open_my_artwork, extras_grid, 1)
