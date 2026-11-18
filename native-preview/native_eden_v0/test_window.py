@@ -149,5 +149,21 @@ class NativeWindowTests(unittest.TestCase):
         self.window.return_home()
         self.assertFalse(self.window.parent_is_unlocked())
 
+    def test_enter_key_submits_parent_pin(self):
+        from PySide6.QtTest import QTest
+        from PySide6.QtCore import Qt
+        from native_eden_v0.eden_core.parent_pin import set_pin
+        set_pin("482761")
+        self.window._show_parent()
+        self.window._pin.setFocus()
+        self.window._pin.setText("482761")
+        QTest.keyClick(self.window._pin, Qt.Key.Key_Return)
+        self.assertTrue(self.window.parent_is_unlocked())
+
+    def test_parent_pin_receives_focus_when_opened(self):
+        self.window._show_parent()
+        self.app.processEvents()
+        self.assertTrue(self.window._pin.hasFocus())
+
 if __name__ == "__main__":
     unittest.main()
