@@ -48,7 +48,7 @@ class GamesIntegrationTests(unittest.TestCase):
   self.window.finish_puzzle_mismatch(self.window.puzzle_game,"eden_demo")
   self.assertIsNone(self.window.puzzle_game.second)
  def test_disabled_word_cannot_open(self):
-  self.click("Eden Demo");self.click("Parent Corner")
+  self.click("Eden Demo");self.click("Parent")
   self.window.pin_input.setText("1234");self.click("Unlock Parent Corner")
   ActivityPreferences(self.window.session,self.repo).save("eden_demo",{"word-woodland":False})
   self.click("Back to child home")

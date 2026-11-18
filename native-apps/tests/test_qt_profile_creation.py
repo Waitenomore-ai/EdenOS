@@ -27,7 +27,7 @@ class QtProfileCreationTests(unittest.TestCase):
   self.assertEqual(len(matches),1,label)
   matches[0].click();self.app.processEvents()
  def unlock(self):
-  self.click("Starter");self.click("Parent Corner")
+  self.click("Starter");self.click("Parent")
   self.assertIsNone(self.window.profile_name)
   self.window.pin_input.setText("1234");self.click("Unlock Parent Corner")
  def test_parent_creates_profile(self):

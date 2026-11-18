@@ -25,7 +25,7 @@ class QtProfilesTests(unittest.TestCase):
  def test_switch_profiles_relocks(self):
   self.click("Eden Demo");self.assertEqual(self.window.state.child_id,"eden_demo")
   self.assertFalse(self.window.avatar_image.pixmap().isNull())
-  self.click("Parent Corner");self.assertFalse(self.window.state.parent_unlocked)
+  self.click("Parent");self.assertFalse(self.window.state.parent_unlocked)
   self.click("Log out");self.assertEqual(self.window.state.page,"login")
   self.click("Colby Demo");self.assertEqual(self.window.state.child_id,"colby_demo")
   self.assertFalse(self.window.state.parent_unlocked)

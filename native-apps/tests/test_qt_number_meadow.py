@@ -34,7 +34,7 @@ class NumberMeadowIntegrationTests(unittest.TestCase):
   self.click("Back to home")
   self.assertEqual(self.window.state.page,"home")
  def test_disabled_cannot_launch_via_callback(self):
-  self.click("Eden Demo");self.click("Parent Corner")
+  self.click("Eden Demo");self.click("Parent")
   self.window.pin_input.setText("1234");self.click("Unlock Parent Corner")
   ActivityPreferences(self.window.session,self.repo).save("eden_demo",{"number-meadow":False})
   self.click("Back to child home")

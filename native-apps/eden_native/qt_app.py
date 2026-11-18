@@ -76,6 +76,36 @@ def create_window(*, pin_adapter=None, profiles=None):
                 QWidget#edenControls { background: transparent; }
             """)
             self.layout = QVBoxLayout(self)
+            self.header = QWidget()
+            self.header.setObjectName("edenImacHeader")
+            self.header.setStyleSheet("background:transparent;")
+            header_layout = QHBoxLayout(self.header)
+            header_layout.setSpacing(12)
+            header_layout.addStretch(1)
+            self.header_home = QPushButton("Home")
+            self.header_home.setAccessibleName("Home")
+            self.header_home.clicked.connect(lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
+            self.header_profile = QPushButton("My Profile")
+            self.header_profile.setAccessibleName("My Profile")
+            self.header_profile.clicked.connect(lambda: self.transition(NavigationState(page="profile", child_id=self.state.child_id)))
+            self.header_parent = QPushButton("Parent")
+            self.header_parent.setAccessibleName("Parent")
+            self.header_parent.clicked.connect(lambda: self.transition(self.state.open_parent()))
+            self.header_logout = QPushButton("Log out")
+            self.header_logout.setAccessibleName("Log out")
+            self.header_logout.clicked.connect(lambda: self.transition(self.state.logout()))
+            nav_folder = Path(__file__).resolve().parent.parent / "assets" / "navigation"
+            for control, filename in ((self.header_home, "home.png"), (self.header_profile, "my-profile-template.png"),
+                                      (self.header_parent, "parent.png"), (self.header_logout, "logout.png")):
+                nav_file = nav_folder / filename
+                if nav_file.is_file() and not nav_file.is_symlink():
+                    control.setText("")
+                    control.setIcon(QIcon(str(nav_file)))
+                    control.setIconSize(QSize(92, 92))
+                    control.setStyleSheet("background:transparent; border:0; padding:0;")
+                control.setFixedSize(96, 96)
+                header_layout.addWidget(control)
+            self.layout.addWidget(self.header)
             self.title = QLabel("Eden OS")
             self.title.setObjectName("edenTitle")
             self.title.setStyleSheet("font-size: 26px; font-weight: bold;")
@@ -261,7 +291,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                 self.info.setText("Activity integration pending")
 
         def open_my_artwork(self):
-            if self.state.page != "home" or self.garden_stars_service() is None:
+            if self.state.page not in ("home", "profile") or self.garden_stars_service() is None:
                 return False
             self.artwork_preview = None
             self.transition(NavigationState(page="my-artwork", child_id=self.state.child_id))
@@ -320,7 +350,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                 return 0
 
         def open_garden_stars(self):
-            if self.state.page != "home" or self.garden_stars_service() is None:
+            if self.state.page not in ("home", "profile") or self.garden_stars_service() is None:
                 return False
             self.transition(NavigationState(page="garden-stars", child_id=self.state.child_id))
             return True
@@ -575,6 +605,19 @@ def create_window(*, pin_adapter=None, profiles=None):
                                "nature-explorer": "Nature Explorer", "my-day": "My Day",
                                "feelings": "Feelings", "story-garden": "Story Garden"}
             is_activity = self.state.page in activity_titles
+            self.header.setVisible(self.state.page != "login")
+            self.header_home.setVisible(self.state.page not in ("login", "home"))
+            nav_folder = Path(__file__).resolve().parent.parent / "assets" / "navigation"
+            profile_nav = nav_folder / "my-profile-template.png"
+            if self.state.child_id and self.profiles is not None:
+                current_child = self.profiles.get(self.state.child_id)
+                if current_child is not None:
+                    avatar_name = current_child.avatar
+                    candidate = nav_folder / ("profile-" + avatar_name + ".png")
+                    if candidate.is_file() and not candidate.is_symlink():
+                        profile_nav = candidate
+            if profile_nav.is_file() and not profile_nav.is_symlink():
+                self.header_profile.setIcon(QIcon(str(profile_nav)))
             self.activity_toolbar.setVisible(is_activity)
             self.title.setVisible(not is_activity)
             self.login_banner.setVisible(self.state.page == "login")
@@ -1049,6 +1092,20 @@ def create_window(*, pin_adapter=None, profiles=None):
                            activity_grid, index)
                 self.buttons.addWidget(activity_grid_widget)
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
+            elif self.state.page == "profile":
+                if self.profiles is None or self.profiles.get(self.state.child_id) is None:
+                    self.transition(self.state.logout())
+                    return
+                child = self.profiles.get(self.state.child_id)
+                self.info.setText(child.display_name)
+                portrait = resolve_avatar(child.avatar)
+                if portrait:
+                    pixmap = QPixmap(str(portrait))
+                    if not pixmap.isNull():
+                        self.avatar_image.setPixmap(pixmap.scaled(110, 115, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+                        self.avatar_image.show()
+                action("My Garden Stars", self.open_garden_stars)
+                action("My saved pictures", self.open_my_artwork)
             elif self.state.page == "home":
                 if self.profiles is not None:
                     card = self.profiles.get(self.state.child_id)
@@ -1077,8 +1134,6 @@ def create_window(*, pin_adapter=None, profiles=None):
                 action("My Garden Stars", self.open_garden_stars, extras_grid, 0)
                 action("My saved pictures", self.open_my_artwork, extras_grid, 1)
                 self.buttons.addWidget(extras_widget)
-                action("Parent Corner", lambda: self.transition(self.state.open_parent()))
-                action("Log out", lambda: self.transition(self.state.logout()))
             else:
                 if self.state.parent_unlocked:
                     self.info.setText("Parent Corner unlocked — child profiles")

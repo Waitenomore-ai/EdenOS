@@ -24,7 +24,7 @@ class ArtStudioTests(unittest.TestCase):
   from eden_native.garden_stars import GardenStars
   self.click('Eden Demo')
   self.assertFalse(self.window.parent_unlock_sticker())
-  self.click('Parent Corner')
+  self.click('Parent')
   self.assertFalse(self.window.parent_unlock_sticker())
   self.window.pin_input.setText('1234')
   self.click('Unlock Parent Corner')

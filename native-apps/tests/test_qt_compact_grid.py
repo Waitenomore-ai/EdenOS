@@ -34,7 +34,7 @@ class CompactGridTests(unittest.TestCase):
   self.click("Art Studio")
   self.assertEqual(self.window.state.page,"art-studio")
  def test_parent_checkboxes_four_by_two(self):
-  self.click("Eden Demo");self.click("Parent Corner")
+  self.click("Eden Demo");self.click("Parent")
   self.window.pin_input.setText("1234");self.click("Unlock Parent Corner")
   boxes=list(self.window.activity_checks.values())
   self.assertEqual(len(boxes),8)

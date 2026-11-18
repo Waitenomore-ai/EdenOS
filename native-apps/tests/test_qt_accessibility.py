@@ -28,7 +28,7 @@ class QtAccessibilityTests(unittest.TestCase):
   self.assertIsInstance(self.window.scroll_area,QScrollArea)
   self.click("Eden Demo")
   self.assertEqual(self.window.scroll_area.verticalScrollBar().maximum(),0)
-  self.click("Parent Corner")
+  self.click("Parent")
   self.assertEqual(self.window.pin_input.accessibleName(),"Parent PIN")
   self.window.pin_input.setText("1234");self.click("Unlock Parent Corner")
   self.assertGreaterEqual(self.window.scroll_area.verticalScrollBar().maximum(),0)

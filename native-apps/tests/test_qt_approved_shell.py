@@ -46,6 +46,10 @@ class ApprovedShellTests(unittest.TestCase):
             self.assertIsNotNone(window.home_wallpaper)
             self.assertFalse(window.home_wallpaper.isNull())
             self.assertEqual((window.home_wallpaper.width(), window.home_wallpaper.height()), (1920, 1080))
+            self.assertFalse(window.header_home.isVisible())
+            self.assertTrue(window.header_profile.isVisible())
+            self.assertTrue(window.header_parent.isVisible())
+            self.assertTrue(window.header_logout.isVisible())
             for name in ("Play", "Learn", "Create"):
                 artwork = window.findChild(QPushButton, "edenHome" + name + "Artwork")
                 self.assertIsNotNone(artwork)
