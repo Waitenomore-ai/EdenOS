@@ -36,6 +36,16 @@ jobs:
         shell: bash
         run: |
           python -m PyInstaller --noconfirm --onedir --name EdenNativeStaging --collect-submodules eden_native.approved_models --hidden-import secrets --add-data 'assets:assets' --add-data 'eden_native/approved_models/parent_pin.py:eden_native/approved_models' launch_native.py
+      - name: Smoke test packaged executable
+        shell: bash
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            ./dist/EdenNativeStaging/EdenNativeStaging.exe --smoke-test
+          else
+            ./dist/EdenNativeStaging/EdenNativeStaging --smoke-test
+          fi
       - name: Upload unsigned preview
         uses: actions/upload-artifact@v4
         with:
