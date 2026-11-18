@@ -101,6 +101,8 @@ def create_window(*, pin_adapter=None, profiles=None):
             self.parent_reward_combo = None
             self.artwork_preview = None
             self.garden_selected_sku = None
+            self.garden_selected_slot = None
+            self.garden_clear_confirm = False
             self.activity_grid = None
             self.number_game = None
             self.word_game = None
@@ -255,6 +257,8 @@ def create_window(*, pin_adapter=None, profiles=None):
             if self.state.page != "home" or self.garden_stars_service() is None:
                 return False
             self.garden_selected_sku = None
+            self.garden_selected_slot = None
+            self.garden_clear_confirm = False
             self.transition(NavigationState(page="sticker-garden", child_id=self.state.child_id))
             return True
 
@@ -284,6 +288,53 @@ def create_window(*, pin_adapter=None, profiles=None):
             placements = load_garden(path, allowed)
             placements[slot] = self.garden_selected_sku
             save_garden(path, placements, allowed)
+            self.garden_selected_slot = slot
+            self.garden_clear_confirm = False
+            self.render()
+            return True
+
+        def select_garden_slot(self, slot):
+            path = self.sticker_garden_path()
+            if path is None or type(slot) is not int or not 0 <= slot < SLOTS:
+                return False
+            placements = load_garden(path, self.art_allowed_stickers_for_garden())
+            if slot not in placements:
+                return False
+            self.garden_selected_slot = slot
+            self.render()
+            return True
+
+        def move_garden_sticker(self, dx, dy):
+            path = self.sticker_garden_path()
+            slot = self.garden_selected_slot
+            if path is None or type(slot) is not int or dx not in (-1, 0, 1) or dy not in (-1, 0, 1) or abs(dx) + abs(dy) != 1:
+                return False
+            row, col = divmod(slot, 6)
+            next_row, next_col = row + dy, col + dx
+            if not 0 <= next_row < 4 or not 0 <= next_col < 6:
+                return False
+            target = next_row * 6 + next_col
+            allowed = self.art_allowed_stickers_for_garden()
+            placements = load_garden(path, allowed)
+            if slot not in placements or target in placements:
+                return False
+            placements[target] = placements.pop(slot)
+            save_garden(path, placements, allowed)
+            self.garden_selected_slot = target
+            self.render()
+            return True
+
+        def clear_sticker_garden(self):
+            path = self.sticker_garden_path()
+            if path is None:
+                return False
+            if not self.garden_clear_confirm:
+                self.garden_clear_confirm = True
+                self.render()
+                return False
+            save_garden(path, {}, self.art_allowed_stickers_for_garden())
+            self.garden_clear_confirm = False
+            self.garden_selected_slot = None
             self.render()
             return True
 
@@ -297,6 +348,8 @@ def create_window(*, pin_adapter=None, profiles=None):
                 return False
             del placements[slot]
             save_garden(path, placements, allowed)
+            self.garden_selected_slot = None
+            self.garden_clear_confirm = False
             self.render()
             return True
 
@@ -1041,15 +1094,21 @@ def create_window(*, pin_adapter=None, profiles=None):
                     button = QPushButton(label)
                     button.setObjectName("stickerGardenSlot")
                     button.setAccessibleName(label)
-                    button.setMinimumHeight(110)
-                    button.setIconSize(QSize(80, 80))
+                    button.setMinimumHeight(76)
+                    button.setIconSize(QSize(57, 57))
                     if sku:
                         image = root / filenames[sku]
                         if image.is_file() and not image.is_symlink():
                             button.setIcon(QIcon(str(image)))
-                    button.clicked.connect(lambda _checked=False, position=slot: self.place_garden_sticker(position))
-                    board_grid.addWidget(button, slot // 4, slot % 4)
+                    button.clicked.connect(lambda _checked=False, position=slot, occupied=bool(sku): self.select_garden_slot(position) if occupied else self.place_garden_sticker(position))
+                    board_grid.addWidget(button, slot // 6, slot % 6)
                 self.buttons.addWidget(board)
+                if self.garden_selected_slot is not None and self.garden_selected_slot in placements:
+                    move_widget = QWidget()
+                    move_grid = QGridLayout(move_widget)
+                    for index, (label, dx, dy) in enumerate((("↑ Move up", 0, -1), ("← Move left", -1, 0), ("→ Move right", 1, 0), ("↓ Move down", 0, 1))):
+                        action(label, lambda x=dx, y=dy: self.move_garden_sticker(x, y), move_grid, index)
+                    self.buttons.addWidget(move_widget)
                 if self.garden_selected_sku:
                     self.buttons.addWidget(QLabel("Selected: " + names.get(self.garden_selected_sku, "Sticker")))
                 sticker_picker = QWidget()
@@ -1073,6 +1132,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                     for index, slot in enumerate(sorted(placements)):
                         action("Remove place " + str(slot + 1), lambda position=slot: self.remove_garden_sticker(position), remove_grid, index)
                     self.buttons.addWidget(remove_grid_widget)
+                action("Clear Garden — confirm" if self.garden_clear_confirm else "Clear Garden", self.clear_sticker_garden)
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
                 action("Log out", lambda: self.transition(self.state.logout()))
             elif self.state.page == "garden-stars":

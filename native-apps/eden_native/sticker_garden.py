@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import tempfile
 
-SLOTS = 12
+SLOTS = 24
 
 
 def load_garden(path: Path, allowed: set[str]) -> dict[int, str]:

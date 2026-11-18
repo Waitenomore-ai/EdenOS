@@ -30,15 +30,31 @@ class ArtStudioTests(unittest.TestCase):
   self.assertFalse(self.window.remove_garden_sticker(0))
   self.click('Apple')
   slots=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.objectName()=='stickerGardenSlot' and b.isVisible()]
-  self.assertEqual(len(slots),12)
+  self.assertEqual(len(slots),24)
   slots[0].click();self.app.processEvents()
   path=self.window.sticker_garden_path()
   self.assertEqual(load_garden(path,{'sticker_apple'}),{0:'sticker_apple'})
-  self.assertFalse(self.window.place_garden_sticker(12))
+  self.assertFalse(self.window.place_garden_sticker(24))
   self.click('Remove place 1')
   self.assertEqual(load_garden(path,{'sticker_apple'}),{})
   self.window.transition(self.window.state.logout())
   self.assertFalse(self.window.place_garden_sticker(0))
+
+ def test_sticker_garden_move_and_confirmed_clear(self):
+  from eden_native.sticker_garden import load_garden
+  self.click('Eden Demo');self.click('My Sticker Garden');self.click('Apple')
+  self.assertTrue(self.window.place_garden_sticker(7))
+  path=self.window.sticker_garden_path()
+  self.assertFalse(self.window.move_garden_sticker(-1,0) if self.window.garden_selected_slot is None else self.window.move_garden_sticker(-1,-1))
+  self.assertTrue(self.window.move_garden_sticker(1,0))
+  self.assertEqual(load_garden(path,{'sticker_apple'}),{8:'sticker_apple'})
+  self.assertTrue(self.window.place_garden_sticker(9))
+  self.assertFalse(self.window.move_garden_sticker(-1,0))
+  self.assertEqual(load_garden(path,{'sticker_apple'}),{8:'sticker_apple',9:'sticker_apple'})
+  self.assertFalse(self.window.clear_sticker_garden())
+  self.assertEqual(len(load_garden(path,{'sticker_apple'})),2)
+  self.assertTrue(self.window.clear_sticker_garden())
+  self.assertEqual(load_garden(path,{'sticker_apple'}),{})
 
  def test_sticker_garden_persists_between_visits(self):
   from eden_native.sticker_garden import load_garden

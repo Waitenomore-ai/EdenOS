@@ -20,7 +20,7 @@ class StickerGardenStorageTests(unittest.TestCase):
             path = Path(folder) / 'eden.json'
             save_garden(path, {0: 'sticker_apple'}, {'sticker_apple'})
             original = path.read_bytes()
-            for placements in ({12: 'sticker_apple'}, {0: 'sticker_locked'}, {True: 'sticker_apple'}):
+            for placements in ({24: 'sticker_apple'}, {0: 'sticker_locked'}, {True: 'sticker_apple'}):
                 with self.assertRaises(ValueError):
                     save_garden(path, placements, {'sticker_apple'})
                 self.assertEqual(path.read_bytes(), original)
