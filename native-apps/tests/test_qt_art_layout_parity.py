@@ -40,9 +40,14 @@ class ArtLayoutParityTests(unittest.TestCase):
                 self.assertIsNotNone(scene.findChild(QWidget,'edenArtStudioWorkspace'))
                 self.assertIsNotNone(scene.findChild(QWidget,'edenArtStudioActions'))
                 self.assertIsNotNone(scene.findChild(QWidget,'edenArtStudioDock'))
+                self.assertIsNotNone(scene.findChild(QWidget,'edenArtStudioWallpaperPicker'))
                 self.assertTrue(window.art_canvas.isVisible())
                 labels={b.text() for b in scene.findChildren(QPushButton)}
-                self.assertTrue({'Pen','Pencil','Crayon','Paint','Eraser','Save editable drawing','Open saved drawing'}.issubset(labels))
+                self.assertTrue({'Pen','Pencil','Crayon','Paint','Eraser','Sky','Grass','Peach','White','Save editable drawing','Open saved drawing'}.issubset(labels))
+                sky=[b for b in scene.findChildren(QPushButton) if b.text()=='Sky']
+                self.assertEqual(len(sky),1)
+                sky[0].click()
+                self.assertEqual(window.art_canvas.background.name(),'#e4f2ff')
             finally:
                 window.close()
                 self.app.processEvents()
