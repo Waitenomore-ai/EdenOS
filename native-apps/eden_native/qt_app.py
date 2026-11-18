@@ -268,6 +268,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             if self.sticker_garden_path() is None or sku not in self.art_allowed_stickers_for_garden():
                 return False
             self.garden_selected_sku = sku
+            self.garden_clear_confirm = False
             self.render()
             self.focus_garden_sticker(sku)
             return True
@@ -305,6 +306,8 @@ def create_window(*, pin_adapter=None, profiles=None):
             if self.garden_selected_sku not in allowed:
                 return False
             placements = load_garden(path, allowed)
+            if slot in placements:
+                return False
             placements[slot] = self.garden_selected_sku
             save_garden(path, placements, allowed)
             self.garden_selected_slot = slot
@@ -317,6 +320,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             if self.sticker_garden_path() is None or category not in ("All", "Animals", "Nature", "Food", "Learning", "Things", "Places"):
                 return False
             self.garden_category = category
+            self.garden_clear_confirm = False
             self.render()
             return True
 
@@ -335,6 +339,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             if slot not in placements:
                 return False
             self.garden_selected_slot = slot
+            self.garden_clear_confirm = False
             self.render()
             self.focus_garden_slot(slot)
             return True
@@ -356,6 +361,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             placements[target] = placements.pop(slot)
             save_garden(path, placements, allowed)
             self.garden_selected_slot = target
+            self.garden_clear_confirm = False
             self.render()
             self.focus_garden_slot(target)
             return True
