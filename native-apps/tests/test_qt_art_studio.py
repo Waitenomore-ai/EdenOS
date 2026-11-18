@@ -20,6 +20,26 @@ class ArtStudioTests(unittest.TestCase):
  def click(self,label):
   found=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible() and b.text()==label]
   self.assertEqual(len(found),1,label);found[0].click();self.app.processEvents()
+ def test_parent_sticker_unlock_requires_verified_pin(self):
+  from eden_native.garden_stars import GardenStars
+  self.click('Eden Demo')
+  self.assertFalse(self.window.parent_unlock_sticker())
+  self.click('Parent Corner')
+  self.assertFalse(self.window.parent_unlock_sticker())
+  self.window.pin_input.setText('1234')
+  self.click('Unlock Parent Corner')
+  self.assertTrue(self.window.state.parent_unlocked)
+  self.window.parent_reward_combo.setCurrentIndex(1)
+  self.assertEqual(self.window.parent_reward_combo.currentData(),'sticker_acorn')
+  self.click('Parent unlock selected sticker')
+  service=GardenStars(self.window.profiles.path.parent/'garden-stars.sqlite3')
+  self.assertIn('sticker_acorn',{item['sku'] for item in service.collection('eden_demo')})
+  self.assertEqual(service.balance('eden_demo'),0)
+  self.click('Back to child home')
+  self.assertFalse(self.window.parent_unlock_sticker())
+  self.click('Art Studio');self.click('Sticker: Acorn')
+  self.assertEqual(self.window.art_canvas.sticker_skus,['sticker_acorn'])
+
  def test_garden_stars_awards_on_correct_answers_only(self):
   from eden_native.garden_stars import GardenStars
   self.click('Eden Demo');self.click('Number Meadow')

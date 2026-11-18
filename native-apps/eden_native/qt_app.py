@@ -97,6 +97,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             self.profile_username = None
             self.profile_avatar = None
             self.activity_checks = {}
+            self.parent_reward_combo = None
             self.activity_grid = None
             self.number_game = None
             self.word_game = None
@@ -226,6 +227,24 @@ def create_window(*, pin_adapter=None, profiles=None):
             service = GardenStars(self.profiles.path.parent / "garden-stars.sqlite3")
             service.create_profile(self.state.child_id)
             return service
+
+        def parent_unlock_sticker(self):
+            if self.state.page != "parent" or not self.state.parent_unlocked or self.parent_reward_combo is None:
+                return False
+            service = self.garden_stars_service()
+            if service is None:
+                return False
+            sku = self.parent_reward_combo.currentData()
+            if not isinstance(sku, str):
+                return False
+            try:
+                result = service.unlock(self.state.child_id, sku, parent_authorized=True)
+            except (OSError, ValueError):
+                self.info.setText("Could not unlock this sticker")
+                return False
+            self.render()
+            self.info.setText("Parent-unlocked sticker is ready in Art Studio" if result["source"] == "parent" else "Sticker already collected")
+            return True
 
         def award_garden_stars(self, activity):
             service = self.garden_stars_service()
@@ -478,6 +497,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             self.profile_username = None
             self.profile_avatar = None
             self.activity_checks = {}
+            self.parent_reward_combo = None
             self.activity_grid = None
             self.avatar_image.clear()
             self.avatar_image.hide()
@@ -969,6 +989,14 @@ def create_window(*, pin_adapter=None, profiles=None):
                                 checks_grid.addWidget(checkbox, index // 4, index % 4)
                             self.buttons.addWidget(checks_widget)
                             action("Save activity choices", self.save_activities)
+                            self.buttons.addWidget(QLabel("Parent-controlled sticker rewards"))
+                            self.parent_reward_combo = QComboBox()
+                            self.parent_reward_combo.setAccessibleName("Choose a sticker to unlock for this child")
+                            manifest_path = Path(__file__).resolve().parent.parent / "assets" / "stickers" / "manifest.json"
+                            for entry in json.loads(manifest_path.read_text(encoding="utf-8"))["items"]:
+                                self.parent_reward_combo.addItem(entry["name"], entry["sku"])
+                            self.buttons.addWidget(self.parent_reward_combo)
+                            action("Parent unlock selected sticker", self.parent_unlock_sticker)
                 elif self.pin_adapter:
                     self.pin_input = QLineEdit()
                     self.pin_input.setObjectName("parentPinInput")
