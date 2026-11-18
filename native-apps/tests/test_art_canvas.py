@@ -62,6 +62,21 @@ class ArtCanvasTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.canvas.set_colour("Invisible")
 
+    def test_picture_save_skips_existing_and_dangling_symlink_without_overwriting(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory=Path(tmp)
+            first=directory/'eden-art-0001.png'
+            first.write_bytes(b'preserve-existing-picture')
+            second=directory/'eden-art-0002.png'
+            second.symlink_to(directory/'missing-private-file.png')
+            saved=self.canvas.save_png(directory)
+            self.assertEqual(saved.name,'eden-art-0003.png')
+            self.assertEqual(first.read_bytes(),b'preserve-existing-picture')
+            self.assertTrue(second.is_symlink())
+            self.assertFalse((directory/'missing-private-file.png').exists())
+            self.assertGreater(saved.stat().st_size,100)
+            self.assertEqual(sorted(x.name for x in directory.iterdir()),['eden-art-0001.png','eden-art-0002.png','eden-art-0003.png'])
+
     def test_editable_project_roundtrip_and_corrupt_input(self):
         QTest.mousePress(self.canvas, Qt.MouseButton.LeftButton, pos=QPoint(40, 40))
         QTest.mouseRelease(self.canvas, Qt.MouseButton.LeftButton, pos=QPoint(100, 90))

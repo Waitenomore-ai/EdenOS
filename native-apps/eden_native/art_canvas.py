@@ -483,11 +483,22 @@ class ArtCanvas(QWidget):
         return stickers
 
     def save_png(self, directory: Path):
-        directory.mkdir(parents=True, exist_ok=True)
-        for i in range(1, 10001):
-            output = directory / f"eden-art-{i:04d}.png"
-            if not output.exists():
-                if not self.grab().save(str(output), "PNG"):
-                    raise OSError("Could not save artwork")
-                return output
-        raise OSError("Art Studio save limit reached")
+        """Create a numbered picture without following links or overwriting files."""
+        directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+        fd, temporary = tempfile.mkstemp(prefix=".eden-art-", suffix=".png", dir=directory)
+        try:
+            os.close(fd)
+            if not self.grab().save(temporary, "PNG"):
+                raise OSError("Could not save artwork")
+            os.chmod(temporary, 0o600)
+            for i in range(1, 10001):
+                output = directory / f"eden-art-{i:04d}.png"
+                try:
+                    os.link(temporary, output, follow_symlinks=False)
+                    return output
+                except FileExistsError:
+                    continue
+            raise OSError("Art Studio save limit reached")
+        finally:
+            if os.path.exists(temporary):
+                os.unlink(temporary)
