@@ -99,6 +99,18 @@ class ArtStudioTests(unittest.TestCase):
   self.assertTrue(self.window.art_canvas.redo_action())
   self.assertEqual([x.symbol for x in self.window.art_game.stamps],['🌼','sticker_apple'])
 
+ def test_garden_stars_shop_uses_approved_png_icons_and_accessible_tiles(self):
+  from PySide6.QtWidgets import QPushButton
+  self.click('Eden Demo');self.click('My Garden Stars')
+  tiles=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.objectName()=='gardenStarsStickerTile']
+  self.assertEqual(len(tiles),75)
+  apple=next(b for b in tiles if b.text()=='Apple — Collected ✓')
+  acorn=next(b for b in tiles if b.text()=='Acorn — 5 stars')
+  self.assertFalse(apple.icon().isNull())
+  self.assertFalse(acorn.icon().isNull())
+  self.assertEqual(acorn.accessibleDescription(),'Unlock for 5 Garden Stars')
+  self.assertGreaterEqual(acorn.minimumHeight(),100)
+
  def test_garden_stars_shop_requires_balance_and_unlocks_only_for_child(self):
   from eden_native.garden_stars import GardenStars
   self.click('Eden Demo');self.click('My Garden Stars')

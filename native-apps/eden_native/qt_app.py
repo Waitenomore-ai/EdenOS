@@ -977,8 +977,21 @@ def create_window(*, pin_adapter=None, profiles=None):
                 sticker_grid = QGridLayout(sticker_grid_widget)
                 for index, entry in enumerate(catalogue):
                     sku, name, price = entry["sku"], entry["name"], entry["price"]
-                    label = name + (" — Collected ✓" if sku in owned or price == 0 else " — " + str(price) + " stars")
-                    action(label, lambda item=sku: self.purchase_garden_sticker(item), sticker_grid, index)
+                    collected = sku in owned or price == 0
+                    label = name + (" — Collected ✓" if collected else " — " + str(price) + " stars")
+                    tile = QPushButton(label)
+                    tile.setObjectName("gardenStarsStickerTile")
+                    tile.setAccessibleName(label)
+                    tile.setAccessibleDescription("Already collected" if collected else "Unlock for " + str(price) + " Garden Stars")
+                    tile.setMinimumHeight(100)
+                    tile.setIconSize(QSize(76, 76))
+                    filename = entry.get("filename", "")
+                    if isinstance(filename, str) and filename.startswith("sticker_") and filename.endswith(".png") and "/" not in filename and "\\" not in filename:
+                        image = root / filename
+                        if image.is_file() and not image.is_symlink():
+                            tile.setIcon(QIcon(str(image)))
+                    tile.clicked.connect(lambda _checked=False, item=sku: self.purchase_garden_sticker(item))
+                    sticker_grid.addWidget(tile, index // 4, index % 4)
                 self.buttons.addWidget(sticker_grid_widget)
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
                 action("Log out", lambda: self.transition(self.state.logout()))
