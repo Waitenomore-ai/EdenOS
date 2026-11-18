@@ -35,10 +35,27 @@ class ArtStudioTests(unittest.TestCase):
   path=self.window.sticker_garden_path()
   self.assertEqual(load_garden(path,{'sticker_apple'}),{0:'sticker_apple'})
   self.assertFalse(self.window.place_garden_sticker(24))
-  self.click('Remove place 1')
+  self.click('Remove selected')
   self.assertEqual(load_garden(path,{'sticker_apple'}),{})
   self.window.transition(self.window.state.logout())
   self.assertFalse(self.window.place_garden_sticker(0))
+
+ def test_sticker_garden_three_panel_layout_and_category_filter(self):
+  from PySide6.QtWidgets import QWidget,QComboBox,QPushButton
+  self.click('Eden Demo');self.click('My Sticker Garden')
+  root=self.window.controls_widget
+  self.assertEqual(len(root.findChildren(QWidget,'stickerGardenThreePanel')),1)
+  self.assertEqual(len(root.findChildren(QWidget,'stickerGardenPickerPanel')),1)
+  self.assertEqual(len(root.findChildren(QWidget,'stickerGardenCentrePanel')),1)
+  self.assertEqual(len(root.findChildren(QWidget,'stickerGardenActionsPanel')),1)
+  combo=root.findChild(QComboBox,'stickerGardenCategory')
+  self.assertEqual(combo.currentText(),'All')
+  self.assertTrue(self.window.select_garden_category('Nature'))
+  combo=self.window.controls_widget.findChildren(QComboBox,'stickerGardenCategory')[-1]
+  self.assertEqual(combo.currentText(),'Nature')
+  self.assertFalse(self.window.select_garden_category('Not a category'))
+  board=self.window.controls_widget.findChildren(QWidget,'stickerGardenBoard')[-1]
+  self.assertEqual(board.layout().count(),24)
 
  def test_sticker_garden_move_and_confirmed_clear(self):
   from eden_native.sticker_garden import load_garden

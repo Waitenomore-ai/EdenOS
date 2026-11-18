@@ -103,6 +103,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             self.garden_selected_sku = None
             self.garden_selected_slot = None
             self.garden_clear_confirm = False
+            self.garden_category = "All"
             self.activity_grid = None
             self.number_game = None
             self.word_game = None
@@ -259,6 +260,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             self.garden_selected_sku = None
             self.garden_selected_slot = None
             self.garden_clear_confirm = False
+            self.garden_category = "All"
             self.transition(NavigationState(page="sticker-garden", child_id=self.state.child_id))
             return True
 
@@ -292,6 +294,20 @@ def create_window(*, pin_adapter=None, profiles=None):
             self.garden_clear_confirm = False
             self.render()
             return True
+
+        def select_garden_category(self, category):
+            if self.sticker_garden_path() is None or category not in ("All", "Animals", "Nature", "Food", "Learning", "Things", "Places"):
+                return False
+            self.garden_category = category
+            self.render()
+            return True
+
+        def place_next_garden_sticker(self):
+            path = self.sticker_garden_path()
+            if path is None:
+                return False
+            placements = load_garden(path, self.art_allowed_stickers_for_garden())
+            return next((self.place_garden_sticker(slot) for slot in range(SLOTS) if slot not in placements), False)
 
         def select_garden_slot(self, slot):
             path = self.sticker_garden_path()
@@ -626,6 +642,11 @@ def create_window(*, pin_adapter=None, profiles=None):
                 self.info.setText("Try again — you can do it!")
 
         def render(self):
+            # Qt may emit a stale category-change signal while deleting the
+            # previous picker; never let it reset the current filter.
+            old_category_picker = self.controls_widget.findChild(QComboBox, "stickerGardenCategory")
+            if old_category_picker is not None:
+                old_category_picker.blockSignals(True)
             while self.buttons.count():
                 item = self.buttons.takeAt(0)
                 if item.widget():
@@ -1085,54 +1106,105 @@ def create_window(*, pin_adapter=None, profiles=None):
                 catalogue = json.loads((root / "manifest.json").read_text(encoding="utf-8"))["items"]
                 names = {entry["sku"]: entry["name"] for entry in catalogue}
                 filenames = {entry["sku"]: entry["filename"] for entry in catalogue}
+                # Match the original iMac composition: narrow sticker picker on
+                # the left, 6x4 placement board in the centre, actions on right.
+                layout_widget = QWidget()
+                layout_widget.setObjectName("stickerGardenThreePanel")
+                panel_layout = QHBoxLayout(layout_widget)
+                panel_layout.setSpacing(9)
+
+                left_panel = QWidget()
+                left_panel.setObjectName("stickerGardenPickerPanel")
+                left_panel.setFixedWidth(212)
+                left_layout = QVBoxLayout(left_panel)
+                left_layout.addWidget(QLabel("My Stickers"))
+                categories = ("All", "Animals", "Nature", "Food", "Learning", "Things", "Places")
+                category_picker = QComboBox()
+                category_picker.setObjectName("stickerGardenCategory")
+                category_picker.setAccessibleName("Sticker category")
+                category_picker.addItems(categories)
+                category_picker.setCurrentText(self.garden_category)
+                category_picker.currentTextChanged.connect(self.select_garden_category)
+                left_layout.addWidget(category_picker)
+                picker_scroll = QScrollArea()
+                picker_scroll.setObjectName("stickerGardenPickerScroll")
+                picker_scroll.setWidgetResizable(True)
+                picker_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+                sticker_picker = QWidget()
+                picker_grid = QGridLayout(sticker_picker)
+                available = [item for item in catalogue if item["sku"] in allowed and
+                             (self.garden_category == "All" or item["category"] == self.garden_category)]
+                for index, entry in enumerate(available):
+                    sku = entry["sku"]
+                    button = QPushButton(entry["name"])
+                    button.setObjectName("stickerGardenPicker")
+                    button.setAccessibleName("Select " + entry["name"])
+                    button.setAccessibleDescription("Selected sticker" if sku == self.garden_selected_sku else "Choose this sticker")
+                    button.setMinimumHeight(78)
+                    button.setIconSize(QSize(41, 41))
+                    image = root / entry["filename"]
+                    if image.is_file() and not image.is_symlink():
+                        button.setIcon(QIcon(str(image)))
+                    button.clicked.connect(lambda _checked=False, item=sku: self.select_garden_sticker(item))
+                    picker_grid.addWidget(button, index // 2, index % 2)
+                picker_scroll.setWidget(sticker_picker)
+                left_layout.addWidget(picker_scroll, 1)
+                panel_layout.addWidget(left_panel)
+
+                middle_panel = QWidget()
+                middle_panel.setObjectName("stickerGardenCentrePanel")
+                middle_layout = QVBoxLayout(middle_panel)
                 board = QWidget()
                 board.setObjectName("stickerGardenBoard")
+                board.setMinimumSize(480, 310)
                 board_grid = QGridLayout(board)
+                board_grid.setSpacing(4)
                 for slot in range(SLOTS):
                     sku = placements.get(slot)
-                    label = "Place " + str(slot + 1) + (" — " + names[sku] if sku else " — +")
-                    button = QPushButton(label)
+                    row, column = divmod(slot, 6)
+                    label = "Garden row " + str(row + 1) + " column " + str(column + 1) + (": " + names[sku] if sku else ": empty")
+                    button = QPushButton("" if sku else "+")
                     button.setObjectName("stickerGardenSlot")
                     button.setAccessibleName(label)
-                    button.setMinimumHeight(76)
-                    button.setIconSize(QSize(57, 57))
+                    button.setToolTip(label)
+                    button.setMinimumHeight(64)
+                    button.setIconSize(QSize(48, 48))
+                    button.setStyleSheet("QPushButton { border: 0; background: transparent; font-size: 26px; font-weight: bold; } QPushButton:focus { border: 3px solid #f1c40f; }")
                     if sku:
                         image = root / filenames[sku]
                         if image.is_file() and not image.is_symlink():
                             button.setIcon(QIcon(str(image)))
                     button.clicked.connect(lambda _checked=False, position=slot, occupied=bool(sku): self.select_garden_slot(position) if occupied else self.place_garden_sticker(position))
-                    board_grid.addWidget(button, slot // 6, slot % 6)
-                self.buttons.addWidget(board)
-                if self.garden_selected_slot is not None and self.garden_selected_slot in placements:
-                    move_widget = QWidget()
-                    move_grid = QGridLayout(move_widget)
-                    for index, (label, dx, dy) in enumerate((("↑ Move up", 0, -1), ("← Move left", -1, 0), ("→ Move right", 1, 0), ("↓ Move down", 0, 1))):
-                        action(label, lambda x=dx, y=dy: self.move_garden_sticker(x, y), move_grid, index)
-                    self.buttons.addWidget(move_widget)
+                    board_grid.addWidget(button, row, column)
+                middle_layout.addWidget(board, 1)
+                middle_layout.addWidget(QLabel("Choose a sticker, then tap a garden square."))
+                panel_layout.addWidget(middle_panel, 1)
+
+                right_panel = QWidget()
+                right_panel.setObjectName("stickerGardenActionsPanel")
+                right_panel.setFixedWidth(160)
+                right_layout = QVBoxLayout(right_panel)
+                right_layout.addWidget(QLabel("Move Sticker"))
+                move_widget = QWidget()
+                move_grid = QGridLayout(move_widget)
+                for index, (label, dx, dy) in enumerate((("↑", 0, -1), ("←", -1, 0), ("→", 1, 0), ("↓", 0, 1))):
+                    action(label, lambda x=dx, y=dy: self.move_garden_sticker(x, y), move_grid, index)
+                right_layout.addWidget(move_widget)
                 if self.garden_selected_sku:
-                    self.buttons.addWidget(QLabel("Selected: " + names.get(self.garden_selected_sku, "Sticker")))
-                sticker_picker = QWidget()
-                picker_grid = QGridLayout(sticker_picker)
-                for index, entry in enumerate(item for item in catalogue if item["sku"] in allowed):
-                    sku = entry["sku"]
-                    button = QPushButton(entry["name"])
-                    button.setObjectName("stickerGardenPicker")
-                    button.setAccessibleName("Select " + entry["name"])
-                    button.setMinimumHeight(75)
-                    button.setIconSize(QSize(55, 55))
-                    image = root / entry["filename"]
-                    if image.is_file() and not image.is_symlink():
-                        button.setIcon(QIcon(str(image)))
-                    button.clicked.connect(lambda _checked=False, item=sku: self.select_garden_sticker(item))
-                    picker_grid.addWidget(button, index // 4, index % 4)
-                self.buttons.addWidget(sticker_picker)
-                if placements:
-                    remove_grid_widget = QWidget()
-                    remove_grid = QGridLayout(remove_grid_widget)
-                    for index, slot in enumerate(sorted(placements)):
-                        action("Remove place " + str(slot + 1), lambda position=slot: self.remove_garden_sticker(position), remove_grid, index)
-                    self.buttons.addWidget(remove_grid_widget)
-                action("Clear Garden — confirm" if self.garden_clear_confirm else "Clear Garden", self.clear_sticker_garden)
+                    right_layout.addWidget(QLabel("Selected: " + names.get(self.garden_selected_sku, "Sticker")))
+                def right_action(label, callback):
+                    button = QPushButton(label)
+                    button.setAccessibleName(label)
+                    button.setMinimumHeight(52)
+                    button.clicked.connect(lambda _checked=False: callback())
+                    right_layout.addWidget(button)
+                if self.garden_selected_slot is not None and self.garden_selected_slot in placements:
+                    right_action("Remove selected", lambda: self.remove_garden_sticker(self.garden_selected_slot))
+                right_action("Place Sticker", self.place_next_garden_sticker)
+                right_action("Clear Garden — confirm" if self.garden_clear_confirm else "Clear Garden", self.clear_sticker_garden)
+                right_layout.addStretch(1)
+                panel_layout.addWidget(right_panel)
+                self.buttons.addWidget(layout_widget)
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
                 action("Log out", lambda: self.transition(self.state.logout()))
             elif self.state.page == "garden-stars":
