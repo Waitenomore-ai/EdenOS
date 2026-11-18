@@ -14,8 +14,12 @@ Target: Windows/macOS PySide6 native app. Live iMac and website must not be modi
   games are implemented.
 - **Character:** The iMac Play category overlays the child's full-body figure in
   the lower-left foreground. Native category view does not yet include this.
-- **Wallpaper:** Native category screen now uses a curated garden wallpaper but
-  does not yet guarantee the identical per-child wallpaper selected on the iMac.
+- **Wallpaper:** The reference iMac screenshot background matches exactly
+  `020-10-13-rainbow-waterfall-glade-clean.png` (crop RMS comparison against
+  all 28 native curated wallpapers, squared error 8.6 versus >76,000 for the
+  next closest). Native category screen currently rotates a different curated
+  wallpaper, so it must adopt the iMac's actual daily/per-child selection rules
+  rather than hard-coding the screenshot's single wallpaper.
 - **Layout:** iMac uses a 4-column first row with two more tiles on the second
   row, 360px activity tiles and image-led controls. Native tiles are image-led
   and have accessibility names, but pixel-alignment remains to be measured.
