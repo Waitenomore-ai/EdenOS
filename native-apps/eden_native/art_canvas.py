@@ -23,7 +23,7 @@ class ArtCanvas(QWidget):
         super().__init__(parent)
         self.setObjectName("artStudioDrawingCanvas")
         self.setAccessibleName("Art Studio drawing canvas")
-        self.setAccessibleDescription("Use Tab to focus, number keys 1 to 9 to select a sticker, arrow keys to move it, and Page Up or Page Down to change its layer")
+        self.setAccessibleDescription("Use Tab to focus; numbers 1 to 9 select a sticker; arrows move it; Page Up or Page Down changes its layer; Control Z undoes and Control Shift Z redoes the last action")
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setMinimumSize(440, 220)
         self.setMouseTracking(True)
@@ -54,7 +54,7 @@ class ArtCanvas(QWidget):
     def undo_action(self):
         if not self.action_undo:
             return False
-        kind, payload = self.action_undo.pop()
+        kind, payload = self.action_undo[-1]
         if kind == "stroke":
             if not self.strokes:
                 return False
@@ -93,6 +93,7 @@ class ArtCanvas(QWidget):
             self.sticker_positions[index] = before[:]
         else:
             return False
+        self.action_undo.pop()
         self.action_redo.append((kind, payload))
         self.update()
         return True
@@ -100,7 +101,7 @@ class ArtCanvas(QWidget):
     def redo_action(self):
         if not self.action_redo:
             return False
-        kind, payload = self.action_redo.pop()
+        kind, payload = self.action_redo[-1]
         if kind == "stroke":
             self.strokes.append(payload)
         elif kind == "sticker_layer":
@@ -137,6 +138,7 @@ class ArtCanvas(QWidget):
             self.sticker_positions[index] = after[:]
         else:
             return False
+        self.action_redo.pop()
         self.action_undo.append((kind, payload))
         self.update()
         return True
@@ -342,6 +344,19 @@ class ArtCanvas(QWidget):
 
     def keyPressEvent(self, event):
         key = event.key()
+        modifiers = event.modifiers()
+        if modifiers & Qt.KeyboardModifier.ControlModifier:
+            if key == Qt.Key.Key_Z:
+                if modifiers & Qt.KeyboardModifier.ShiftModifier:
+                    self.redo_action()
+                else:
+                    self.undo_action()
+                event.accept()
+                return
+            if key == Qt.Key.Key_Y:
+                self.redo_action()
+                event.accept()
+                return
         if Qt.Key.Key_1 <= key <= Qt.Key.Key_9:
             index = key - Qt.Key.Key_1
             if index < len(self.sticker_positions):

@@ -19,6 +19,28 @@ class ArtCanvasTests(unittest.TestCase):
     def tearDown(self):
         self.canvas.close()
 
+    def test_failed_undo_preserves_history_for_recovery(self):
+        self.canvas._record_action('sticker_move',(0,[.1,.1],[.2,.2]))
+        self.assertFalse(self.canvas.undo_action())
+        self.assertEqual(len(self.canvas.action_undo),1)
+        self.assertEqual(len(self.canvas.action_redo),0)
+        self.canvas.sticker_positions.append([.2,.2])
+        self.assertTrue(self.canvas.undo_action())
+        self.assertEqual(self.canvas.sticker_positions[0],[.1,.1])
+
+    def test_keyboard_shortcuts_undo_redo_combined_actions(self):
+        QTest.mousePress(self.canvas, Qt.MouseButton.LeftButton, pos=QPoint(30, 30))
+        QTest.mouseRelease(self.canvas, Qt.MouseButton.LeftButton, pos=QPoint(100, 90))
+        self.assertEqual(len(self.canvas.strokes),1)
+        self.canvas.setFocus()
+        QTest.keyClick(self.canvas, Qt.Key.Key_Z, Qt.KeyboardModifier.ControlModifier)
+        self.assertEqual(len(self.canvas.strokes),0)
+        QTest.keyClick(self.canvas, Qt.Key.Key_Z, Qt.KeyboardModifier.ControlModifier|Qt.KeyboardModifier.ShiftModifier)
+        self.assertEqual(len(self.canvas.strokes),1)
+        QTest.keyClick(self.canvas, Qt.Key.Key_Z, Qt.KeyboardModifier.ControlModifier)
+        QTest.keyClick(self.canvas, Qt.Key.Key_Y, Qt.KeyboardModifier.ControlModifier)
+        self.assertEqual(len(self.canvas.strokes),1)
+
     def test_draw_undo_redo_and_export(self):
         QTest.mousePress(self.canvas, Qt.MouseButton.LeftButton, pos=QPoint(30, 30))
         QTest.mouseRelease(self.canvas, Qt.MouseButton.LeftButton, pos=QPoint(100, 90))
