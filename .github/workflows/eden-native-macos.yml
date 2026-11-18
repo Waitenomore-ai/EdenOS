@@ -1,0 +1,47 @@
+name: Eden Native macOS Preview (manual)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    name: macOS ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15-intel
+            arch: intel
+          - runner: macos-26
+            arch: apple-silicon
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        working-directory: native-preview
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt 'pyinstaller>=6,<7'
+      - name: Test native window
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python -m unittest native_eden_v0.test_window -q
+      - name: Build macOS app
+        run: |
+          pyinstaller --noconfirm --clean --windowed --onedir --name EdenNativePreview --paths . \
+            --add-data 'native_eden_v0/assets:native_eden_v0/assets' \
+            --add-data 'native_eden_v0/eden_core/data:native_eden_v0/eden_core/data' launch.py
+      - name: Smoke test app
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: ./dist/EdenNativePreview.app/Contents/MacOS/EdenNativePreview --smoke-test
+      - name: Archive unsigned app
+        run: ditto -c -k --keepParent dist/EdenNativePreview.app EdenNativePreview-macos-${{ matrix.arch }}.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: EdenNativePreview-macos-${{ matrix.arch }}
+          path: native-preview/EdenNativePreview-macos-${{ matrix.arch }}.zip
+          if-no-files-found: error
