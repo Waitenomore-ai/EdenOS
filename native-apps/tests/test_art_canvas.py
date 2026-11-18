@@ -224,6 +224,49 @@ class ArtCanvasTests(unittest.TestCase):
         self.assertEqual(self.canvas.selected_sticker,0)
         self.canvas.hide()
 
+    def test_sticker_keyboard_move_undo_redo_and_layer_history_invalidation(self):
+        from PySide6.QtCore import Qt
+        from PySide6.QtTest import QTest
+        import json
+        root=Path(__file__).resolve().parents[1]/'assets'/'stickers'
+        by_sku={item['sku']:root/item['filename'] for item in json.loads((root/'manifest.json').read_text())['items']}
+        self.canvas.set_stickers([by_sku['sticker_apple'],by_sku['sticker_butterfly']],['sticker_apple','sticker_butterfly'])
+        self.canvas.show();self.app.processEvents();self.canvas.setFocus()
+        QTest.keyClick(self.canvas,Qt.Key.Key_1)
+        before=self.canvas.sticker_positions[0][:]
+        QTest.keyClick(self.canvas,Qt.Key.Key_Right)
+        moved=self.canvas.sticker_positions[0][:]
+        self.assertNotEqual(before,moved)
+        self.assertTrue(self.canvas.undo_sticker_move())
+        self.assertEqual(self.canvas.sticker_positions[0],before)
+        self.assertTrue(self.canvas.redo_sticker_move())
+        self.assertEqual(self.canvas.sticker_positions[0],moved)
+        QTest.keyClick(self.canvas,Qt.Key.Key_PageUp)
+        self.assertFalse(self.canvas.undo_sticker_move())
+        self.canvas.hide()
+
+    def test_drag_sticker_undo_redo(self):
+        from PySide6.QtCore import Qt,QPoint
+        from PySide6.QtTest import QTest
+        from PySide6.QtGui import QMouseEvent
+        from PySide6.QtCore import QEvent,QPointF
+        import json
+        root=Path(__file__).resolve().parents[1]/'assets'/'stickers'
+        apple=next(item for item in json.loads((root/'manifest.json').read_text())['items'] if item['sku']=='sticker_apple')
+        self.canvas.set_stickers([root/apple['filename']],['sticker_apple'])
+        before=self.canvas.sticker_positions[0][:]
+        start=QPoint(round(before[0]*500)+10,round(before[1]*300)+10)
+        QTest.mousePress(self.canvas,Qt.MouseButton.LeftButton,pos=start)
+        move=QMouseEvent(QEvent.Type.MouseMove,QPointF(210,145),Qt.MouseButton.NoButton,Qt.MouseButton.LeftButton,Qt.KeyboardModifier.NoModifier)
+        self.app.sendEvent(self.canvas,move)
+        QTest.mouseRelease(self.canvas,Qt.MouseButton.LeftButton,pos=QPoint(210,145))
+        after=self.canvas.sticker_positions[0][:]
+        self.assertNotEqual(before,after)
+        self.assertTrue(self.canvas.undo_sticker_move())
+        self.assertEqual(self.canvas.sticker_positions[0],before)
+        self.assertTrue(self.canvas.redo_sticker_move())
+        self.assertEqual(self.canvas.sticker_positions[0],after)
+
     def test_eraser_reveals_new_background_not_old_background_colour(self):
         from PySide6.QtGui import QColor
         self.canvas.strokes = [

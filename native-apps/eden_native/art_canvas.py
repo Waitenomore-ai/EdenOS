@@ -38,6 +38,9 @@ class ArtCanvas(QWidget):
         self.drag_sticker = None
         self.selected_sticker = None
         self.brush_mode = "paint"
+        self.sticker_move_undo = []
+        self.sticker_move_redo = []
+        self._drag_origin = None
 
     def set_stickers(self, paths, skus=None):
         self.sticker_paths = list(paths[:24])
@@ -48,6 +51,8 @@ class ArtCanvas(QWidget):
             index = len(self.sticker_positions)
             self.sticker_positions.append([min(.85, .05 + (index % 5) * .19), min(.82, .07 + (index // 5) * .20)])
         self.sticker_positions = self.sticker_positions[:len(self.sticker_paths)]
+        self.sticker_move_undo.clear()
+        self.sticker_move_redo.clear()
         if self.selected_sticker is not None and self.selected_sticker >= len(self.sticker_paths):
             self.selected_sticker = None
         self.update()
@@ -74,6 +79,8 @@ class ArtCanvas(QWidget):
             self.sticker_skus[index], self.sticker_skus[target] = self.sticker_skus[target], self.sticker_skus[index]
         self.sticker_positions[index], self.sticker_positions[target] = self.sticker_positions[target], self.sticker_positions[index]
         self.selected_sticker = target
+        self.sticker_move_undo.clear()
+        self.sticker_move_redo.clear()
         self.update()
         self.sticker_layer_changed.emit()
         return True
@@ -108,6 +115,7 @@ class ArtCanvas(QWidget):
             self.drag_sticker = self._sticker_at(self._point(event))
             if self.drag_sticker is not None:
                 self.selected_sticker = self.drag_sticker
+                self._drag_origin = self.sticker_positions[self.drag_sticker][:]
                 return
         if event.button() == Qt.MouseButton.LeftButton and len(self.strokes) < 500:
             self.active = {"colour": self.colour, "width": self.stroke_width, "points": [self._point(event)], "mode": self.brush_mode}
@@ -125,7 +133,13 @@ class ArtCanvas(QWidget):
 
     def mouseReleaseEvent(self, event):
         if self.drag_sticker is not None:
+            index = self.drag_sticker
+            before = self._drag_origin
+            after = self.sticker_positions[index][:]
             self.drag_sticker = None
+            self._drag_origin = None
+            if before is not None and before != after:
+                self._remember_sticker_move(index, before, after)
             self.update()
             return
         if self.active is not None:
@@ -134,6 +148,34 @@ class ArtCanvas(QWidget):
             self.redo_strokes.clear()
             self.active = None
             self.update()
+
+    def _remember_sticker_move(self, index, before, after):
+        self.sticker_move_undo.append((index, before[:], after[:]))
+        if len(self.sticker_move_undo) > 100:
+            self.sticker_move_undo.pop(0)
+        self.sticker_move_redo.clear()
+
+    def undo_sticker_move(self):
+        if not self.sticker_move_undo:
+            return False
+        index, before, after = self.sticker_move_undo.pop()
+        if index >= len(self.sticker_positions):
+            return False
+        self.sticker_positions[index] = before[:]
+        self.sticker_move_redo.append((index, before, after))
+        self.update()
+        return True
+
+    def redo_sticker_move(self):
+        if not self.sticker_move_redo:
+            return False
+        index, before, after = self.sticker_move_redo.pop()
+        if index >= len(self.sticker_positions):
+            return False
+        self.sticker_positions[index] = after[:]
+        self.sticker_move_undo.append((index, before, after))
+        self.update()
+        return True
 
     def undo(self):
         if self.strokes:
@@ -169,8 +211,12 @@ class ArtCanvas(QWidget):
         if key in movements and self.selected_sticker is not None and self.selected_sticker < len(self.sticker_positions):
             dx, dy = movements[key]
             x, y = self.sticker_positions[self.selected_sticker]
-            self.sticker_positions[self.selected_sticker] = [max(0, min(1 - 54/max(1, self.width()), x+dx)),
-                                                             max(0, min(1 - 54/max(1, self.height()), y+dy))]
+            before = [x, y]
+            after = [max(0, min(1 - 54/max(1, self.width()), x+dx)),
+                     max(0, min(1 - 54/max(1, self.height()), y+dy))]
+            self.sticker_positions[self.selected_sticker] = after
+            if before != after:
+                self._remember_sticker_move(self.selected_sticker, before, after)
             self.update()
             event.accept()
             return
@@ -272,6 +318,8 @@ class ArtCanvas(QWidget):
         self.strokes = strokes
         self.sticker_positions = positions
         self.selected_sticker = None
+        self.sticker_move_undo.clear()
+        self.sticker_move_redo.clear()
         self.redo_strokes.clear()
         self.active = None
         self.update()

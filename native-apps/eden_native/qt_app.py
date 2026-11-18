@@ -621,6 +621,8 @@ def create_window(*, pin_adapter=None, profiles=None):
                     dock_layout = QHBoxLayout(dock)
                     dock_layout.setContentsMargins(0, 0, 0, 0)
                     for label, callback in (
+                        ("Undo sticker move", self.art_canvas.undo_sticker_move),
+                        ("Redo sticker move", self.art_canvas.redo_sticker_move),
                         ("Sticker back", lambda: self.move_art_sticker_layer(-1)),
                         ("Sticker forward", lambda: self.move_art_sticker_layer(1)),
                         ("Save picture", self.save_art_picture),
