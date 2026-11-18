@@ -70,6 +70,39 @@ class EdenNativeWindow(QMainWindow):
         parents.clicked.connect(self._show_parent)
         layout.addWidget(parents)
         self._stack.addWidget(self._home)
+        self._child_home = QWidget()
+        child_layout = QVBoxLayout(self._child_home)
+        child_layout.setContentsMargins(35, 26, 35, 26)
+        self._child_heading = QLabel("Welcome")
+        self._child_heading.setObjectName("heading")
+        self._child_heading.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        child_layout.addWidget(self._child_heading)
+        actions = QHBoxLayout()
+        self._home_action_names = ("Play", "Learn", "Create")
+        for action in self._home_action_names:
+            button = QPushButton(action)
+            button.setAccessibleName(action + " activities")
+            button.setMinimumSize(180, 135)
+            button.clicked.connect(lambda checked=False, name=action: self.navigate_home_action(name))
+            actions.addWidget(button)
+        child_layout.addLayout(actions)
+        self._child_feedback = QLabel("Activities are being connected to the approved iMac versions.")
+        self._child_feedback.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._child_feedback.setWordWrap(True)
+        child_layout.addWidget(self._child_feedback)
+        child_layout.addStretch()
+        footer = QHBoxLayout()
+        profile_button = QPushButton("My Profile")
+        profile_button.clicked.connect(lambda: self._child_feedback.setText("Profile settings are not yet connected."))
+        footer.addWidget(profile_button)
+        parent_button = QPushButton("Parent")
+        parent_button.clicked.connect(self._show_parent)
+        footer.addWidget(parent_button)
+        logout_button = QPushButton("Log out")
+        logout_button.clicked.connect(self.logout)
+        footer.addWidget(logout_button)
+        child_layout.addLayout(footer)
+        self._stack.addWidget(self._child_home)
         self._parent = QWidget()
         parent_layout = QVBoxLayout(self._parent)
         parent_layout.setContentsMargins(60, 50, 60, 50)
@@ -132,6 +165,33 @@ class EdenNativeWindow(QMainWindow):
             QLineEdit { background: white; padding: 12px; border-radius: 12px; }
         """)
 
+    def current_page(self):
+        pages = {
+            self._home: "login",
+            self._child_home: "home",
+            self._parent: "parent-pin",
+            self._dashboard: "parent-corner",
+        }
+        return pages.get(self._stack.currentWidget(), "unknown")
+
+    def home_actions(self):
+        return self._home_action_names
+
+    def navigate_home_action(self, name):
+        if self.current_page() != "home" or name not in self._home_action_names:
+            return False
+        self._child_feedback.setText(name + " will open when the approved activities are integrated.")
+        return False
+
+    def logout(self):
+        self._chooser.select(-1)
+        self._selected_label.setText("Choose your character" if self._is_demo else "Choose your picture")
+        self._child_heading.setText("Welcome")
+        self._child_feedback.setText("Activities are being connected to the approved iMac versions.")
+        self._unlocked = False
+        self._pin.clear()
+        self._stack.setCurrentWidget(self._home)
+
     def character_count(self):
         return len(self._chooser.tiles())
 
@@ -143,6 +203,8 @@ class EdenNativeWindow(QMainWindow):
         if identifier:
             card = self._chooser.selected_public_card()
             self._selected_label.setText("Selected: " + card["display_name"])
+            self._child_heading.setText("Welcome, " + card["display_name"])
+            self._stack.setCurrentWidget(self._child_home)
         return identifier
 
     def selected_profile_id(self):
@@ -202,13 +264,14 @@ class EdenNativeWindow(QMainWindow):
     def return_home(self):
         self._unlocked = False
         self._pin.clear()
-        self._stack.setCurrentWidget(self._home)
+        self._stack.setCurrentWidget(self._child_home if self._chooser.selected_username() else self._home)
 
     def _show_parent(self):
         self._unlocked = False
         self._pin.clear()
         self._parent_message.setText("Enter your existing Eden parent PIN to unlock.")
         self._stack.setCurrentWidget(self._parent)
+        self._pin.setFocus()
 
     def unlock_parent(self, pin):
         if not has_pin() or not verify_pin(pin):

@@ -36,6 +36,31 @@ class NativeWindowTests(unittest.TestCase):
     def test_existing_profile_chooser(self):
         self.window.choose_character(2)
         self.assertEqual(self.window.selected_profile_id(), "demo_mila")
+    def test_profile_selection_opens_child_home_and_logout_returns_to_chooser(self):
+        self.assertEqual(self.window.current_page(), "login")
+        self.assertEqual(self.window.choose_character(2), "demo_mila")
+        self.assertEqual(self.window.current_page(), "home")
+        self.assertEqual(self.window.home_actions(), ("Play", "Learn", "Create"))
+        self.window.logout()
+        self.assertEqual(self.window.current_page(), "login")
+        self.assertIsNone(self.window.selected_profile_id())
+        self.assertFalse(self.window.parent_is_unlocked())
+
+    def test_child_home_navigation_never_opens_unimplemented_games(self):
+        self.window.choose_character(0)
+        self.assertFalse(self.window.navigate_home_action("Play"))
+        self.assertEqual(self.window.current_page(), "home")
+
+    def test_parent_corner_can_return_to_selected_child_home(self):
+        from native_eden_v0.eden_core.parent_pin import set_pin
+        set_pin("482761")
+        self.window.choose_character(0)
+        self.window._show_parent()
+        self.assertTrue(self.window.unlock_parent("482761"))
+        self.window.return_home()
+        self.assertEqual(self.window.current_page(), "home")
+        self.assertFalse(self.window.parent_is_unlocked())
+
     def test_parent_locked_without_pin(self):
         self.assertFalse(self.window.parent_is_unlocked())
         self.assertFalse(self.window.unlock_parent("1234"))
