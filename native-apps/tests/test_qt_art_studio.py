@@ -56,6 +56,7 @@ class ArtStudioTests(unittest.TestCase):
   self.assertFalse(self.window.select_garden_category('Not a category'))
   board=self.window.controls_widget.findChildren(QWidget,'stickerGardenBoard')[-1]
   self.assertEqual(board.layout().count(),24)
+  self.assertTrue(board.property("approvedGardenBackground").endswith("garden-background-v58.webp"))
 
  def test_sticker_garden_move_and_confirmed_clear(self):
   from eden_native.sticker_garden import load_garden

@@ -1157,6 +1157,12 @@ def create_window(*, pin_adapter=None, profiles=None):
                 board = QWidget()
                 board.setObjectName("stickerGardenBoard")
                 board.setMinimumSize(480, 310)
+                # Use the exact approved 1672x941 original iMac background.
+                # Never substitute unapproved artwork if it is missing.
+                garden_background = Path(__file__).resolve().parent.parent / "assets" / "garden-stars" / "backgrounds" / "garden-background-v58.webp"
+                if garden_background.is_file() and not garden_background.is_symlink() and not QPixmap(str(garden_background)).isNull():
+                    board.setStyleSheet('QWidget#stickerGardenBoard { border-image: url("' + str(garden_background) + '") 0 0 0 0 stretch stretch; }')
+                    board.setProperty("approvedGardenBackground", str(garden_background))
                 board_grid = QGridLayout(board)
                 board_grid.setSpacing(4)
                 for slot in range(SLOTS):
