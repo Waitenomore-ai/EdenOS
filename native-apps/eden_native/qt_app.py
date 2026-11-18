@@ -526,36 +526,96 @@ def create_window(*, pin_adapter=None, profiles=None):
                 if not ActivityPreferences(self.session, self.profiles).load(self.state.child_id).get("art-studio", True):
                     self.transition(NavigationState(page="home", child_id=self.state.child_id))
                     return
-                self.info.setText("Art Studio — draw, add stickers and save your picture")
+                self.info.setText("Pick a wallpaper, add stickers, or draw!")
                 if self.art_canvas is not None:
                     self.art_canvas.setParent(None)
-                    self.buttons.addWidget(self.art_canvas)
-                    colour_widget = QWidget()
-                    colour_grid = QGridLayout(colour_widget)
+                    # Mirror the approved iMac's arrangement: a horizontal
+                    # action strip, 220px tool sidebar and large drawing area.
+                    studio = QWidget()
+                    studio.setObjectName("edenArtStudioScene")
+                    studio_layout = QVBoxLayout(studio)
+                    studio_layout.setSpacing(8)
+                    topbar = QWidget()
+                    topbar.setObjectName("edenArtStudioActions")
+                    top_actions = QHBoxLayout(topbar)
+                    top_actions.setContentsMargins(0, 0, 0, 0)
+                    def studio_button(label, callback, target):
+                        button = QPushButton(label)
+                        button.setAccessibleName(label)
+                        button.setMinimumHeight(48)
+                        button.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+                        button.clicked.connect(lambda _checked=False: callback())
+                        target.addWidget(button)
+                        return button
+                    for label, callback in (
+                        ("Draw", lambda: self.art_canvas.set_eraser(False)),
+                        ("Undo drawing", self.art_canvas.undo),
+                        ("Redo drawing", self.art_canvas.redo),
+                        ("Save", self.save_art_picture),
+                        ("Clear drawing", self.art_canvas.clear),
+                    ):
+                        studio_button(label, callback, top_actions)
+                    studio_layout.addWidget(topbar)
+                    workspace = QWidget()
+                    workspace.setObjectName("edenArtStudioWorkspace")
+                    work_layout = QHBoxLayout(workspace)
+                    work_layout.setContentsMargins(0, 0, 0, 0)
+                    sidebar_scroll = QScrollArea()
+                    sidebar_scroll.setObjectName("edenArtStudioSidebar")
+                    sidebar_scroll.setWidgetResizable(True)
+                    sidebar_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+                    sidebar_scroll.setFixedWidth(220)
+                    sidebar = QWidget()
+                    sidebar_layout = QVBoxLayout(sidebar)
+                    sidebar_layout.setSpacing(7)
+                    brush_label = QLabel("✏️ Brushes")
+                    brush_label.setObjectName("edenArtStudioBrushHeading")
+                    sidebar_layout.addWidget(brush_label)
+                    brush_grid_widget = QWidget()
+                    brush_grid = QGridLayout(brush_grid_widget)
+                    for index, (name, width) in enumerate((("Pen", 3), ("Pencil", 4), ("Crayon", 13), ("Paint", 20))):
+                        brush_button = QPushButton(name)
+                        brush_button.setAccessibleName(name + " brush")
+                        brush_button.setMinimumHeight(58)
+                        brush_button.clicked.connect(lambda _checked=False, w=width: self.art_canvas.set_brush_width(w))
+                        brush_grid.addWidget(brush_button, index // 2, index % 2)
+                    sidebar_layout.addWidget(brush_grid_widget)
+                    studio_button("Eraser", lambda: self.art_canvas.set_eraser(True), sidebar_layout)
+                    for label, width in (("Small brush", 3), ("Medium brush", 6), ("Large brush", 12)):
+                        studio_button(label, lambda w=width: self.art_canvas.set_brush_width(w), sidebar_layout)
+                    colour_label = QLabel("🎨 Colours")
+                    colour_label.setObjectName("edenArtStudioColourHeading")
+                    sidebar_layout.addWidget(colour_label)
+                    colour_grid_widget = QWidget()
+                    colour_grid = QGridLayout(colour_grid_widget)
                     for index, colour in enumerate(PALETTE):
-                        action(colour, lambda c=colour: self.art_canvas.set_colour(c), colour_grid, index)
-                    self.buttons.addWidget(colour_widget)
-                    background_widget = QWidget()
-                    background_grid = QGridLayout(background_widget)
-                    for index, background in enumerate(BACKGROUNDS):
-                        action("Background: " + background, lambda name=background: self.art_canvas.set_background(name), background_grid, index)
-                    self.buttons.addWidget(background_widget)
-                    action("Small brush", lambda: self.art_canvas.set_brush_width(3))
-                    action("Medium brush", lambda: self.art_canvas.set_brush_width(6))
-                    action("Large brush", lambda: self.art_canvas.set_brush_width(12))
-                    action("Pen", lambda: self.art_canvas.set_brush_width(3))
-                    action("Pencil", lambda: self.art_canvas.set_brush_width(4))
-                    action("Crayon", lambda: self.art_canvas.set_brush_width(13))
-                    action("Paint", lambda: self.art_canvas.set_brush_width(20))
-                    action("Eraser", lambda: self.art_canvas.set_eraser(True))
-                    action("Sticker layer back", lambda: self.move_art_sticker_layer(-1))
-                    action("Sticker layer forward", lambda: self.move_art_sticker_layer(1))
-                    action("Undo drawing", self.art_canvas.undo)
-                    action("Redo drawing", self.art_canvas.redo)
-                    action("Clear drawing", self.art_canvas.clear)
-                    action("Save picture", self.save_art_picture)
-                    action("Save editable drawing", self.save_art_project)
-                    action("Open saved drawing", self.load_art_project)
+                        button = QPushButton(colour)
+                        button.setAccessibleName(colour + " paint")
+                        button.setMinimumHeight(48)
+                        button.clicked.connect(lambda _checked=False, c=colour: self.art_canvas.set_colour(c))
+                        colour_grid.addWidget(button, index // 3, index % 3)
+                    sidebar_layout.addWidget(colour_grid_widget)
+                    sidebar_layout.addStretch(1)
+                    sidebar_scroll.setWidget(sidebar)
+                    work_layout.addWidget(sidebar_scroll)
+                    self.art_canvas.setMinimumSize(440, 260)
+                    self.art_canvas.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+                    work_layout.addWidget(self.art_canvas, 1)
+                    studio_layout.addWidget(workspace, 1)
+                    dock = QWidget()
+                    dock.setObjectName("edenArtStudioDock")
+                    dock_layout = QHBoxLayout(dock)
+                    dock_layout.setContentsMargins(0, 0, 0, 0)
+                    for label, callback in (
+                        ("Sticker back", lambda: self.move_art_sticker_layer(-1)),
+                        ("Sticker forward", lambda: self.move_art_sticker_layer(1)),
+                        ("Save picture", self.save_art_picture),
+                        ("Save editable drawing", self.save_art_project),
+                        ("Open saved drawing", self.load_art_project),
+                    ):
+                        studio_button(label, callback, dock_layout)
+                    studio_layout.addWidget(dock)
+                    self.buttons.addWidget(studio)
                 sticker_root = Path(__file__).resolve().parent.parent / "assets" / "stickers"
                 sticker_map = {}
                 try:
