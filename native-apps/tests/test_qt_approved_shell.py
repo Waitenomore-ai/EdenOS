@@ -60,6 +60,37 @@ class ApprovedShellTests(unittest.TestCase):
             self.assertTrue(any(b.text() == "Story Garden" for b in window.findChildren(QPushButton)))
             window.close()
 
+    def test_profile_wallpaper_picker_changes_only_selected_child(self):
+        from eden_native.core import detect_platform
+        from eden_native.profiles import ProfileRepository
+        from eden_native.wallpaper_choices import WallpaperChoices
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory(prefix="eden-wallpaper-") as folder:
+            platform = detect_platform("linux", Path(folder), {"XDG_DATA_HOME": folder + "/data", "XDG_CONFIG_HOME": folder + "/config"})
+            profiles = ProfileRepository(platform)
+            profiles.create("eden", "Eden", "approved-eden")
+            profiles.create("colby", "Colby", "approved-colby")
+            window = create_window(profiles=profiles)
+            window.show(); self.app.processEvents()
+            eden = next(b for b in window.findChildren(QPushButton) if b.text() == "Eden")
+            eden.click(); self.app.processEvents()
+            window.header_profile.click(); self.app.processEvents()
+            self.assertEqual(window.state.page, "profile")
+            picker = next(b for b in window.findChildren(QPushButton) if b.accessibleName() == "Choose My Wallpaper")
+            self.assertFalse(picker.icon().isNull())
+            picker.click(); self.app.processEvents()
+            self.assertEqual(window.state.page, "wallpapers")
+            self.assertEqual(len(window.approved_backgrounds), 28)
+            selected = window.approved_backgrounds[0]
+            button = next(b for b in window.findChildren(QPushButton) if b.accessibleName() == "Choose wallpaper " + selected.stem.replace("-", " "))
+            button.click(); self.app.processEvents()
+            self.assertEqual(window.state.page, "home")
+            choices = WallpaperChoices(profiles.path.parent / "wallpaper-selection.json")
+            self.assertEqual(choices.selected("eden", {selected.name}), selected.name)
+            self.assertIsNone(choices.selected("colby", {selected.name}))
+            window.close()
+
 
 if __name__ == "__main__":
     unittest.main()

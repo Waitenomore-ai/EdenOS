@@ -22,6 +22,7 @@ from .approved_models.time_routines_model import Routine, ROUTINES
 from .approved_models.story_garden_model import StoryGarden, SCENES
 from .art_canvas import ArtCanvas, PALETTE, BACKGROUNDS
 from .garden_stars import GardenStars
+from .wallpaper_choices import WallpaperChoices
 
 def create_window(*, pin_adapter=None, profiles=None):
     from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QLineEdit, QComboBox, QCheckBox, QScrollArea, QSizePolicy, QGridLayout, QHBoxLayout
@@ -56,8 +57,8 @@ def create_window(*, pin_adapter=None, profiles=None):
         def __init__(self):
             super().__init__()
             self.state = NavigationState()
-            approved_backgrounds = sorted(path for path in (Path(__file__).resolve().parent.parent / "assets" / "backgrounds").glob("*.png") if path.is_file() and not path.is_symlink())
-            wallpaper_file = approved_backgrounds[date.today().toordinal() % len(approved_backgrounds)] if approved_backgrounds else None
+            self.approved_backgrounds = sorted(path for path in (Path(__file__).resolve().parent.parent / "assets" / "backgrounds").glob("*.png") if path.is_file() and not path.is_symlink())
+            wallpaper_file = self.approved_backgrounds[date.today().toordinal() % len(self.approved_backgrounds)] if self.approved_backgrounds else None
             self.home_wallpaper = QPixmap(str(wallpaper_file)) if wallpaper_file is not None else None
             self.pin_adapter = pin_adapter
             self.profiles = profiles
@@ -190,7 +191,26 @@ def create_window(*, pin_adapter=None, profiles=None):
         def transition(self, state):
             self.state = state
             if self.session: self.session.state = state
+            self.refresh_home_wallpaper()
             self.render()
+
+        def refresh_home_wallpaper(self):
+            approved = {path.name: path for path in self.approved_backgrounds}
+            selected = None
+            if self.profiles is not None and self.state.child_id:
+                selected = WallpaperChoices(self.profiles.path.parent / "wallpaper-selection.json").selected(self.state.child_id, approved)
+            wallpaper_file = approved.get(selected) if selected else (self.approved_backgrounds[date.today().toordinal() % len(self.approved_backgrounds)] if self.approved_backgrounds else None)
+            self.home_wallpaper = QPixmap(str(wallpaper_file)) if wallpaper_file is not None else None
+            self.update()
+
+        def choose_wallpaper(self, filename):
+            if self.state.page != "wallpapers" or not self.profiles or not self.state.child_id:
+                return False
+            approved = {path.name for path in self.approved_backgrounds}
+            if not WallpaperChoices(self.profiles.path.parent / "wallpaper-selection.json").choose(self.state.child_id, filename, approved):
+                return False
+            self.transition(NavigationState(page="home", child_id=self.state.child_id))
+            return True
 
         def submit_pin(self):
             if not self.session or not self.pin_input: return
@@ -1085,6 +1105,27 @@ def create_window(*, pin_adapter=None, profiles=None):
                            activity_grid, index)
                 self.buttons.addWidget(activity_grid_widget)
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
+            elif self.state.page == "wallpapers":
+                if not self.profiles or self.profiles.get(self.state.child_id) is None:
+                    self.transition(self.state.logout())
+                    return
+                self.info.setText("Choose My Wallpaper")
+                picker_widget = QWidget()
+                picker_grid = QGridLayout(picker_widget)
+                picker_grid.setSpacing(8)
+                approved = {path.name for path in self.approved_backgrounds}
+                selected = WallpaperChoices(self.profiles.path.parent / "wallpaper-selection.json").selected(self.state.child_id, approved)
+                for index, picture_file in enumerate(self.approved_backgrounds):
+                    button = QPushButton("✓" if selected == picture_file.name else "")
+                    button.setAccessibleName("Choose wallpaper " + picture_file.stem.replace("-", " "))
+                    button.setToolTip(picture_file.stem.replace("-", " "))
+                    button.setIcon(QIcon(str(picture_file)))
+                    button.setIconSize(QSize(192, 108))
+                    button.setMinimumHeight(126)
+                    button.clicked.connect(lambda _checked=False, name=picture_file.name: self.choose_wallpaper(name))
+                    picker_grid.addWidget(button, index // 3, index % 3)
+                self.buttons.addWidget(picker_widget)
+                action("Back to My Profile", lambda: self.transition(NavigationState(page="profile", child_id=self.state.child_id)))
             elif self.state.page == "profile":
                 if self.profiles is None or self.profiles.get(self.state.child_id) is None:
                     self.transition(self.state.logout())
@@ -1097,7 +1138,28 @@ def create_window(*, pin_adapter=None, profiles=None):
                     if not pixmap.isNull():
                         self.avatar_image.setPixmap(pixmap.scaled(110, 115, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
                         self.avatar_image.show()
-                action("My Garden Stars", self.open_garden_stars)
+                profile_buttons = QWidget()
+                profile_buttons.setStyleSheet("background:transparent;")
+                profile_grid = QGridLayout(profile_buttons)
+                picture_buttons = (
+                    ("Choose My Wallpaper", "eden_s_garden_wallpaper_button.png", lambda: self.transition(NavigationState(page="wallpapers", child_id=self.state.child_id))),
+                    ("My Garden Stars", "eden_s_garden_stars_button.png", self.open_garden_stars),
+                )
+                for index, (label, filename, callback) in enumerate(picture_buttons):
+                    button = QPushButton("")
+                    button.setAccessibleName(label)
+                    button.setToolTip(label)
+                    image_file = Path(__file__).resolve().parent.parent / "assets" / "profile-buttons" / filename
+                    if image_file.is_file() and not image_file.is_symlink():
+                        button.setIcon(QIcon(str(image_file)))
+                        button.setIconSize(QSize(256, 86))
+                        button.setStyleSheet("background:transparent; border:0; padding:0;")
+                    else:
+                        button.setText(label)
+                    button.setMinimumHeight(96)
+                    button.clicked.connect(lambda _checked=False, run=callback: run())
+                    profile_grid.addWidget(button, 0, index)
+                self.buttons.addWidget(profile_buttons)
                 action("My saved pictures", self.open_my_artwork)
             elif self.state.page == "home":
                 if self.profiles is not None:
