@@ -215,3 +215,20 @@ class ArtCanvasTests(unittest.TestCase):
         QTest.keyClick(self.canvas,Qt.Key.Key_PageDown)
         self.assertEqual(self.canvas.selected_sticker,0)
         self.canvas.hide()
+
+    def test_eraser_reveals_new_background_not_old_background_colour(self):
+        from PySide6.QtGui import QColor
+        self.canvas.strokes = [
+            {'colour':'Blue','width':20,'points':[[.1,.5],[.9,.5]],'mode':'paint'},
+            {'colour':'Blue','width':24,'points':[[.5,.4],[.5,.6]],'mode':'erase'},
+        ]
+        self.canvas.set_background('Sky')
+        self.app.processEvents()
+        image=self.canvas.grab().toImage()
+        centre=image.pixelColor(250,150)
+        side=image.pixelColor(120,150)
+        self.assertEqual(centre.name(),QColor('#e4f2ff').name())
+        self.assertEqual(side.name(),QColor('#2964d4').name())
+        self.canvas.set_background('Peach')
+        self.app.processEvents()
+        self.assertEqual(self.canvas.grab().toImage().pixelColor(250,150).name(),QColor('#fff0dc').name())

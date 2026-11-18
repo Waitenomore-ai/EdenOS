@@ -4,7 +4,7 @@ import json
 import os
 import tempfile
 from PySide6.QtCore import Qt, QPointF
-from PySide6.QtGui import QColor, QPainter, QPen, QPixmap
+from PySide6.QtGui import QColor, QPainter, QPen, QPixmap, QImage
 from PySide6.QtWidgets import QWidget
 
 BACKGROUNDS = {"White": "#ffffff", "Sky": "#e4f2ff", "Grass": "#e8f7e7", "Peach": "#fff0dc"}
@@ -177,16 +177,27 @@ class ArtCanvas(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.fillRect(self.rect(), self.background)
+        # Keep drawing marks on a transparent layer so erasing reveals the
+        # CURRENT background, even after the child changes backgrounds.
+        layer = QImage(self.size(), QImage.Format.Format_ARGB32_Premultiplied)
+        layer.fill(Qt.GlobalColor.transparent)
+        ink = QPainter(layer)
+        ink.setRenderHint(QPainter.RenderHint.Antialiasing)
         for stroke in self.strokes + ([self.active] if self.active else []):
-            pen = QPen(QColor(self.background if stroke.get("mode") == "erase" else PALETTE[stroke["colour"]]), stroke["width"],
+            erasing = stroke.get("mode") == "erase"
+            ink.setCompositionMode(QPainter.CompositionMode.CompositionMode_Clear if erasing
+                                   else QPainter.CompositionMode.CompositionMode_SourceOver)
+            pen = QPen(QColor("black") if erasing else QColor(PALETTE[stroke["colour"]]), stroke["width"],
                        Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin)
-            painter.setPen(pen)
+            ink.setPen(pen)
             points = [QPointF(x*self.width(), y*self.height()) for x, y in stroke["points"]]
             if len(points) == 1:
-                painter.drawPoint(points[0])
+                ink.drawPoint(points[0])
             else:
                 for first, second in zip(points, points[1:]):
-                    painter.drawLine(first, second)
+                    ink.drawLine(first, second)
+        ink.end()
+        painter.drawImage(0, 0, layer)
         for index, path in enumerate(self.sticker_paths):
             if path.is_file() and not path.is_symlink():
                 pixmap = QPixmap(str(path))
