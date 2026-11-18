@@ -198,6 +198,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                 self.art_game = ArtBoard()
                 self.art_canvas = ArtCanvas()
                 self.art_canvas.sticker_layer_changed.connect(self.sync_art_sticker_layers)
+                self.art_canvas.sticker_collection_changed.connect(self.sync_art_sticker_collection)
                 self.transition(NavigationState(page=activity, child_id=self.state.child_id))
             elif activity == "my-day":
                 self.day_game = Routine(ROUTINES["full_day"])
@@ -242,6 +243,27 @@ def create_window(*, pin_adapter=None, profiles=None):
             if not child.replace("_", "").replace("-", "").isalnum():
                 return None
             return self.profiles.path.parent / "art-studio" / child
+
+        def add_art_sticker(self, sku, path):
+            if self.art_project_directory() is None or sku not in self.art_allowed_stickers():
+                return False
+            if self.art_canvas is None or self.art_game is None or len(self.art_game.stamps) >= self.art_game.limit:
+                return False
+            if not self.art_canvas.add_sticker(path, sku):
+                return False
+            self.render()
+            return True
+
+        def sync_art_sticker_collection(self):
+            if self.art_project_directory() is None or self.art_canvas is None or self.art_game is None:
+                return
+            allowed = self.art_allowed_stickers()
+            skus = self.art_canvas.sticker_skus
+            if any(sku not in allowed for sku in skus):
+                return
+            from .approved_models.art_studio_model import Stamp
+            self.art_game.stamps[:] = [Stamp(sku, "approved") for sku in skus]
+            self.render()
 
         def move_art_sticker_layer(self, direction):
             if self.art_project_directory() is None or self.art_canvas is None or self.art_game is None:
@@ -667,7 +689,8 @@ def create_window(*, pin_adapter=None, profiles=None):
                     pass
                 if self.art_canvas is not None:
                     selected_skus = [stamp.symbol for stamp in game.stamps if stamp.symbol in sticker_map]
-                    self.art_canvas.set_stickers([sticker_map[sku][1] for sku in selected_skus], selected_skus)
+                    if selected_skus != self.art_canvas.sticker_skus:
+                        self.art_canvas.set_stickers([sticker_map[sku][1] for sku in selected_skus], selected_skus)
                 picture = QLabel(" ".join(stamp.symbol for stamp in game.stamps if stamp.symbol not in sticker_map) or "Choose a sticker to begin")
                 picture.setObjectName("artStudioCanvas")
                 picture.setWordWrap(True)
@@ -683,7 +706,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                 free_widget = QWidget()
                 free_grid = QGridLayout(free_widget)
                 for index, (sku, (name, path)) in enumerate(sticker_map.items()):
-                    action("Sticker: " + name, lambda item=sku: (game.add(item, "approved"), self.render()), free_grid, index)
+                    action("Sticker: " + name, lambda item=sku, image=path: self.add_art_sticker(item, image), free_grid, index)
                 self.buttons.addWidget(free_widget)
                 action("Undo", lambda: (game.undo(), self.render()))
                 action("Redo", lambda: (game.redo(), self.render()))

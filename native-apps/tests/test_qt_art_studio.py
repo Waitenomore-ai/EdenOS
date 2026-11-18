@@ -30,6 +30,23 @@ class ArtStudioTests(unittest.TestCase):
   self.click('Redo');self.assertEqual(len(self.window.art_game.stamps),1)
   self.click('Clear');self.assertEqual(len(self.window.art_game.stamps),0)
   self.click('Back to home');self.assertEqual(self.window.state.page,'home')
+ def test_unified_sticker_add_undo_redo_preserves_model_and_save(self):
+  import json
+  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Sticker: Apple')
+  canvas=self.window.art_canvas
+  self.assertEqual(canvas.sticker_skus,['sticker_apple'])
+  self.assertEqual([x.symbol for x in self.window.art_game.stamps],['sticker_apple'])
+  self.assertTrue(canvas.undo_action())
+  self.assertEqual(canvas.sticker_skus,[])
+  self.assertEqual(self.window.art_game.stamps,[])
+  self.assertTrue(canvas.redo_action())
+  self.assertEqual(canvas.sticker_skus,['sticker_apple'])
+  self.assertEqual([x.symbol for x in self.window.art_game.stamps],['sticker_apple'])
+  self.window.save_art_project()
+  project=self.window.art_project_directory()/'current-art-project.json'
+  self.assertEqual(json.loads(project.read_text())['stickers'],['sticker_apple'])
+
  def test_keyboard_layer_change_syncs_canonical_model_and_saved_project(self):
   import json
   from PySide6.QtCore import Qt

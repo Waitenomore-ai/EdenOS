@@ -18,6 +18,7 @@ PALETTE = {
 
 class ArtCanvas(QWidget):
     sticker_layer_changed = Signal()
+    sticker_collection_changed = Signal()
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("artStudioDrawingCanvas")
@@ -58,6 +59,16 @@ class ArtCanvas(QWidget):
             if not self.strokes:
                 return False
             self.strokes.pop()
+        elif kind == "sticker_add":
+            index, path, sku, position = payload
+            if index >= len(self.sticker_paths):
+                return False
+            self.sticker_paths.pop(index)
+            if self.sticker_skus:
+                self.sticker_skus.pop(index)
+            self.sticker_positions.pop(index)
+            self.selected_sticker = None
+            self.sticker_collection_changed.emit()
         elif kind == "background":
             self.background = QColor(BACKGROUNDS[payload[0]])
         elif kind == "sticker_move":
@@ -77,6 +88,15 @@ class ArtCanvas(QWidget):
         kind, payload = self.action_redo.pop()
         if kind == "stroke":
             self.strokes.append(payload)
+        elif kind == "sticker_add":
+            index, path, sku, position = payload
+            if len(self.sticker_paths) >= 24:
+                return False
+            self.sticker_paths.insert(index, path)
+            if sku is not None:
+                self.sticker_skus.insert(index, sku)
+            self.sticker_positions.insert(index, position[:])
+            self.sticker_collection_changed.emit()
         elif kind == "background":
             self.background = QColor(BACKGROUNDS[payload[1]])
         elif kind == "sticker_move":
@@ -106,6 +126,19 @@ class ArtCanvas(QWidget):
         if self.selected_sticker is not None and self.selected_sticker >= len(self.sticker_paths):
             self.selected_sticker = None
         self.update()
+
+    def add_sticker(self, path, sku):
+        if len(self.sticker_paths) >= 24 or not isinstance(sku, str) or not sku:
+            return False
+        index = len(self.sticker_paths)
+        position = [min(.85, .05 + (index % 5) * .19), min(.82, .07 + (index // 5) * .20)]
+        self.sticker_paths.append(Path(path))
+        self.sticker_skus.append(sku)
+        self.sticker_positions.append(position[:])
+        self._record_action("sticker_add", (index, Path(path), sku, position[:]))
+        self.sticker_collection_changed.emit()
+        self.update()
+        return True
 
     def _sticker_at(self, point):
         for index in range(len(self.sticker_paths) - 1, -1, -1):
