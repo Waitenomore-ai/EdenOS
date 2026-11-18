@@ -4,6 +4,7 @@ from collections import Counter
 import json
 import math
 import os
+import stat
 import tempfile
 from PySide6.QtCore import Qt, QPointF, Signal
 from PySide6.QtGui import QColor, QPainter, QPen, QPixmap, QImage
@@ -437,11 +438,20 @@ class ArtCanvas(QWidget):
     def load_project(self, directory: Path, allowed_stickers=None):
         """Validate bounds before applying a saved project. Return sticker SKUs."""
         source = directory / "current-art-project.json"
-        if source.is_symlink() or source.stat().st_size > 2_000_000:
+        if source.is_symlink():
+            raise ValueError("Invalid art project file")
+        flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
+        fd = os.open(source, flags)
+        with os.fdopen(fd, "rb") as stream:
+            metadata = os.fstat(stream.fileno())
+            if not stat.S_ISREG(metadata.st_mode) or metadata.st_size > 2_000_000:
+                raise ValueError("Invalid art project file")
+            content = stream.read(2_000_001)
+        if len(content) > 2_000_000:
             raise ValueError("Invalid art project file")
         def reject_nonfinite(value):
             raise ValueError("Non-finite art project number")
-        payload = json.loads(source.read_text(encoding="utf-8"), parse_constant=reject_nonfinite)
+        payload = json.loads(content.decode("utf-8"), parse_constant=reject_nonfinite)
         if not isinstance(payload, dict) or payload.get("version") != 1:
             raise ValueError("Unsupported art project")
         background = payload.get("background", "White")

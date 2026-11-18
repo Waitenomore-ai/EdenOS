@@ -62,6 +62,23 @@ class ArtCanvasTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.canvas.set_colour("Invisible")
 
+    def test_project_load_rejects_symlink_and_oversized_file_without_mutation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory=Path(tmp)
+            project=directory/'current-art-project.json'
+            outside=directory/'original.json'
+            outside.write_text('{"version":1,"strokes":[],"stickers":[]}')
+            project.symlink_to(outside)
+            self.canvas.set_background('Sky')
+            with self.assertRaises(ValueError):
+                self.canvas.load_project(directory)
+            self.assertEqual(self.canvas.background.name(),'#e4f2ff')
+            project.unlink()
+            project.write_bytes(b' ' * 2_000_001)
+            with self.assertRaises(ValueError):
+                self.canvas.load_project(directory)
+            self.assertEqual(self.canvas.background.name(),'#e4f2ff')
+
     def test_rejected_sticker_replacement_keeps_existing_canvas_and_history(self):
         self.canvas.set_stickers([Path('/tmp/eden-one.png')],['sticker_apple'])
         self.canvas.set_background('Sky')
