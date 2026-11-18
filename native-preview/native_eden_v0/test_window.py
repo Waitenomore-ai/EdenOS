@@ -46,6 +46,17 @@ class NativeWindowTests(unittest.TestCase):
         self.assertIsNone(self.window.selected_profile_id())
         self.assertFalse(self.window.parent_is_unlocked())
 
+    def test_login_banner_and_navigation_use_approved_imac_assets(self):
+        from PySide6.QtWidgets import QPushButton
+        self.assertIsNotNone(self.window._login_banner.pixmap())
+        self.assertFalse(self.window._login_banner.pixmap().isNull())
+        self.window.choose_character(0)
+        controls = {b.text(): b for b in self.window._child_home.findChildren(QPushButton)}
+        for label in ("Home", "My Profile", "Parent", "Log out"):
+            self.assertIn(label, controls)
+            self.assertFalse(controls[label].icon().isNull())
+            self.assertTrue(controls[label].accessibleName())
+
     def test_child_home_has_approved_imac_artwork_for_three_actions(self):
         from PySide6.QtWidgets import QPushButton
         self.window.choose_character(0)

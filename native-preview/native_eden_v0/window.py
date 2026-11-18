@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import (
     QApplication, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
     QMainWindow, QPushButton, QStackedWidget, QVBoxLayout, QWidget,
@@ -35,11 +35,21 @@ class EdenNativeWindow(QMainWindow):
         self.setCentralWidget(self._stack)
         self._home = QWidget()
         layout = QVBoxLayout(self._home)
-        layout.setContentsMargins(35, 26, 35, 26)
+        layout.setContentsMargins(25, 12, 25, 12)
         title = QLabel("Welcome to Eden's Garden")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setObjectName("heading")
         layout.addWidget(title)
+        self._login_banner = QLabel()
+        self._login_banner.setAccessibleName("Choose your character banner")
+        self._login_banner.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        banner_file = Path(__file__).parent / "assets" / "login" / "eden_choose_your_character_banner.png"
+        if banner_file.is_file():
+            banner = QPixmap(str(banner_file))
+            self._login_banner.setPixmap(banner.scaled(
+                520, 118, Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation))
+        layout.addWidget(self._login_banner)
         hint = QLabel(
             "Choose your picture to open your Eden space"
             if not self._is_demo else
@@ -57,9 +67,9 @@ class EdenNativeWindow(QMainWindow):
                 button.setIcon(QIcon(str(portrait_path)))
                 button.setIconSize(QSize(90, 116))
             button.setProperty("avatar_id", card["avatar"])
-            button.setMinimumHeight(146)
+            button.setMinimumHeight(115)
             button.clicked.connect(lambda checked=False, i=index: self.choose_character(i))
-            grid.addWidget(button, index // 4, index % 4)
+            grid.addWidget(button, index // 5, index % 5)
         layout.addLayout(grid)
         self._selected_label = QLabel("Choose your character" if self._is_demo else "Choose your picture")
         self._selected_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -96,13 +106,24 @@ class EdenNativeWindow(QMainWindow):
         child_layout.addWidget(self._child_feedback)
         child_layout.addStretch()
         footer = QHBoxLayout()
+        home_button = QPushButton("Home")
+        home_button.setAccessibleName("Home")
+        home_button.setIcon(QIcon(str(Path(__file__).parent / "assets" / "navigation" / "home.png")))
+        home_button.clicked.connect(self.return_home)
+        footer.addWidget(home_button)
         profile_button = QPushButton("My Profile")
+        profile_button.setAccessibleName("My Profile")
+        profile_button.setIcon(QIcon(str(Path(__file__).parent / "assets" / "navigation" / "my-profile-template.png")))
         profile_button.clicked.connect(lambda: self._child_feedback.setText("Profile settings are not yet connected."))
         footer.addWidget(profile_button)
         parent_button = QPushButton("Parent")
+        parent_button.setAccessibleName("Parent Corner")
+        parent_button.setIcon(QIcon(str(Path(__file__).parent / "assets" / "navigation" / "parent.png")))
         parent_button.clicked.connect(self._show_parent)
         footer.addWidget(parent_button)
         logout_button = QPushButton("Log out")
+        logout_button.setAccessibleName("Log out")
+        logout_button.setIcon(QIcon(str(Path(__file__).parent / "assets" / "navigation" / "logout.png")))
         logout_button.clicked.connect(self.logout)
         footer.addWidget(logout_button)
         child_layout.addLayout(footer)
