@@ -56,6 +56,23 @@ class ArtStudioTests(unittest.TestCase):
   self.window.answer_word(game.round.answer)
   self.assertEqual(service.balance('eden_demo'),20)
 
+ def test_puzzle_completion_and_saved_art_award_stars(self):
+  from eden_native.garden_stars import GardenStars
+  self.click('Eden Demo');self.click('Puzzle Pond')
+  service=GardenStars(self.window.profiles.path.parent/'garden-stars.sqlite3')
+  game=self.window.puzzle_game
+  pairs={}
+  for card in game.cards:
+   pairs.setdefault(card.symbol,[]).append(card.index)
+  for first,second in pairs.values():
+   self.window.choose_puzzle(first)
+   self.window.choose_puzzle(second)
+  self.assertTrue(game.complete)
+  self.assertEqual(service.balance('eden_demo'),10)
+  self.window.toolbar_home.click();self.app.processEvents()
+  self.click('Art Studio');self.click('Save picture')
+  self.assertEqual(service.balance('eden_demo'),20)
+
  def test_free_emoji_stamps_survive_approved_sticker_undo(self):
   self.click('Eden Demo');self.click('Art Studio')
   self.click('Add 🌼')

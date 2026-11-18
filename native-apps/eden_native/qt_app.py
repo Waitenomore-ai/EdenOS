@@ -397,6 +397,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             directory = self.profiles.path.parent / "art-studio" / safe_child
             try:
                 saved = self.art_canvas.save_png(directory)
+                self.award_garden_stars("art_studio")
                 self.info.setText("Saved picture: " + saved.name)
             except OSError:
                 self.info.setText("Could not save your picture")
@@ -467,6 +468,8 @@ def create_window(*, pin_adapter=None, profiles=None):
             else:
                 self.render()
                 if result == "matched":
+                    if self.puzzle_game.complete:
+                        self.award_garden_stars("puzzle_pond")
                     self.info.setText("Great match!" if not self.puzzle_game.complete else "All pairs found! Well done!")
 
         def finish_puzzle_mismatch(self, game, child):
