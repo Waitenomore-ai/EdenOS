@@ -417,6 +417,12 @@ class ArtCanvas(QWidget):
         ordered_skus = self.sticker_skus if self.sticker_skus else list(sticker_skus[:24])
         if self.sticker_skus and sticker_skus and Counter(ordered_skus) != Counter(sticker_skus):
             raise ValueError("Sticker entitlement mismatch")
+        if len(ordered_skus) > 24 or len(self.sticker_positions) not in (0, len(ordered_skus)):
+            raise ValueError("Invalid sticker project state")
+        if not all(isinstance(sku, str) and sku.startswith("sticker_") and len(sku) <= 80 for sku in ordered_skus):
+            raise ValueError("Invalid sticker project identifiers")
+        if not all(isinstance(pos, (list, tuple)) and len(pos) == 2 and all(isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) and 0 <= v <= 1 for v in pos) for pos in self.sticker_positions[:len(ordered_skus)]):
+            raise ValueError("Invalid sticker project positions")
         payload = {"version": 1, "strokes": self.strokes,
                    "stickers": ordered_skus,
                    "sticker_positions": self.sticker_positions[:len(ordered_skus)],

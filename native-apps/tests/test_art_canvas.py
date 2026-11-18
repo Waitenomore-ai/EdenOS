@@ -62,6 +62,21 @@ class ArtCanvasTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.canvas.set_colour("Invisible")
 
+    def test_project_save_rejects_invalid_sticker_positions_without_overwriting(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory=Path(tmp)
+            project=self.canvas.save_project(directory)
+            original=project.read_bytes()
+            self.canvas.sticker_skus=['sticker_apple']
+            self.canvas.sticker_positions=[[float('nan'),.2]]
+            with self.assertRaises(ValueError):
+                self.canvas.save_project(directory)
+            self.assertEqual(project.read_bytes(),original)
+            self.canvas.sticker_positions=[[.1,.2],[.3,.4]]
+            with self.assertRaises(ValueError):
+                self.canvas.save_project(directory)
+            self.assertEqual(project.read_bytes(),original)
+
     def test_project_load_rejects_symlink_and_oversized_file_without_mutation(self):
         with tempfile.TemporaryDirectory() as tmp:
             directory=Path(tmp)
