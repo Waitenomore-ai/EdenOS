@@ -1112,12 +1112,41 @@ def create_window(*, pin_adapter=None, profiles=None):
                 layout_widget.setObjectName("stickerGardenThreePanel")
                 panel_layout = QHBoxLayout(layout_widget)
                 panel_layout.setSpacing(9)
+                layout_widget.setStyleSheet("""
+                    QWidget#stickerGardenPickerPanel, QWidget#stickerGardenActionsPanel {
+                        background: #fff5e2; border: 4px solid white; border-radius: 19px;
+                    }
+                    QLabel#stickerGardenPanelHeading {
+                        color: white; background: #196fc1; font-size: 18px;
+                        font-weight: 900; border-radius: 14px; padding: 6px;
+                    }
+                    QPushButton#stickerGardenPicker {
+                        background: white; border: 3px solid #cbd8e7;
+                        border-radius: 16px; padding: 5px;
+                    }
+                    QPushButton#stickerGardenPicker[selected="true"] {
+                        background: #eaffd9; border: 4px solid #4eaf42;
+                    }
+                    QPushButton#stickerGardenAction {
+                        background: #166fbd; color: white; border: 3px solid white;
+                        border-radius: 17px; font-weight: 900; font-size: 16px;
+                    }
+                    QPushButton#stickerGardenAction[role="clear"] { background: #d88412; }
+                    QPushButton#stickerGardenAction[role="remove"] { background: #be272c; }
+                    QPushButton#stickerGardenAction[role="place"] { background: #299e3e; }
+                    QLabel#stickerGardenHelp {
+                        background: #ffffffe7; color: #202639; border-radius: 12px;
+                        padding: 5px; font-weight: 700;
+                    }
+                """)
 
                 left_panel = QWidget()
                 left_panel.setObjectName("stickerGardenPickerPanel")
                 left_panel.setFixedWidth(212)
                 left_layout = QVBoxLayout(left_panel)
-                left_layout.addWidget(QLabel("My Stickers"))
+                left_heading = QLabel("My Stickers")
+                left_heading.setObjectName("stickerGardenPanelHeading")
+                left_layout.addWidget(left_heading)
                 categories = ("All", "Animals", "Nature", "Food", "Learning", "Things", "Places")
                 category_picker = QComboBox()
                 category_picker.setObjectName("stickerGardenCategory")
@@ -1138,6 +1167,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                     sku = entry["sku"]
                     button = QPushButton(entry["name"])
                     button.setObjectName("stickerGardenPicker")
+                    button.setProperty("selected", sku == self.garden_selected_sku)
                     button.setAccessibleName("Select " + entry["name"])
                     button.setAccessibleDescription("Selected sticker" if sku == self.garden_selected_sku else "Choose this sticker")
                     button.setMinimumHeight(78)
@@ -1183,23 +1213,34 @@ def create_window(*, pin_adapter=None, profiles=None):
                     button.clicked.connect(lambda _checked=False, position=slot, occupied=bool(sku): self.select_garden_slot(position) if occupied else self.place_garden_sticker(position))
                     board_grid.addWidget(button, row, column)
                 middle_layout.addWidget(board, 1)
-                middle_layout.addWidget(QLabel("Choose a sticker, then tap a garden square."))
+                help_text = QLabel("Choose a sticker, then tap a garden square.")
+                help_text.setObjectName("stickerGardenHelp")
+                middle_layout.addWidget(help_text)
                 panel_layout.addWidget(middle_panel, 1)
 
                 right_panel = QWidget()
                 right_panel.setObjectName("stickerGardenActionsPanel")
                 right_panel.setFixedWidth(160)
                 right_layout = QVBoxLayout(right_panel)
-                right_layout.addWidget(QLabel("Move Sticker"))
+                right_heading = QLabel("Move Sticker")
+                right_heading.setObjectName("stickerGardenPanelHeading")
+                right_layout.addWidget(right_heading)
                 move_widget = QWidget()
                 move_grid = QGridLayout(move_widget)
                 for index, (label, dx, dy) in enumerate((("↑", 0, -1), ("←", -1, 0), ("→", 1, 0), ("↓", 0, 1))):
-                    action(label, lambda x=dx, y=dy: self.move_garden_sticker(x, y), move_grid, index)
+                    move_button = QPushButton(label)
+                    move_button.setObjectName("stickerGardenAction")
+                    move_button.setAccessibleName({"↑": "Move sticker up", "←": "Move sticker left", "→": "Move sticker right", "↓": "Move sticker down"}[label])
+                    move_button.setMinimumHeight(52)
+                    move_button.clicked.connect(lambda _checked=False, x=dx, y=dy: self.move_garden_sticker(x, y))
+                    move_grid.addWidget(move_button, index // 2, index % 2)
                 right_layout.addWidget(move_widget)
                 if self.garden_selected_sku:
                     right_layout.addWidget(QLabel("Selected: " + names.get(self.garden_selected_sku, "Sticker")))
                 def right_action(label, callback):
                     button = QPushButton(label)
+                    button.setObjectName("stickerGardenAction")
+                    button.setProperty("role", "clear" if label.startswith("Clear") else "remove" if label.startswith("Remove") else "place")
                     button.setAccessibleName(label)
                     button.setMinimumHeight(52)
                     button.clicked.connect(lambda _checked=False: callback())

@@ -58,6 +58,22 @@ class ArtStudioTests(unittest.TestCase):
   self.assertEqual(board.layout().count(),24)
   self.assertTrue(board.property("approvedGardenBackground").endswith("garden-background-v58.webp"))
 
+ def test_sticker_garden_approved_panel_styling_and_selection(self):
+  from PySide6.QtWidgets import QWidget,QLabel,QPushButton
+  self.click('Eden Demo');self.click('My Sticker Garden')
+  root=self.window.controls_widget
+  panel=root.findChildren(QWidget,'stickerGardenThreePanel')[-1]
+  self.assertIn('#fff5e2',panel.styleSheet())
+  self.assertIn('#196fc1',panel.styleSheet())
+  self.assertEqual(len(root.findChildren(QLabel,'stickerGardenPanelHeading')),2)
+  self.click('Apple')
+  selected=[b for b in self.window.controls_widget.findChildren(QPushButton,'stickerGardenPicker') if b.property('selected') is True]
+  self.assertEqual(len(selected),1)
+  self.assertEqual(selected[0].text(),'Apple')
+  actions=self.window.controls_widget.findChildren(QPushButton,'stickerGardenAction')
+  self.assertTrue(any(b.property('role')=='clear' for b in actions))
+  self.assertTrue(any(b.property('role')=='place' for b in actions))
+
  def test_sticker_garden_move_and_confirmed_clear(self):
   from eden_native.sticker_garden import load_garden
   self.click('Eden Demo');self.click('My Sticker Garden');self.click('Apple')
