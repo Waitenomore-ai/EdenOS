@@ -708,9 +708,9 @@ def create_window(*, pin_adapter=None, profiles=None):
                 for index, (sku, (name, path)) in enumerate(sticker_map.items()):
                     action("Sticker: " + name, lambda item=sku, image=path: self.add_art_sticker(item, image), free_grid, index)
                 self.buttons.addWidget(free_widget)
-                action("Undo", lambda: (game.undo(), self.render()))
-                action("Redo", lambda: (game.redo(), self.render()))
-                action("Clear", lambda: (game.clear(), self.render()))
+                action("Undo", self.art_canvas.remove_last_sticker)
+                action("Redo", self.art_canvas.undo_action)
+                action("Clear", lambda: (game.clear(), self.art_canvas.set_stickers([], []), self.render()))
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
                 action("Log out", lambda: self.transition(self.state.logout()))
             elif self.state.page in ("nature-explorer", "feelings"):

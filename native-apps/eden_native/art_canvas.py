@@ -59,6 +59,15 @@ class ArtCanvas(QWidget):
             if not self.strokes:
                 return False
             self.strokes.pop()
+        elif kind == "sticker_remove":
+            index, path, sku, position = payload
+            if len(self.sticker_paths) >= 24:
+                return False
+            self.sticker_paths.insert(index, path)
+            if sku is not None:
+                self.sticker_skus.insert(index, sku)
+            self.sticker_positions.insert(index, position[:])
+            self.sticker_collection_changed.emit()
         elif kind == "sticker_add":
             index, path, sku, position = payload
             if index >= len(self.sticker_paths):
@@ -88,6 +97,16 @@ class ArtCanvas(QWidget):
         kind, payload = self.action_redo.pop()
         if kind == "stroke":
             self.strokes.append(payload)
+        elif kind == "sticker_remove":
+            index, path, sku, position = payload
+            if index >= len(self.sticker_paths):
+                return False
+            self.sticker_paths.pop(index)
+            if self.sticker_skus:
+                self.sticker_skus.pop(index)
+            self.sticker_positions.pop(index)
+            self.selected_sticker = None
+            self.sticker_collection_changed.emit()
         elif kind == "sticker_add":
             index, path, sku, position = payload
             if len(self.sticker_paths) >= 24:
@@ -136,6 +155,19 @@ class ArtCanvas(QWidget):
         self.sticker_skus.append(sku)
         self.sticker_positions.append(position[:])
         self._record_action("sticker_add", (index, Path(path), sku, position[:]))
+        self.sticker_collection_changed.emit()
+        self.update()
+        return True
+
+    def remove_last_sticker(self):
+        if not self.sticker_paths:
+            return False
+        index = len(self.sticker_paths) - 1
+        path = self.sticker_paths.pop()
+        sku = self.sticker_skus.pop() if self.sticker_skus else None
+        position = self.sticker_positions.pop()
+        self.selected_sticker = None
+        self._record_action("sticker_remove", (index, path, sku, position[:]))
         self.sticker_collection_changed.emit()
         self.update()
         return True

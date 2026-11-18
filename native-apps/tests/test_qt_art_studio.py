@@ -30,6 +30,22 @@ class ArtStudioTests(unittest.TestCase):
   self.click('Redo');self.assertEqual(len(self.window.art_game.stamps),1)
   self.click('Clear');self.assertEqual(len(self.window.art_game.stamps),0)
   self.click('Back to home');self.assertEqual(self.window.state.page,'home')
+ def test_remove_sticker_can_be_undone_and_redone_in_shared_history(self):
+  self.click('Eden Demo');self.click('Art Studio')
+  self.click('Sticker: Apple');self.click('Sticker: Butterfly')
+  canvas=self.window.art_canvas
+  self.assertTrue(canvas.remove_last_sticker())
+  self.assertEqual(canvas.sticker_skus,['sticker_apple'])
+  self.assertEqual([x.symbol for x in self.window.art_game.stamps],['sticker_apple'])
+  self.assertTrue(canvas.undo_action())
+  self.assertEqual(canvas.sticker_skus,['sticker_apple','sticker_butterfly'])
+  self.assertTrue(canvas.redo_action())
+  self.assertEqual(canvas.sticker_skus,['sticker_apple'])
+  self.window.save_art_project()
+  import json
+  project=self.window.art_project_directory()/'current-art-project.json'
+  self.assertEqual(json.loads(project.read_text())['stickers'],['sticker_apple'])
+
  def test_unified_sticker_add_undo_redo_preserves_model_and_save(self):
   import json
   self.click('Eden Demo');self.click('Art Studio')
