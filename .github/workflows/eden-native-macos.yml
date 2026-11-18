@@ -31,7 +31,7 @@ jobs:
       - name: Test native window
         env:
           QT_QPA_PLATFORM: offscreen
-        run: python -m unittest native_eden_v0.test_window native_eden_v0.test_parent_pin_rate_limit native_eden_v0.test_profile_source -q
+        run: python -m unittest native_eden_v0.test_window native_eden_v0.test_parent_pin_rate_limit native_eden_v0.test_profile_source native_eden_v0.test_activity_choices -q
       - name: Build macOS app
         run: |
           pyinstaller --noconfirm --clean --windowed --onedir --name EdenNativePreview --paths . \
