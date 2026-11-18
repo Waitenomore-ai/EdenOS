@@ -93,7 +93,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             self.header_parent.clicked.connect(lambda: self.transition(self.state.open_parent()))
             self.header_logout = QPushButton("Log out")
             self.header_logout.setAccessibleName("Log out")
-            self.header_logout.clicked.connect(lambda: self.transition(self.state.logout()))
+            self.header_logout.clicked.connect(lambda: (self.stop_story_audio(), self.transition(self.state.logout())))
             nav_folder = Path(__file__).resolve().parent.parent / "assets" / "navigation"
             for control, filename in ((self.header_home, "home.png"), (self.header_profile, "my-profile-template.png"),
                                       (self.header_parent, "parent.png"), (self.header_logout, "logout.png")):
@@ -730,7 +730,6 @@ def create_window(*, pin_adapter=None, profiles=None):
                         else:
                             action("Next page", lambda: (game.next_scene(), self.render()))
                 action("Back to home", lambda: (self.stop_story_audio(), self.transition(NavigationState(page="home", child_id=self.state.child_id))))
-                action("Log out", lambda: (self.stop_story_audio(), self.transition(self.state.logout())))
             elif self.state.page == "art-studio":
                 game = self.art_game
                 if not self.profiles or not self.session or self.profiles.get(self.state.child_id) is None or game is None:
@@ -903,7 +902,6 @@ def create_window(*, pin_adapter=None, profiles=None):
                 action("Redo", self.art_canvas.redo_action)
                 action("Clear", lambda: (game.clear(), self.art_canvas.set_stickers([], []), self.render()))
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
-                action("Log out", lambda: self.transition(self.state.logout()))
             elif self.state.page in ("nature-explorer", "feelings"):
                 activity = self.state.page
                 game = self.nature_game if activity == "nature-explorer" else self.feelings_game
@@ -947,7 +945,6 @@ def create_window(*, pin_adapter=None, profiles=None):
                     for index, (symbol, instruction) in enumerate(CALM_ACTIONS):
                         action(("✓ " if game.completed[index] else "○ ") + symbol + " " + instruction, lambda i=index: (game.toggle_action(i), self.render()))
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
-                action("Log out", lambda: self.transition(self.state.logout()))
             elif self.state.page in ("word-woodland", "puzzle-pond"):
                 activity = self.state.page
                 game = self.word_game if activity == "word-woodland" else self.puzzle_game
@@ -996,7 +993,6 @@ def create_window(*, pin_adapter=None, profiles=None):
                     if game.complete:
                         action("Play again", lambda: (game.restart(), self.render()))
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
-                action("Log out", lambda: self.transition(self.state.logout()))
             elif self.state.page == "number-meadow":
                 if not self.profiles or not self.session or self.profiles.get(self.state.child_id) is None or self.number_game is None:
                     self.transition(self.state.logout())
@@ -1033,7 +1029,6 @@ def create_window(*, pin_adapter=None, profiles=None):
                     action(str(number), lambda value=number: self.answer_number(value), choices_grid, index)
                 self.buttons.addWidget(choices_widget)
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
-                action("Log out", lambda: self.transition(self.state.logout()))
             elif self.state.page == "my-artwork":
                 if self.garden_stars_service() is None:
                     self.transition(self.state.logout())
@@ -1058,7 +1053,6 @@ def create_window(*, pin_adapter=None, profiles=None):
                 for path in pictures[:100]:
                     action(path.name, lambda name=path.name: self.select_artwork(name))
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
-                action("Log out", lambda: self.transition(self.state.logout()))
             elif self.state.page == "garden-stars":
                 service = self.garden_stars_service()
                 if service is None:
@@ -1078,7 +1072,6 @@ def create_window(*, pin_adapter=None, profiles=None):
                     action(label, lambda item=sku: self.purchase_garden_sticker(item), sticker_grid, index)
                 self.buttons.addWidget(sticker_grid_widget)
                 action("Back to home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
-                action("Log out", lambda: self.transition(self.state.logout()))
             elif self.state.page in HOME_CATEGORIES:
                 category = self.state.page
                 self.info.setText(category.title())
@@ -1201,7 +1194,6 @@ def create_window(*, pin_adapter=None, profiles=None):
                     action("Back to profiles", lambda: self.transition(self.state.logout()))
                 else:
                     action("Back to child home", lambda: self.transition(NavigationState(page="home", child_id=self.state.child_id)))
-                action("Log out", lambda: self.transition(self.state.logout()))
             self.buttons.activate()
             required_height = self.buttons.contentsMargins().top() + self.buttons.contentsMargins().bottom()
             for index in range(self.buttons.count()):
