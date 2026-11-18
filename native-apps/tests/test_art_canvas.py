@@ -192,3 +192,26 @@ class ArtCanvasTests(unittest.TestCase):
             directory=Path(tmp)
             self.canvas.save_project(directory,['sticker_apple','sticker_butterfly'])
             self.assertEqual(self.canvas.load_project(directory,allowed_stickers={'sticker_apple','sticker_butterfly'}),['sticker_butterfly','sticker_apple'])
+
+    def test_keyboard_selection_move_and_layer_change(self):
+        from PySide6.QtCore import Qt
+        from PySide6.QtTest import QTest
+        from PySide6.QtWidgets import QApplication
+        import json
+        root=Path(__file__).resolve().parents[1]/'assets'/'stickers'
+        by_sku={item['sku']:root/item['filename'] for item in json.loads((root/'manifest.json').read_text())['items']}
+        self.canvas.set_stickers([by_sku['sticker_apple'],by_sku['sticker_butterfly']],['sticker_apple','sticker_butterfly'])
+        self.canvas.show()
+        QApplication.processEvents()
+        self.canvas.setFocus()
+        QTest.keyClick(self.canvas,Qt.Key.Key_1)
+        self.assertEqual(self.canvas.selected_sticker,0)
+        before=self.canvas.sticker_positions[0][0]
+        QTest.keyClick(self.canvas,Qt.Key.Key_Right)
+        self.assertGreater(self.canvas.sticker_positions[0][0],before)
+        QTest.keyClick(self.canvas,Qt.Key.Key_PageUp)
+        self.assertEqual(self.canvas.selected_sticker,1)
+        self.assertEqual(self.canvas.sticker_skus,['sticker_butterfly','sticker_apple'])
+        QTest.keyClick(self.canvas,Qt.Key.Key_PageDown)
+        self.assertEqual(self.canvas.selected_sticker,0)
+        self.canvas.hide()

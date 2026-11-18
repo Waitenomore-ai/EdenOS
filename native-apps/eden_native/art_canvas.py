@@ -20,7 +20,7 @@ class ArtCanvas(QWidget):
         super().__init__(parent)
         self.setObjectName("artStudioDrawingCanvas")
         self.setAccessibleName("Art Studio drawing canvas")
-        self.setAccessibleDescription("Use Tab to focus, keys 1 to 4 to select a sticker, and arrow keys to move it")
+        self.setAccessibleDescription("Use Tab to focus, number keys 1 to 9 to select a sticker, arrow keys to move it, and Page Up or Page Down to change its layer")
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setMinimumSize(440, 220)
         self.setMouseTracking(True)
@@ -150,13 +150,17 @@ class ArtCanvas(QWidget):
 
     def keyPressEvent(self, event):
         key = event.key()
-        if Qt.Key.Key_1 <= key <= Qt.Key.Key_4:
+        if Qt.Key.Key_1 <= key <= Qt.Key.Key_9:
             index = key - Qt.Key.Key_1
             if index < len(self.sticker_positions):
                 self.selected_sticker = index
                 self.update()
                 event.accept()
                 return
+        if key in (Qt.Key.Key_PageUp, Qt.Key.Key_PageDown):
+            self.move_selected_sticker_layer(1 if key == Qt.Key.Key_PageUp else -1)
+            event.accept()
+            return
         movements = {Qt.Key.Key_Left: (-.025, 0), Qt.Key.Key_Right: (.025, 0),
                      Qt.Key.Key_Up: (0, -.025), Qt.Key.Key_Down: (0, .025)}
         if key in movements and self.selected_sticker is not None and self.selected_sticker < len(self.sticker_positions):
