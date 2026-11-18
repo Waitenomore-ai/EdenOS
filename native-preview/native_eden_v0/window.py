@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
 )
 from .eden_core.profile_cards import APPROVED_AVATARS, make_profile_card
 from .eden_core.profile_source import read_profile_cards
+from .eden_core.profile_discovery import find_existing_profiles
 from .eden_core.activity_choices import read_choices, save_choices
 from .eden_core.profile_chooser_model import ProfileChooser
 from .eden_core.parent_pin import has_pin, verify_pin
@@ -249,7 +250,9 @@ class EdenNativeWindow(QMainWindow):
             if item.widget():
                 item.widget().deleteLater()
         child = self._chooser.selected_username()
-        if self._is_demo or not self._unlocked or not child:
+        configured_root = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+        if (self._is_demo or not self._unlocked or not child or
+                configured_root.resolve() != self._profile_source.parent.resolve()):
             self._activity_box.hide()
             return
         choices = read_choices(self._profile_source.parent, child, self._known_usernames)
@@ -384,7 +387,7 @@ class EdenNativeWindow(QMainWindow):
 
 def main():
     application = QApplication(sys.argv)
-    window = EdenNativeWindow()
+    window = EdenNativeWindow(profile_source=find_existing_profiles())
     window.show()
     return application.exec()
 
