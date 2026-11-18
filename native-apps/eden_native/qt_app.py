@@ -152,7 +152,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                 return
             try:
                 ParentProfileService(self.session, self.profiles).create(
-                    self.profile_username.text(), self.profile_name.text(), self.profile_avatar.currentText())
+                    self.profile_username.text().strip().lower(), self.profile_name.text(), self.profile_avatar.currentText())
             except (ValueError, PermissionError, OSError) as exc:
                 self.info.setText("Profile not created: " + str(exc))
                 return
