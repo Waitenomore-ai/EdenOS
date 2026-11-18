@@ -21,9 +21,9 @@ class QtActivitiesTests(unittest.TestCase):
  def tearDown(self):
   self.window.close();self.app.processEvents();self.temp.cleanup()
  def buttons(self):
-  return [b.text() or b.accessibleName() for b in [b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible()]]
+  return [b.text() or b.accessibleName() for b in [b for b in self.window.findChildren(QPushButton) if b.isVisible()]]
  def click(self,label):
-  widgets=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible()]
+  widgets=[b for b in self.window.findChildren(QPushButton) if b.isVisible()]
   found=[w for w in widgets if isinstance(w,QPushButton) and (w.text()==label or w.accessibleName()==label)]
   self.assertEqual(len(found),1,label);found[0].click();self.app.processEvents()
  def unlock(self):

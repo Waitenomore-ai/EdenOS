@@ -18,7 +18,7 @@ class QtProfilesTests(unittest.TestCase):
  def tearDown(self):
   self.window.close();self.app.processEvents();self.temp.cleanup()
  def click(self,label):
-  buttons=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible()]
+  buttons=[b for b in self.window.findChildren(QPushButton) if b.isVisible()]
   matches=[b for b in buttons if isinstance(b,QPushButton) and (b.text()==label or b.accessibleName()==label)]
   self.assertEqual(len(matches),1,label)
   matches[0].click();self.app.processEvents()

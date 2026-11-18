@@ -18,7 +18,7 @@ class QtPinTests(unittest.TestCase):
  def tearDown(self):
   self.window.close();self.app.processEvents();self.temp.cleanup()
  def click(self,label):
-  matches=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible()]
+  matches=[b for b in self.window.findChildren(QPushButton) if b.isVisible()]
   matches=[b for b in matches if isinstance(b,QPushButton) and (b.text()==label or b.accessibleName()==label)]
   self.assertEqual(len(matches),1,label)
   matches[0].click();self.app.processEvents()

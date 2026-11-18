@@ -21,8 +21,8 @@ class QtAccessibilityTests(unittest.TestCase):
  def tearDown(self):
   self.window.close();self.app.processEvents();self.temp.cleanup()
  def click(self,label):
-  widgets=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible()]
-  buttons=[w for w in widgets if isinstance(w,QPushButton) and w.text()==label]
+  widgets=[b for b in self.window.findChildren(QPushButton) if b.isVisible()]
+  buttons=[w for w in widgets if isinstance(w,QPushButton) and (w.text()==label or w.accessibleName()==label)]
   self.assertEqual(len(buttons),1);buttons[0].click();self.app.processEvents()
  def test_scrollable_child_and_parent_controls(self):
   self.assertIsInstance(self.window.scroll_area,QScrollArea)
@@ -38,7 +38,7 @@ class QtAccessibilityTests(unittest.TestCase):
    self.assertTrue(checkbox.accessibleName().startswith("Enable "))
  def test_buttons_keyboard_focus_and_labels(self):
   self.click("Eden Demo")
-  for widget in [b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible()]:
+  for widget in [b for b in self.window.findChildren(QPushButton) if b.isVisible()]:
    if isinstance(widget,QPushButton):
     self.assertTrue(widget.accessibleName())
     if widget.text(): self.assertEqual(widget.accessibleName(),widget.text())

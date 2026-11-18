@@ -20,7 +20,7 @@ class NumberMeadowIntegrationTests(unittest.TestCase):
   self.window.resize(800,600);self.window.show();self.app.processEvents()
  def tearDown(self):self.window.close();self.app.processEvents();self.tmp.cleanup()
  def click(self,label):
-  found=[b for b in self.window.controls_widget.findChildren(QPushButton) if b.isVisible() and (b.text()==label or b.accessibleName()==label)]
+  found=[b for b in self.window.findChildren(QPushButton) if b.isVisible() and (b.text()==label or b.accessibleName()==label)]
   self.assertEqual(len(found),1,label);found[0].click();self.app.processEvents()
  def test_round_correct_wrong_and_home(self):
   self.click("Eden Demo");self.click("Learn");self.click("Number Meadow")
