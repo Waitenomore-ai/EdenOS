@@ -1,4 +1,4 @@
-"""Eden native desktop prototype. Demo profiles only; no live child data."""
+"""Eden native desktop prototype with opt-in, read-only child cards."""
 from __future__ import annotations
 import sys
 from pathlib import Path
@@ -9,21 +9,26 @@ from PySide6.QtWidgets import (
     QMainWindow, QPushButton, QStackedWidget, QVBoxLayout, QWidget,
 )
 from .eden_core.profile_cards import APPROVED_AVATARS, make_profile_card
+from .eden_core.profile_source import read_profile_cards
 from .eden_core.profile_chooser_model import ProfileChooser
 from .eden_core.parent_pin import has_pin, verify_pin
 from .eden_core.activity_visibility import REVIEWED_RATINGS
 from .eden_core.garden_stars import CATALOGUE, ACTIVITIES
 
 class EdenNativeWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, profile_source: Path | None = None):
         super().__init__()
         self.setWindowTitle("Eden's Garden — Native Desktop Preview")
         self.resize(1000, 690)
-        cards = [
-            make_profile_card("demo_" + avatar.removeprefix("approved-"),
-                              avatar.removeprefix("approved-").title(), avatar)
-            for avatar in APPROVED_AVATARS
-        ]
+        self._is_demo = profile_source is None
+        if self._is_demo:
+            cards = [
+                make_profile_card("demo_" + avatar.removeprefix("approved-"),
+                                  avatar.removeprefix("approved-").title(), avatar)
+                for avatar in APPROVED_AVATARS
+            ]
+        else:
+            cards = read_profile_cards(Path(profile_source))
         self._chooser = ProfileChooser(cards)
         self._unlocked = False
         self._stack = QStackedWidget()
@@ -35,14 +40,18 @@ class EdenNativeWindow(QMainWindow):
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setObjectName("heading")
         layout.addWidget(title)
-        hint = QLabel("Choose a character to explore — demonstration profiles only")
+        hint = QLabel(
+            "Choose your picture to open your Eden space"
+            if not self._is_demo else
+            "Choose a character to explore — demonstration profiles only"
+        )
         hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(hint)
         grid = QGridLayout()
         for index, card in enumerate(self._chooser.tiles()):
             name = card["display_name"]
             button = QPushButton(name)
-            button.setAccessibleName("Choose character " + name)
+            button.setAccessibleName(("Choose character " if self._is_demo else "Choose child ") + name)
             portrait_path = Path(__file__).parent / "assets" / "avatars" / (card["avatar"] + ".png")
             if portrait_path.is_file():
                 button.setIcon(QIcon(str(portrait_path)))
@@ -52,7 +61,7 @@ class EdenNativeWindow(QMainWindow):
             button.clicked.connect(lambda checked=False, i=index: self.choose_character(i))
             grid.addWidget(button, index // 4, index % 4)
         layout.addLayout(grid)
-        self._selected_label = QLabel("Choose your character")
+        self._selected_label = QLabel("Choose your character" if self._is_demo else "Choose your picture")
         self._selected_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self._selected_label)
         parents = QPushButton("Parent Corner")
@@ -159,8 +168,9 @@ class EdenNativeWindow(QMainWindow):
             selected = self._chooser.selected_public_card()
             selected_name = selected["display_name"] if selected else "none"
             self._section_description.setText(
-                f"{len(names)} demonstration profiles: {', '.join(names)}. "
-                f"Currently selected: {selected_name}. Read-only; no real child data loaded."
+                f"{len(names)} {'demonstration profiles' if self._is_demo else 'child profiles'}: {', '.join(names)}. "
+                f"Currently selected: {selected_name}. "
+                + ("Read-only; no real child data loaded." if self._is_demo else "Read-only preview; no profiles modified.")
             )
         elif name == "Activity Controls":
             catalogue = ", ".join(sorted(REVIEWED_RATINGS))
