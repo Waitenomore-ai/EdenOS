@@ -269,7 +269,24 @@ def create_window(*, pin_adapter=None, profiles=None):
                 return False
             self.garden_selected_sku = sku
             self.render()
+            self.focus_garden_sticker(sku)
             return True
+
+        def focus_garden_sticker(self, sku):
+            if self.state.page != "sticker-garden":
+                return
+            for button in self.controls_widget.findChildren(QPushButton, "stickerGardenPicker"):
+                if button.property("stickerSku") == sku and button.isVisible():
+                    QTimer.singleShot(0, lambda target=button: target.setFocus(Qt.FocusReason.OtherFocusReason))
+                    return
+
+        def focus_garden_slot(self, slot):
+            if self.state.page != "sticker-garden":
+                return
+            for button in self.controls_widget.findChildren(QPushButton, "stickerGardenSlot"):
+                if button.property("gardenSlot") == slot and button.isVisible():
+                    QTimer.singleShot(0, lambda target=button: target.setFocus(Qt.FocusReason.OtherFocusReason))
+                    return
 
         def art_allowed_stickers_for_garden(self):
             service = self.garden_stars_service()
@@ -293,6 +310,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             self.garden_selected_slot = slot
             self.garden_clear_confirm = False
             self.render()
+            self.focus_garden_slot(slot)
             return True
 
         def select_garden_category(self, category):
@@ -318,6 +336,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                 return False
             self.garden_selected_slot = slot
             self.render()
+            self.focus_garden_slot(slot)
             return True
 
         def move_garden_sticker(self, dx, dy):
@@ -338,6 +357,7 @@ def create_window(*, pin_adapter=None, profiles=None):
             save_garden(path, placements, allowed)
             self.garden_selected_slot = target
             self.render()
+            self.focus_garden_slot(target)
             return True
 
         def clear_sticker_garden(self):
@@ -1169,6 +1189,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                     button = QPushButton(entry["name"])
                     button.setObjectName("stickerGardenPicker")
                     button.setProperty("selected", sku == self.garden_selected_sku)
+                    button.setProperty("stickerSku", sku)
                     button.setAccessibleName("Select " + entry["name"])
                     button.setAccessibleDescription("Selected sticker" if sku == self.garden_selected_sku else "Choose this sticker")
                     button.setMinimumHeight(78)
@@ -1207,7 +1228,9 @@ def create_window(*, pin_adapter=None, profiles=None):
                     label = "Garden row " + str(row + 1) + " column " + str(column + 1) + (": " + names[sku] if sku else ": empty")
                     button = QPushButton("" if sku else "+")
                     button.setObjectName("stickerGardenSlot")
+                    button.setProperty("gardenSlot", slot)
                     button.setAccessibleName(label)
+                    button.setAccessibleDescription("Press Enter to select this sticker for moving or removing" if sku else "Choose a sticker first, then press Enter to place it")
                     button.setToolTip(label)
                     button.setMinimumHeight(64)
                     button.setIconSize(QSize(48, 48))

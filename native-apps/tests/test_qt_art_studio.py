@@ -74,6 +74,27 @@ class ArtStudioTests(unittest.TestCase):
   self.assertTrue(any(b.property('role')=='clear' for b in actions))
   self.assertTrue(any(b.property('role')=='place' for b in actions))
 
+ def test_sticker_garden_keyboard_focus_and_accessible_slots(self):
+  from PySide6.QtWidgets import QPushButton
+  self.click('Eden Demo');self.click('My Sticker Garden')
+  self.assertTrue(self.window.select_garden_sticker('sticker_apple'))
+  self.app.processEvents()
+  pickers=self.window.controls_widget.findChildren(QPushButton,'stickerGardenPicker')
+  apple=[b for b in pickers if b.property('stickerSku')=='sticker_apple'][-1]
+  self.assertTrue(apple.isVisible())
+  self.assertEqual(apple.accessibleName(),'Select Apple')
+  self.assertTrue(self.window.place_garden_sticker(7))
+  self.app.processEvents()
+  slots=self.window.controls_widget.findChildren(QPushButton,'stickerGardenSlot')
+  selected=[b for b in slots if b.property('gardenSlot')==7][-1]
+  self.assertTrue(selected.isVisible())
+  self.assertIn('row 2 column 2',selected.accessibleName())
+  self.assertIn('Enter',selected.accessibleDescription())
+  self.assertTrue(self.window.move_garden_sticker(1,0))
+  self.app.processEvents()
+  moved=[b for b in self.window.controls_widget.findChildren(QPushButton,'stickerGardenSlot') if b.property('gardenSlot')==8][-1]
+  self.assertTrue(moved.isVisible())
+
  def test_sticker_garden_move_and_confirmed_clear(self):
   from eden_native.sticker_garden import load_garden
   self.click('Eden Demo');self.click('My Sticker Garden');self.click('Apple')
