@@ -145,10 +145,12 @@ class ArtCanvas(QWidget):
         return True
 
     def set_stickers(self, paths, skus=None):
-        self.sticker_paths = list(paths[:24])
-        self.sticker_skus = list(skus[:24]) if skus is not None else []
-        if self.sticker_skus and len(self.sticker_skus) != len(self.sticker_paths):
+        next_paths = [Path(path) for path in paths[:24]]
+        next_skus = list(skus[:24]) if skus is not None else []
+        if next_skus and len(next_skus) != len(next_paths):
             raise ValueError("Sticker identifiers and images do not match")
+        self.sticker_paths = next_paths
+        self.sticker_skus = next_skus
         while len(self.sticker_positions) < len(self.sticker_paths):
             index = len(self.sticker_positions)
             self.sticker_positions.append([min(.85, .05 + (index % 5) * .19), min(.82, .07 + (index // 5) * .20)])

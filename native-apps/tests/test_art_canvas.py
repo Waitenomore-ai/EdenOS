@@ -62,6 +62,22 @@ class ArtCanvasTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.canvas.set_colour("Invisible")
 
+    def test_rejected_sticker_replacement_keeps_existing_canvas_and_history(self):
+        self.canvas.set_stickers([Path('/tmp/eden-one.png')],['sticker_apple'])
+        self.canvas.set_background('Sky')
+        before_paths=self.canvas.sticker_paths[:]
+        before_skus=self.canvas.sticker_skus[:]
+        before_positions=[point[:] for point in self.canvas.sticker_positions]
+        before_history=self.canvas.action_undo[:]
+        with self.assertRaises(ValueError):
+            self.canvas.set_stickers([Path('/tmp/eden-one.png'),Path('/tmp/eden-two.png')],['sticker_apple'])
+        self.assertEqual(self.canvas.sticker_paths,before_paths)
+        self.assertEqual(self.canvas.sticker_skus,before_skus)
+        self.assertEqual(self.canvas.sticker_positions,before_positions)
+        self.assertEqual(self.canvas.action_undo,before_history)
+        self.assertTrue(self.canvas.undo_action())
+        self.assertEqual(self.canvas.background.name(),'#ffffff')
+
     def test_picture_save_skips_existing_and_dangling_symlink_without_overwriting(self):
         with tempfile.TemporaryDirectory() as tmp:
             directory=Path(tmp)
