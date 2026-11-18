@@ -1110,7 +1110,8 @@ def create_window(*, pin_adapter=None, profiles=None):
                 # the left, 6x4 placement board in the centre, actions on right.
                 layout_widget = QWidget()
                 layout_widget.setObjectName("stickerGardenThreePanel")
-                panel_layout = QHBoxLayout(layout_widget)
+                compact_garden = self.width() < 1000
+                panel_layout = QVBoxLayout(layout_widget) if compact_garden else QHBoxLayout(layout_widget)
                 panel_layout.setSpacing(9)
                 layout_widget.setStyleSheet("""
                     QWidget#stickerGardenPickerPanel, QWidget#stickerGardenActionsPanel {
@@ -1142,7 +1143,7 @@ def create_window(*, pin_adapter=None, profiles=None):
 
                 left_panel = QWidget()
                 left_panel.setObjectName("stickerGardenPickerPanel")
-                left_panel.setFixedWidth(212)
+                left_panel.setFixedWidth(212) if not compact_garden else left_panel.setMinimumWidth(0)
                 left_layout = QVBoxLayout(left_panel)
                 left_heading = QLabel("My Stickers")
                 left_heading.setObjectName("stickerGardenPanelHeading")
@@ -1179,6 +1180,8 @@ def create_window(*, pin_adapter=None, profiles=None):
                     picker_grid.addWidget(button, index // 2, index % 2)
                 picker_scroll.setWidget(sticker_picker)
                 left_layout.addWidget(picker_scroll, 1)
+                if compact_garden:
+                    picker_scroll.setFixedHeight(180)
                 panel_layout.addWidget(left_panel)
 
                 middle_panel = QWidget()
@@ -1186,7 +1189,7 @@ def create_window(*, pin_adapter=None, profiles=None):
                 middle_layout = QVBoxLayout(middle_panel)
                 board = QWidget()
                 board.setObjectName("stickerGardenBoard")
-                board.setMinimumSize(480, 310)
+                board.setMinimumSize(480 if compact_garden else 0, 310 if compact_garden else min(550, max(350, self.height() - 350)))
                 # Use the exact approved 1672x941 original iMac background.
                 # Never substitute unapproved artwork if it is missing.
                 garden_background = Path(__file__).resolve().parent.parent / "assets" / "garden-stars" / "backgrounds" / "garden-background-v58.webp"
@@ -1220,7 +1223,7 @@ def create_window(*, pin_adapter=None, profiles=None):
 
                 right_panel = QWidget()
                 right_panel.setObjectName("stickerGardenActionsPanel")
-                right_panel.setFixedWidth(160)
+                right_panel.setFixedWidth(160) if not compact_garden else right_panel.setMinimumWidth(0)
                 right_layout = QVBoxLayout(right_panel)
                 right_heading = QLabel("Move Sticker")
                 right_heading.setObjectName("stickerGardenPanelHeading")
