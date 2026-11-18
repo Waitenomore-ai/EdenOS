@@ -1,5 +1,6 @@
 """Eden native desktop prototype with opt-in, read-only child cards."""
 from __future__ import annotations
+import os
 import sys
 from pathlib import Path
 from PySide6.QtCore import Qt, QSize
@@ -227,6 +228,10 @@ class EdenNativeWindow(QMainWindow):
     def set_child_activity_choice(self, activity: str, enabled: bool) -> bool:
         if (not self._unlocked or self._profile_source is None or
                 not self._chooser.selected_username()):
+            return False
+        configured_root = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+        if configured_root.resolve() != self._profile_source.parent.resolve():
+            # A demonstration PIN must never authorise writing real child data.
             return False
         child = self._chooser.selected_username()
         choices = read_choices(self._profile_source.parent, child, self._known_usernames)

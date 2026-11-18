@@ -113,6 +113,26 @@ class NativeWindowTests(unittest.TestCase):
         self.assertEqual(len(matches), 1)
         self.assertEqual(matches[0].text(), "PIN && Security")
 
+    def test_demo_parent_pin_cannot_modify_profiles_in_another_config_root(self):
+        import json
+        from native_eden_v0.eden_core.parent_pin import set_pin
+        with tempfile.TemporaryDirectory() as separate_root:
+            target = Path(separate_root)
+            profiles = target / "profiles.json"
+            profiles.write_text(json.dumps({"profiles": [
+                {"username": "sample_one", "display_name": "Sample One", "avatar": "approved-eden"}
+            ]}))
+            other = EdenNativeWindow(profile_source=profiles)
+            try:
+                other.choose_character(0)
+                set_pin("482761")
+                self.assertTrue(other.unlock_parent("482761"))
+                self.assertFalse(other.set_child_activity_choice("art-studio", False))
+                self.assertFalse((target / "activity-choices").exists())
+            finally:
+                other.close()
+                other.deleteLater()
+
     def test_unlocked_parent_can_change_selected_child_activity_only(self):
         import json
         from native_eden_v0.eden_core.parent_pin import set_pin
